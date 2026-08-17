@@ -22,8 +22,7 @@
     .EXAMPLE
         Test-AzResourceNotFoundError -ErrorRecord $_
 #>
-function Test-AzResourceNotFoundError
-{
+function Test-AzResourceNotFoundError {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -47,23 +46,19 @@ function Test-AzResourceNotFoundError
     $notFoundMessagePattern = 'ResourceNotFound|ResourceGroupNotFound|' +
     'does not exist|could not be found|was not found|cannot be found'
 
-    if ($ErrorRecord.FullyQualifiedErrorId -match $deniedPattern)
-    {
+    if ($ErrorRecord.FullyQualifiedErrorId -match $deniedPattern) {
         return $false
     }
 
     $statusCode = $null
     $exception = $ErrorRecord.Exception
 
-    while ($null -ne $exception)
-    {
-        if ($exception.Message -match $deniedPattern)
-        {
+    while ($null -ne $exception) {
+        if ($exception.Message -match $deniedPattern) {
             return $false
         }
 
-        if ($null -eq $statusCode)
-        {
+        if ($null -eq $statusCode) {
             $statusCode = $exception.PSObject.Properties['Response'].Value.StatusCode
         }
 
@@ -72,22 +67,18 @@ function Test-AzResourceNotFoundError
 
     # Az wraps the REST layer, so when a status is exposed it settles the question
     # on its own and the free-text fallbacks below are not consulted.
-    if ($null -ne $statusCode)
-    {
+    if ($null -ne $statusCode) {
         return ($statusCode -eq 'NotFound' -or $statusCode -eq 404)
     }
 
-    if ($ErrorRecord.FullyQualifiedErrorId -match 'NotFound')
-    {
+    if ($ErrorRecord.FullyQualifiedErrorId -match 'NotFound') {
         return $true
     }
 
     $exception = $ErrorRecord.Exception
 
-    while ($null -ne $exception)
-    {
-        if ($exception.Message -match $notFoundMessagePattern)
-        {
+    while ($null -ne $exception) {
+        if ($exception.Message -match $notFoundMessagePattern) {
             return $true
         }
 

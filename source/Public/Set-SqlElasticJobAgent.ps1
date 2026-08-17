@@ -18,6 +18,11 @@
     .PARAMETER Tag
         The tags to apply to the agent.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed operation cannot pass unnoticed. Pass $false to get a warning and
+        no output instead, which suits pipeline processing.
+
     .OUTPUTS
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobAgentModel
 
@@ -49,7 +54,11 @@ function Set-SqlElasticJobAgent
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateNotNull()]
         [System.Collections.Hashtable]
-        $Tag
+        $Tag,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -60,8 +69,10 @@ function Set-SqlElasticJobAgent
 
         if ($null -eq $existingAgent)
         {
-            throw ("Elastic Job agent '{0}' was not found on server '{1}' in resource group '{2}'." -f
-                $Name, $ServerName, $ResourceGroupName)
+            Stop-PSFFunction -Message ('Elastic Job agent ''{0}'' was not found on server ''{1}'' in resource group ''{2}''.' -f
+                $Name, $ServerName, $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
+
+            return
         }
 
         if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $Name), 'Update Elastic Job agent'))

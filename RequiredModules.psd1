@@ -22,6 +22,7 @@
     'Sampler.GitHubTasks' = 'latest'
     'Az.Accounts'         = 'latest'
     'Az.Sql'              = 'latest'
+    PSFramework           = 'latest'
 
 
 }

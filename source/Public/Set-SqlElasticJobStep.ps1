@@ -49,6 +49,11 @@
     .PARAMETER RetryIntervalBackoffMultiplier
         The multiplier applied to the retry delay after each failure.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed operation cannot pass unnoticed. Pass $false to get a warning and
+        no output instead, which suits pipeline processing.
+
     .OUTPUTS
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel
 
@@ -132,7 +137,11 @@ function Set-SqlElasticJobStep
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1.0, [System.Double]::MaxValue)]
         [System.Double]
-        $RetryIntervalBackoffMultiplier
+        $RetryIntervalBackoffMultiplier,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -143,8 +152,10 @@ function Set-SqlElasticJobStep
 
         if ($null -eq $existingStep)
         {
-            throw ("Elastic Job step '{0}' was not found on job '{1}' in resource group '{2}'." -f
-                $Name, $JobName, $ResourceGroupName)
+            Stop-PSFFunction -Message ('Elastic Job step ''{0}'' was not found on job ''{1}'' in resource group ''{2}''.' -f
+                $Name, $JobName, $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
+
+            return
         }
 
         if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $JobName, $Name), 'Update Elastic Job step'))

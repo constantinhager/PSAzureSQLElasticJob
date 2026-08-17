@@ -33,7 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- For changes in existing functionality.
+- The module now depends on PSFramework. Diagnostics go through
+  `Write-PSFMessage` and are retrievable with `Get-PSFMessage`; domain failures
+  in public commands go through `Stop-PSFFunction`.
+- Commands that can fail with a domain error gained an `-EnableException`
+  parameter. It defaults to `$true`, which preserves the existing behaviour of
+  raising a terminating error; pass `$false` for a warning and no output.
+- The job database service objective and logical server version defaults are now
+  PSFramework settings (`PSAzureSQLElasticJob.Provisioning.ServiceObjective` and
+  `...ServerVersion`) instead of hardcoded parameter defaults, so they can be
+  retuned with `Set-PSFConfig` without editing code.
 
 ### Deprecated
 

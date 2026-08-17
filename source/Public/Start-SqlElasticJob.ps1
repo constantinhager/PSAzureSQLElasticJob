@@ -21,6 +21,11 @@
     .PARAMETER Wait
         Wait for the job execution to finish before returning.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed operation cannot pass unnoticed. Pass $false to get a warning and
+        no output instead, which suits pipeline processing.
+
     .OUTPUTS
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobExecutionModel
 
@@ -61,7 +66,11 @@ function Start-SqlElasticJob
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter]
-        $Wait
+        $Wait,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -72,8 +81,10 @@ function Start-SqlElasticJob
 
         if ($null -eq $existingJob)
         {
-            throw ("Elastic Job '{0}' was not found on agent '{1}' in resource group '{2}'." -f
-                $Name, $AgentName, $ResourceGroupName)
+            Stop-PSFFunction -Message ('Elastic Job ''{0}'' was not found on agent ''{1}'' in resource group ''{2}''.' -f
+                $Name, $AgentName, $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
+
+            return
         }
 
         if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $Name), 'Start Elastic Job'))

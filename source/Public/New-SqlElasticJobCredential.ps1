@@ -75,7 +75,7 @@ function New-SqlElasticJobCredential
 
         if ($null -ne $existingCredential)
         {
-            Write-Verbose -Message ("Elastic Job credential '{0}' already exists on agent '{1}'." -f $Name, $AgentName)
+            Write-PSFMessage -Level Verbose -Message ('Elastic Job credential ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingCredential
         }

@@ -131,7 +131,7 @@ function New-SqlElasticJob
 
         if ($null -ne $existingJob)
         {
-            Write-Verbose -Message ("Elastic Job '{0}' already exists on agent '{1}'." -f $Name, $AgentName)
+            Write-PSFMessage -Level Verbose -Message ('Elastic Job ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingJob
         }

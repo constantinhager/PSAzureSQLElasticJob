@@ -43,6 +43,11 @@
     .PARAMETER ServerVersion
         The version of a new logical SQL server. Defaults to '12.0'.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed provisioning run cannot pass unnoticed. Pass $false to get a
+        warning and no output instead.
+
     .OUTPUTS
         PSCustomObject describing the environment and which parts were created.
 
@@ -99,12 +104,16 @@ function New-SqlElasticJobEnvironment
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ServiceObjectiveName = 'S1',
+        $ServiceObjectiveName = (Get-PSFConfigValue -FullName 'PSAzureSQLElasticJob.Provisioning.ServiceObjective'),
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ServerVersion = '12.0'
+        $ServerVersion = (Get-PSFConfigValue -FullName 'PSAzureSQLElasticJob.Provisioning.ServerVersion'),
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -117,8 +126,10 @@ function New-SqlElasticJobEnvironment
 
         if ($null -eq $resourceGroup)
         {
-            throw ("Resource group '{0}' was not found. Create it before provisioning an Elastic Job environment." -f
-                $ResourceGroupName)
+            Stop-PSFFunction -Message ('Resource group ''{0}'' was not found. Create it before provisioning an Elastic Job environment.' -f
+                $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
+
+            return
         }
 
         $createdServer = $false
@@ -133,13 +144,17 @@ function New-SqlElasticJobEnvironment
         {
             if (-not $PSBoundParameters.ContainsKey('Location'))
             {
-                throw ("Logical SQL server '{0}' does not exist and no -Location was supplied." -f $ServerName)
+                Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -Location was supplied.' -f $ServerName) -EnableException $EnableException -Category InvalidArgument
+
+                return
             }
 
             if (-not $PSBoundParameters.ContainsKey('ServerAdministratorCredential'))
             {
-                throw ("Logical SQL server '{0}' does not exist and no -ServerAdministratorCredential was supplied." -f
-                    $ServerName)
+                Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
+                    $ServerName) -EnableException $EnableException -Category InvalidArgument
+
+                return
             }
 
             if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location)))
@@ -151,7 +166,7 @@ function New-SqlElasticJobEnvironment
         }
         else
         {
-            Write-Verbose -Message ("Logical SQL server '{0}' already exists." -f $ServerName)
+            Write-PSFMessage -Level Verbose -Message ('Logical SQL server ''{0}'' already exists.' -f $ServerName) -Tag 'idempotent'
         }
 
         $database = Get-AzResourceIfPresent -ScriptBlock {
@@ -171,7 +186,7 @@ function New-SqlElasticJobEnvironment
         }
         else
         {
-            Write-Verbose -Message ("Job database '{0}' already exists." -f $DatabaseName)
+            Write-PSFMessage -Level Verbose -Message ('Job database ''{0}'' already exists.' -f $DatabaseName) -Tag 'idempotent'
         }
 
         $agent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
@@ -187,7 +202,7 @@ function New-SqlElasticJobEnvironment
         }
         else
         {
-            Write-Verbose -Message ("Elastic Job agent '{0}' already exists." -f $AgentName)
+            Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
         }
 
         [PSCustomObject]@{

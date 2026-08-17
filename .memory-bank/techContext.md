@@ -12,6 +12,8 @@ source: repository evidence
 - PowerShell 7+ (`PowerShellVersion = '7.0'`, `CompatiblePSEditions = @('Core')`).
 - `Az.Accounts` (>= 2.13.0) and `Az.Sql` (>= 4.0.0) as manifest `RequiredModules`.
   The module reuses the caller's `Az.Accounts` context and never authenticates.
+- `PSFramework` (>= 1.9.310) for logging (`Write-PSFMessage`), flow control
+  (`Stop-PSFFunction`) and configuration (`Set-PSFConfig`).
 - Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
   `RequiredModules.psd1`), ModuleBuilder, InvokeBuild.
 - Pester **pinned to `[5.7.1, 6.0.0)`**; GitVersion for semantic versioning.
@@ -49,4 +51,10 @@ source: repository evidence
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
 - Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
   exported function; grouping several functions into one file fails the build.
-- Last verified run: `.\build.ps1` -> 326 tests passed, 17 tasks, 0 errors.
+- Last verified run: `.\build.ps1` -> 337 tests passed, 17 tasks, 0 errors.
+- `source/suffix.ps1` is appended to the built `.psm1` by ModuleBuilder
+  (`suffix: suffix.ps1` in `build.yaml`) and is the only place module code runs
+  at import time. The `Set-PSFConfig -Initialize` calls live there.
+- Do not run `-ResolveDependency` from a session that has imported
+  `PSScriptAnalyzer` from `output/RequiredModules`: the loaded assembly locks the
+  folder and dependency resolution fails trying to replace it.

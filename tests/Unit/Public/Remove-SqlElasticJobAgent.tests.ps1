@@ -71,5 +71,12 @@ Describe 'Remove-SqlElasticJobAgent' {
             { Remove-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -Name 'gone' -Strict -Confirm:$false } |
                 Should -Throw -ExpectedMessage '*was not found*'
         }
+
+        It 'Should warn instead of throwing when -Strict is combined with -EnableException $false' {
+            { Remove-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -Name 'gone' -Strict -EnableException $false -Confirm:$false -WarningAction SilentlyContinue } |
+                Should -Not -Throw
+
+            Should -Invoke -CommandName Remove-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
     }
 }

@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -110,8 +110,7 @@ Describe 'Test-AzResourceNotFoundError' {
         BeforeAll {
             # Built in the test scope and passed in, because a function defined
             # here is not visible inside InModuleScope.
-            function New-StatusErrorRecord
-            {
+            function New-StatusErrorRecord {
                 param
                 (
                     [Parameter(Mandatory)]

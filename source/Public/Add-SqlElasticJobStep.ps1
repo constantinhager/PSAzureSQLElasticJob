@@ -144,7 +144,7 @@ function Add-SqlElasticJobStep
 
         if ($null -ne $existingStep)
         {
-            Write-Verbose -Message ("Elastic Job step '{0}' already exists on job '{1}'." -f $Name, $JobName)
+            Write-PSFMessage -Level Verbose -Message ('Elastic Job step ''{0}'' already exists on job ''{1}''.' -f $Name, $JobName) -Tag 'idempotent'
 
             return $existingStep
         }

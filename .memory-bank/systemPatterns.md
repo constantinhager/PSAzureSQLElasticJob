@@ -25,6 +25,10 @@ state, then create/update/remove only when needed, under `ShouldProcess`.
 Optional parameters are forwarded through `Add-OptionalParameter`, which
 preserves the difference between "not supplied" and "supplied as false".
 
+Diagnostics go through `Write-PSFMessage`, and domain failures in public commands
+go through `Stop-PSFFunction` with a caller-controlled `-EnableException` that
+defaults to `$true`. The two private helpers deliberately still throw.
+
 Every `Remove-*` command is a no-op when the resource is absent unless
 `-Strict` is supplied, and supports `-PassThru`.
 
@@ -58,3 +62,9 @@ Every `Remove-*` command is a no-op when the resource is absent unless
 - Choice: See `decisions/0004-fail-closed-resource-lookup.md`.
 - Rationale: Discarding the error stream made an unreadable resource look absent,
   defeating the classifier decision 0002 relies on.
+
+### Decision 6: Adopt PSFramework
+
+- Choice: See `decisions/0005-adopt-psframework.md`.
+- Rationale: Requested by the user; `-EnableException` defaults to `$true` here
+  because these commands provision infrastructure and must not fail quietly.

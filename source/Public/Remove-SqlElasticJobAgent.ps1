@@ -25,6 +25,11 @@
     .PARAMETER PassThru
         Return the removed agent object.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed operation cannot pass unnoticed. Pass $false to get a warning and
+        no output instead, which suits pipeline processing.
+
     .OUTPUTS
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobAgentModel
 
@@ -59,7 +64,11 @@ function Remove-SqlElasticJobAgent
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter]
-        $PassThru
+        $PassThru,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -75,10 +84,12 @@ function Remove-SqlElasticJobAgent
 
             if ($Strict.IsPresent)
             {
-                throw $message
+                Stop-PSFFunction -Message $message -EnableException $EnableException -Category ObjectNotFound -Tag 'strict'
+
+                return
             }
 
-            Write-Verbose -Message ('{0} Nothing to remove.' -f $message)
+            Write-PSFMessage -Level Verbose -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
 
             return
         }

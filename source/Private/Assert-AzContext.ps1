@@ -8,6 +8,10 @@
         missing or incomplete context into one clear, actionable terminating error
         instead of letting an Az.Sql cmdlet fail later with an obscure message.
 
+        This is internal plumbing and throws rather than calling Stop-PSFFunction.
+        The public commands own the -EnableException contract; a precondition
+        assert has to interrupt its caller unconditionally to be worth anything.
+
     .PARAMETER SubscriptionId
         Optional subscription to validate the current context against. When
         supplied and the current context targets a different subscription, a
@@ -44,7 +48,7 @@ function Assert-AzContext {
             'Run Set-AzContext -Subscription {1} first.') -f $context.Subscription.Id, $SubscriptionId
     }
 
-    Write-Verbose -Message ("Using Azure context for subscription '{0}'." -f $context.Subscription.Id)
+    Write-PSFMessage -Level Verbose -Message ('Using Azure context for subscription ''{0}''.' -f $context.Subscription.Id) -Tag 'context'
 
     return $context
 }

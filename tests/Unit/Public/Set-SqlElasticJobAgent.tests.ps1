@@ -56,5 +56,12 @@ Describe 'Set-SqlElasticJobAgent' {
 
             Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
         }
+
+        It 'Should warn instead of throwing when -EnableException is $false' {
+            { Set-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -Name 'agent01' -Tag @{ Env = 'Prod' } -EnableException $false -WarningAction SilentlyContinue } |
+                Should -Not -Throw
+
+            Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
     }
 }

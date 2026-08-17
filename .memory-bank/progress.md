@@ -28,6 +28,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-17: Remediation pass. Tightened not-found classification, pinned every
   GitHub Action to a commit SHA, added credential patterns to `.gitignore`;
   332 tests passing.
+- 2026-08-17: Adopted PSFramework for logging, flow control and configuration;
+  337 tests passing.
 
 ## Stable capabilities
 

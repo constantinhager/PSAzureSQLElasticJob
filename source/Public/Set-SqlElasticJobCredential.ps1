@@ -22,6 +22,11 @@
     .PARAMETER Credential
         The new user name and password.
 
+    .PARAMETER EnableException
+        Whether a failure raises a terminating exception. Defaults to $true so a
+        failed operation cannot pass unnoticed. Pass $false to get a warning and
+        no output instead, which suits pipeline processing.
+
     .OUTPUTS
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobCredentialModel
 
@@ -61,7 +66,11 @@ function Set-SqlElasticJobCredential
         [Parameter(Mandatory)]
         [ValidateNotNull()]
         [System.Management.Automation.PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Boolean]
+        $EnableException = $true
     )
 
     process
@@ -72,8 +81,10 @@ function Set-SqlElasticJobCredential
 
         if ($null -eq $existingCredential)
         {
-            throw ("Elastic Job credential '{0}' was not found on agent '{1}' in resource group '{2}'." -f
-                $Name, $AgentName, $ResourceGroupName)
+            Stop-PSFFunction -Message ('Elastic Job credential ''{0}'' was not found on agent ''{1}'' in resource group ''{2}''.' -f
+                $Name, $AgentName, $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
+
+            return
         }
 
         if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $Name), 'Update Elastic Job credential'))

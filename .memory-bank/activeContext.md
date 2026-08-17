@@ -9,9 +9,9 @@ source: current task evidence
 
 ## Current focus
 
-Security review and remediation are complete. Every finding fixable from the
-codebase is fixed and verified; only enabling secret scanning and push protection
-remains, and that is a repository setting. 332 tests passing.
+PSFramework adopted across the module: `Write-PSFMessage` logging,
+`Stop-PSFFunction` flow control with a caller-controlled `-EnableException`, and
+`Set-PSFConfig` provisioning defaults. 337 tests passing.
 
 ## Evidence
 

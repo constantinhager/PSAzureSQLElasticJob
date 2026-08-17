@@ -61,7 +61,7 @@ function New-SqlElasticJobTargetGroup
 
         if ($null -ne $existingTargetGroup)
         {
-            Write-Verbose -Message ("Elastic Job target group '{0}' already exists on agent '{1}'." -f $Name, $AgentName)
+            Write-PSFMessage -Level Verbose -Message ('Elastic Job target group ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingTargetGroup
         }
