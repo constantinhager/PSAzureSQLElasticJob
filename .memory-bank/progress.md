@@ -9,9 +9,8 @@ source: repository evidence
 
 ## Current status
 
-First implementation slice in place: Sampler scaffold builds, and provisioning
-plus Elastic Job agent CRUD are implemented and unit tested. The remaining CRUD
-surface is not started.
+Feature-complete for the agreed CRUD scope. 25 public commands, 322 passing
+unit tests, green `build.ps1`. Not yet released or integration tested.
 
 ## Recent milestones
 
@@ -21,19 +20,23 @@ surface is not started.
   retargeted to PowerShell 7+ with `Az.Accounts`/`Az.Sql` dependencies.
 - 2026-08-17: Provisioning (`New-`/`Test-SqlElasticJobEnvironment`) and agent
   CRUD implemented; full `build.ps1` run green with 105 passing tests.
+- 2026-08-17: Job, job step, job credential, target group and target CRUD
+  implemented; GitHub Actions CI/release workflow and issue templates added;
+  `build.ps1` green with 322 passing tests.
 
 ## Stable capabilities
 
 - Idempotent provisioning of the logical SQL server, job database and Elastic
   Job agent, with `-WhatIf` support.
-- Elastic Job agent create, read, update and delete.
-- Non-throwing `Get-SqlElasticJobAgent` usable in conditional logic.
+- CRUD for Elastic Job agents, jobs, job steps, job credentials, target groups
+  and targets, plus `Start-`/`Stop-SqlElasticJob`.
+- Non-throwing `Get-*` commands usable in conditional logic.
+- Consistent `-Strict` and `-PassThru` semantics on every `Remove-*` command.
 
 ## Open work
 
-- CRUD for Jobs (`New`/`Get`/`Set`/`Remove`, plus `Start`/`Stop`).
-- CRUD for Job Steps, Job Credentials, Target Groups and Targets.
 - Integration tests against a real subscription (currently unit tests only).
 - Populate `README.md` with usage examples.
-- Add a CI workflow; the scaffold did not generate `.github/workflows/`.
-- Confirm the PowerShell Gallery publish path.
+- Configure the `GitHubToken` and `GalleryApiToken` repository secrets before
+  the first release.
+- Confirm the PowerShell Gallery publish path end to end.

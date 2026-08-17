@@ -14,6 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`
   and `Remove-SqlElasticJobAgent` for Elastic Job agent CRUD.
+- Job CRUD: `Get-SqlElasticJob`, `New-SqlElasticJob`, `Set-SqlElasticJob`,
+  `Remove-SqlElasticJob`, plus `Start-SqlElasticJob` and `Stop-SqlElasticJob`.
+  Schedules are set through the job itself with `-RunOnce` or
+  `-IntervalType`/`-IntervalCount`, matching the Elastic Jobs object model.
+- Job step CRUD: `Get-SqlElasticJobStep`, `Add-SqlElasticJobStep`,
+  `Set-SqlElasticJobStep` and `Remove-SqlElasticJobStep`.
+- Job credential CRUD: `Get-SqlElasticJobCredential`,
+  `New-SqlElasticJobCredential`, `Set-SqlElasticJobCredential` and
+  `Remove-SqlElasticJobCredential`.
+- Target group CRUD: `Get-SqlElasticJobTargetGroup`,
+  `New-SqlElasticJobTargetGroup` and `Remove-SqlElasticJobTargetGroup`, plus
+  `Add-SqlElasticJobTarget` and `Remove-SqlElasticJobTarget`.
+- GitHub Actions workflow `.github/workflows/ci.yml` covering build, test and
+  release to GitHub and the PowerShell Gallery.
+- GitHub issue templates under `.github/ISSUE_TEMPLATE/`.
 - MIT license file.
 
 ### Changed

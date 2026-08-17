@@ -22,6 +22,11 @@ wrap. Three private helpers carry the cross-cutting behaviour:
 
 Public commands follow a consistent shape: assert context, look up current
 state, then create/update/remove only when needed, under `ShouldProcess`.
+Optional parameters are forwarded through `Add-OptionalParameter`, which
+preserves the difference between "not supplied" and "supplied as false".
+
+Every `Remove-*` command is a no-op when the resource is absent unless
+`-Strict` is supplied, and supports `-PassThru`.
 
 ## Decisions
 
@@ -41,3 +46,9 @@ state, then create/update/remove only when needed, under `ShouldProcess`.
 - Choice: See `decisions/0002-wrap-az-sql-and-fail-safe-lookups.md`.
 - Rationale: `Az.Sql` already exposes the whole object model; the gap this
   module fills is idempotent provisioning and non-throwing lookups.
+
+### Decision 4: Testable optional-parameter forwarding
+
+- Choice: See `decisions/0003-testable-optional-parameter-forwarding.md`.
+- Rationale: Pester does not populate `$PSBoundParameters` inside mocks, so the
+  forwarding logic had to move into a directly testable private function.

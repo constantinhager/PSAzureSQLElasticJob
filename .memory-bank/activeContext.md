@@ -9,29 +9,30 @@ source: current task evidence
 
 ## Current focus
 
-First implementation slice of the `PSAzureSQLElasticJob` module: Sampler scaffold
-plus idempotent environment provisioning and Elastic Job **agent** CRUD, with unit
-tests. Job, Job Step, Job Credential and Target Group CRUD are not implemented yet.
+The full Elastic Jobs CRUD surface is implemented and unit tested (25 public
+commands, 322 passing tests), and a GitHub Actions CI/release workflow is in
+place. No integration tests against a real subscription yet.
 
 ## Evidence
 
-- Sampler `SimpleModule` scaffold generated and merged into the repository
-  (`build.ps1`, `build.yaml`, `RequiredModules.psd1`, `GitVersion.yml`,
-  `.github/`, `.vscode/`, `source/`, `tests/`). The existing `README.md` was
-  preserved and the placeholder sample functions were not copied.
-- `Az.Sql` 7.0.0 already exposes the complete Elastic Jobs object model
-  (29 `*ElasticJob*` cmdlets, verified via `ExportedCommands`). This module's
-  value is therefore idempotent provisioning and consistent, non-throwing
-  wrappers - not reimplementing the API.
-- Implemented: `Assert-AzContext`, `Get-AzResourceIfPresent`,
-  `Test-AzResourceNotFoundError` (private); `New-SqlElasticJobEnvironment`,
-  `Test-SqlElasticJobEnvironment`, and `Get`/`New`/`Set`/`Remove-SqlElasticJobAgent`
-  (public).
-- Pester had to be pinned to 5.x. `Pester = 'latest'` resolved to 6.1.0, under
-  which Sampler's own `tests/QA/module.tests.ps1` aborts with a labelled
-  break/continue error (pester/pester#2669).
+- `Az.Sql` 7.0.0 exposes the whole Elastic Jobs object model, so this module
+  wraps it rather than reimplementing it - see
+  `decisions/0002-wrap-az-sql-and-fail-safe-lookups.md`.
+- Schedules are not a separate resource. They are parameters on
+  `New-`/`Set-AzSqlElasticJob` (`-RunOnce`, `-IntervalType`, `-IntervalCount`,
+  `-StartTime`, `-EndTime`, `-Enable`), verified from the cmdlet parameter sets.
+- `Add-AzSqlElasticJobTarget` uses `-AgentServerName` for the agent's server and
+  `-ServerName` for the target server. The wrapper exposes these as
+  `-ServerName` and `-TargetServerName` for consistency with the rest of the
+  module.
+- Sampler ships **no** GitHub Actions workflow templates - only
+  `azure-pipelines.yml.template`, `appveyor.yml` and GitHub *issue* templates.
+  `.github/workflows/ci.yml` therefore comes from the canonical template in the
+  `sampler-framework` skill, adapted to this module.
+- Pester 5 does not populate `$PSBoundParameters` inside `ParameterFilter` or
+  `MockWith`; see `decisions/0003-testable-optional-parameter-forwarding.md`.
 
 ## Next step
 
-Implement the remaining CRUD surface - Job, Job Step, Job Credential, Target Group
-and Target - following the same wrapper pattern, then add integration tests.
+Add integration tests against a real subscription, and populate `README.md`
+with usage examples.

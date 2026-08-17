@@ -1,0 +1,168 @@
+# Continuous integration and release pipeline for PSAzureSQLElasticJob.
+#
+#   * Build  - calculate the version with GitVersion, build and package the
+#              module, then publish the output/ folder as a build artifact.
+#   * Test   - on every target platform, reuse the build artifact and run the
+#              Sampler test workflow.
+#   * Deploy - on the upstream repository, for pushes to main or v* tags,
+#              publish the release to GitHub and the PowerShell Gallery and
+#              raise the changelog pull request.
+#
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   GitHubToken     - personal access token used to create the GitHub release
+#                     and the changelog pull request. The automatic
+#                     secrets.GITHUB_TOKEN cannot raise the changelog PR.
+#   GalleryApiToken - PowerShell Gallery API key used to publish the module.
+name: CI
+
+# GitHub evaluates run-name before any job starts, so it cannot contain a
+# version GitVersion computes mid-run. Show the version for tag releases (the
+# tag is the version) and stamp the computed value into the downstream job
+# names via the build job's outputs.
+run-name: ${{ github.ref_type == 'tag' && format('Release {0}', github.ref_name) || '' }}
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+      - '!v*-*'
+    paths-ignore:
+      - CHANGELOG.md
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  buildArtifactName: output
+  defaultBranch: main
+
+jobs:
+  build:
+    name: Package Module
+    runs-on: ubuntu-latest
+    outputs:
+      fullSemVer: ${{ steps.gitversion.outputs.FullSemVer }}
+      nuGetVersion: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # GitVersion needs the full history to calculate the version.
+          fetch-depth: 0
+
+      - name: Calculate ModuleVersion (GitVersion)
+        id: gitversion
+        shell: pwsh
+        env:
+          # GitVersion 5.x targets an older .NET; allow it to run on the
+          # runner's newer shared framework.
+          DOTNET_ROLL_FORWARD: LatestMajor
+        run: |
+          dotnet tool install --global GitVersion.Tool --version 5.*
+          $env:PATH += [System.IO.Path]::PathSeparator + (Join-Path -Path $HOME -ChildPath '.dotnet/tools')
+          $gitVersionObject = dotnet-gitversion | ConvertFrom-Json
+          $gitVersionObject.PSObject.Properties.ForEach{
+              Write-Host -Object "Setting output '$($_.Name)' with value '$($_.Value)'."
+              "$($_.Name)=$($_.Value)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          Write-Host -Object "ModuleVersion (FullSemVer): $($gitVersionObject.FullSemVer)"
+          "## PSAzureSQLElasticJob $($gitVersionObject.FullSemVer)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Build & Package Module
+        shell: pwsh
+        env:
+          ModuleVersion: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
+        run: ./build.ps1 -ResolveDependency -Tasks pack
+
+      - name: Publish Build Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.buildArtifactName }}
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
+
+  test:
+    name: Test ${{ needs.build.outputs.fullSemVer }} (${{ matrix.os }})
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      # PSAzureSQLElasticJob targets PowerShell 7 only, so every leg runs pwsh
+      # and there is no Windows PowerShell 5.1 leg.
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.buildArtifactName }}
+          path: output/
+
+      - name: Run Tests
+        shell: pwsh
+        run: ./build.ps1 -Tasks test
+
+      - name: Publish Test Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: CodeCoverage-${{ matrix.os }}
+          path: output/testResults/
+          if-no-files-found: warn
+
+  deploy:
+    name: Deploy Module ${{ needs.build.outputs.fullSemVer }}
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    # Only deploy from the upstream repository, for pushes to the default
+    # branch or for version tags. This stops a fork from publishing.
+    if: >-
+      github.repository_owner == 'constantinhager' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ env.buildArtifactName }}
+          path: output/
+
+      - name: Publish Release
+        shell: pwsh
+        env:
+          GitHubToken: ${{ secrets.GitHubToken }}
+          GalleryApiToken: ${{ secrets.GalleryApiToken }}
+          ModuleVersion: ${{ needs.build.outputs.nuGetVersion }}
+          ReleaseBranch: ${{ env.defaultBranch }}
+          MainGitBranch: ${{ env.defaultBranch }}
+        run: ./build.ps1 -Tasks publish
+
+      - name: Send Changelog PR
+        shell: pwsh
+        env:
+          GitHubToken: ${{ secrets.GitHubToken }}
+          ReleaseBranch: ${{ env.defaultBranch }}
+          MainGitBranch: ${{ env.defaultBranch }}
+        run: ./build.ps1 -Tasks Create_ChangeLog_GitHub_PR

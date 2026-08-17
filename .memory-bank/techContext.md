@@ -15,8 +15,10 @@ source: repository evidence
 - Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
   `RequiredModules.psd1`), ModuleBuilder, InvokeBuild.
 - Pester **pinned to `[5.7.1, 6.0.0)`**; GitVersion for semantic versioning.
-- CI provider: **not configured yet**. The Sampler `github` feature produced only
-  `codecov.yml`; there is no `.github/workflows/` directory. To confirm.
+- CI: GitHub Actions, `.github/workflows/ci.yml` (build -> test -> deploy).
+  Sampler ships no GitHub Actions template, so this came from the canonical
+  template in the `sampler-framework` skill. Requires the `GitHubToken` and
+  `GalleryApiToken` repository secrets.
 
 ## Environment
 
@@ -45,4 +47,6 @@ source: repository evidence
 - The detached child is the MSIX-packaged `pwsh`, which resets `PATH` to two
   entries. Restore it in the payload or the QA test's `git` call fails:
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
-- Last verified run: `.\build.ps1` -> 105 tests passed, 17 tasks, 0 errors.
+- Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
+  exported function; grouping several functions into one file fails the build.
+- Last verified run: `.\build.ps1` -> 322 tests passed, 17 tasks, 0 errors.

@@ -73,11 +73,30 @@ RequiredModules = @(
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
 FunctionsToExport = @(
+    'Add-SqlElasticJobStep'
+    'Add-SqlElasticJobTarget'
+    'Get-SqlElasticJob'
     'Get-SqlElasticJobAgent'
+    'Get-SqlElasticJobCredential'
+    'Get-SqlElasticJobStep'
+    'Get-SqlElasticJobTargetGroup'
+    'New-SqlElasticJob'
     'New-SqlElasticJobAgent'
+    'New-SqlElasticJobCredential'
     'New-SqlElasticJobEnvironment'
+    'New-SqlElasticJobTargetGroup'
+    'Remove-SqlElasticJob'
     'Remove-SqlElasticJobAgent'
+    'Remove-SqlElasticJobCredential'
+    'Remove-SqlElasticJobStep'
+    'Remove-SqlElasticJobTarget'
+    'Remove-SqlElasticJobTargetGroup'
+    'Set-SqlElasticJob'
     'Set-SqlElasticJobAgent'
+    'Set-SqlElasticJobCredential'
+    'Set-SqlElasticJobStep'
+    'Start-SqlElasticJob'
+    'Stop-SqlElasticJob'
     'Test-SqlElasticJobEnvironment'
 )
 
