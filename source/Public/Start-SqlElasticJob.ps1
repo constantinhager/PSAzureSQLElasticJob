@@ -101,6 +101,12 @@ function Start-SqlElasticJob
 
         $startParameters = Add-OptionalParameter -Parameter $startParameters -BoundParameter $PSBoundParameters -Name 'Wait'
 
-        Start-AzSqlElasticJob @startParameters
+        Write-PSFMessage -Level Verbose -Message ('Starting Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'execution'
+
+        $execution = Start-AzSqlElasticJob @startParameters
+
+        Write-PSFMessage -Level Verbose -Message ('Started Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'execution'
+
+        return $execution
     }
 }

@@ -81,6 +81,8 @@ function Get-SqlElasticJobStep
             $stepParameters['Name'] = $Name
         }
 
+        Write-PSFMessage -Level VeryVerbose -Message ('Looking up step on Elastic Job ''{0}'' in resource group ''{1}''.' -f $JobName, $ResourceGroupName) -Tag 'step', 'lookup'
+
         Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobStep @stepParameters }
     }
 }

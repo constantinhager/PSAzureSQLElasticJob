@@ -11,7 +11,8 @@ source: current task evidence
 
 PSFramework adopted across the module: `Write-PSFMessage` logging,
 `Stop-PSFFunction` flow control with a caller-controlled `-EnableException`, and
-`Set-PSFConfig` provisioning defaults. 337 tests passing.
+`Set-PSFConfig` provisioning defaults. Logging now covers every Azure mutation
+and lookup, tagged by resource and operation. 341 tests passing.
 
 ## Evidence
 

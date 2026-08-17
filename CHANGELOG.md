@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Every Azure create, update, remove and execution call is now bracketed by an
+  intent and a completion message, and every lookup is traced. Messages carry a
+  resource tag and an operation tag, so `Get-PSFMessage -Tag 'agent'` or
+  `-Tag 'remove'` slices the log without parsing console output. Enable a
+  destination with `Set-PSFLoggingProvider` when a durable log is wanted.
 - The module now depends on PSFramework. Diagnostics go through
   `Write-PSFMessage` and are retrievable with `Get-PSFMessage`; domain failures
   in public commands go through `Stop-PSFFunction`.

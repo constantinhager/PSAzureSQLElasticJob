@@ -74,6 +74,8 @@ function Get-SqlElasticJobTargetGroup
             $targetGroupParameters['Name'] = $Name
         }
 
+        Write-PSFMessage -Level VeryVerbose -Message ('Looking up Elastic Job target group on agent ''{0}'' in resource group ''{1}''.' -f $AgentName, $ResourceGroupName) -Tag 'targetgroup', 'lookup'
+
         Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobTargetGroup @targetGroupParameters }
     }
 }

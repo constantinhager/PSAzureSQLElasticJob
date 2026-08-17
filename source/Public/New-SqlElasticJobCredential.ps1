@@ -85,6 +85,12 @@ function New-SqlElasticJobCredential
             return
         }
 
-        New-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
+        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
+
+        $jobCredential = New-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
+
+        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
+
+        return $jobCredential
     }
 }

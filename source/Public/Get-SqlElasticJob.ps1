@@ -73,6 +73,8 @@ function Get-SqlElasticJob
             $jobParameters['Name'] = $Name
         }
 
+        Write-PSFMessage -Level VeryVerbose -Message ('Looking up Elastic Job on agent ''{0}'' in resource group ''{1}''.' -f $AgentName, $ResourceGroupName) -Tag 'job', 'lookup'
+
         Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob @jobParameters }
     }
 }

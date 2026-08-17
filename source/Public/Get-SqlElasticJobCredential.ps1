@@ -75,6 +75,8 @@ function Get-SqlElasticJobCredential
             $credentialParameters['Name'] = $Name
         }
 
+        Write-PSFMessage -Level VeryVerbose -Message ('Looking up Elastic Job credential on agent ''{0}'' in resource group ''{1}''.' -f $AgentName, $ResourceGroupName) -Tag 'credential', 'lookup'
+
         Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobCredential @credentialParameters }
     }
 }

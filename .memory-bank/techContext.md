@@ -51,7 +51,10 @@ source: repository evidence
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
 - Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
   exported function; grouping several functions into one file fails the build.
-- Last verified run: `.\build.ps1` -> 337 tests passed, 17 tasks, 0 errors.
+- Last verified run: `.\build.ps1` -> 341 tests passed, 17 tasks, 0 errors.
+- Logging conformance is checkable: 64 `Write-PSFMessage` calls, all with an
+  explicit `-Level`, and zero `Write-Verbose`/`Warning`/`Host`/`Error` calls in
+  `source/`.
 - `source/suffix.ps1` is appended to the built `.psm1` by ModuleBuilder
   (`suffix: suffix.ps1` in `build.yaml`) and is the only place module code runs
   at import time. The `Set-PSFConfig -Initialize` calls live there.

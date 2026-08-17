@@ -30,6 +30,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   332 tests passing.
 - 2026-08-17: Adopted PSFramework for logging, flow control and configuration;
   337 tests passing.
+- 2026-08-17: Extended logging to every Azure mutation and lookup with resource
+  and operation tags; 341 tests passing.
 
 ## Stable capabilities
 

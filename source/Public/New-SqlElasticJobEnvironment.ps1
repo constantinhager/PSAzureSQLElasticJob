@@ -159,7 +159,11 @@ function New-SqlElasticJobEnvironment
 
             if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location)))
             {
+                Write-PSFMessage -Level Verbose -Message ('Creating logical SQL server ''{0}'' in ''{1}''.' -f $ServerName, $Location) -Tag 'server', 'create'
+
                 $server = New-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Location $Location -ServerVersion $ServerVersion -SqlAdministratorCredentials $ServerAdministratorCredential
+
+                Write-PSFMessage -Level Verbose -Message ('Created logical SQL server ''{0}''.' -f $ServerName) -Tag 'server', 'create'
 
                 $createdServer = $true
             }
@@ -179,7 +183,11 @@ function New-SqlElasticJobEnvironment
                     ('{0}/{1}' -f $ServerName, $DatabaseName),
                     ("Create job database at service objective '{0}'" -f $ServiceObjectiveName)))
             {
+                Write-PSFMessage -Level Verbose -Message ('Creating job database ''{0}'' at service objective ''{1}''.' -f $DatabaseName, $ServiceObjectiveName) -Tag 'database', 'create'
+
                 $database = New-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -RequestedServiceObjectiveName $ServiceObjectiveName
+
+                Write-PSFMessage -Level Verbose -Message ('Created job database ''{0}''.' -f $DatabaseName) -Tag 'database', 'create'
 
                 $createdDatabase = $true
             }
@@ -195,7 +203,11 @@ function New-SqlElasticJobEnvironment
         {
             if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $AgentName), 'Create Elastic Job agent'))
             {
+                Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
+
                 $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName
+
+                Write-PSFMessage -Level Verbose -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 $createdAgent = $true
             }

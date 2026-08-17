@@ -150,6 +150,12 @@ function New-SqlElasticJob
 
         $jobParameters = Add-OptionalParameter -Parameter $jobParameters -BoundParameter $PSBoundParameters -Name 'Description', 'Enable', 'RunOnce', 'IntervalType', 'IntervalCount', 'StartTime', 'EndTime'
 
-        New-AzSqlElasticJob @jobParameters
+        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
+
+        $job = New-AzSqlElasticJob @jobParameters
+
+        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
+
+        return $job
     }
 }

@@ -29,8 +29,7 @@
     .EXAMPLE
         New-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -Name 'agent01'
 #>
-function New-SqlElasticJobAgent
-{
+function New-SqlElasticJobAgent {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([System.Object])]
     param
@@ -57,14 +56,12 @@ function New-SqlElasticJobAgent
         $Name
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
-        if ($null -ne $existingAgent)
-        {
+        if ($null -ne $existingAgent) {
             Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists on server ''{1}''.' -f $Name, $ServerName) -Tag 'idempotent'
 
             return $existingAgent
@@ -72,11 +69,16 @@ function New-SqlElasticJobAgent
 
         if (-not $PSCmdlet.ShouldProcess(
                 ('{0}/{1}' -f $ServerName, $Name),
-                ("Create Elastic Job agent backed by database '{0}'" -f $DatabaseName)))
-        {
+                ("Create Elastic Job agent backed by database '{0}'" -f $DatabaseName))) {
             return
         }
 
-        New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $Name
+        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job agent ''{0}'' on server ''{1}'' backed by database ''{2}''.' -f $Name, $ServerName, $DatabaseName) -Tag 'agent', 'create'
+
+        $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $Name
+
+        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'create'
+
+        return $agent
     }
 }

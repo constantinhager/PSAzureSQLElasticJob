@@ -111,7 +111,11 @@ function Remove-SqlElasticJobStep
             return
         }
 
+        Write-PSFMessage -Level Verbose -Message ('Removing step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
+
         $null = Remove-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
+
+        Write-PSFMessage -Level Verbose -Message ('Removed step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
 
         if ($PassThru.IsPresent)
         {

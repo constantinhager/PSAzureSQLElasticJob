@@ -146,6 +146,12 @@ function Add-SqlElasticJobTarget
             return
         }
 
-        Add-AzSqlElasticJobTarget @targetParameters
+        Write-PSFMessage -Level Verbose -Message ('Adding target server ''{0}'' to target group ''{1}'' on agent ''{2}''.' -f $TargetServerName, $TargetGroupName, $AgentName) -Tag 'target', 'create'
+
+        $targetGroup = Add-AzSqlElasticJobTarget @targetParameters
+
+        Write-PSFMessage -Level Verbose -Message ('Added target server ''{0}'' to target group ''{1}''.' -f $TargetServerName, $TargetGroupName) -Tag 'target', 'create'
+
+        return $targetGroup
     }
 }

@@ -120,7 +120,11 @@ function Remove-SqlElasticJob
 
         $removeParameters = Add-OptionalParameter -Parameter $removeParameters -BoundParameter $PSBoundParameters -Name 'Force'
 
+        Write-PSFMessage -Level Verbose -Message ('Removing Elastic Job ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'remove'
+
         $null = Remove-AzSqlElasticJob @removeParameters
+
+        Write-PSFMessage -Level Verbose -Message ('Removed Elastic Job ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'remove'
 
         if ($PassThru.IsPresent)
         {

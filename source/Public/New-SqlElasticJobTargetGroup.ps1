@@ -71,6 +71,12 @@ function New-SqlElasticJobTargetGroup
             return
         }
 
-        New-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
+
+        $targetGroup = New-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+
+        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
+
+        return $targetGroup
     }
 }

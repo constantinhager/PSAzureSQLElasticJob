@@ -36,8 +36,7 @@
     .EXAMPLE
         Remove-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -Name 'agent01'
 #>
-function Remove-SqlElasticJobAgent
-{
+function Remove-SqlElasticJobAgent {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     [OutputType([System.Object])]
     param
@@ -71,19 +70,16 @@ function Remove-SqlElasticJobAgent
         $EnableException = $true
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
-        if ($null -eq $existingAgent)
-        {
+        if ($null -eq $existingAgent) {
             $message = "Elastic Job agent '{0}' was not found on server '{1}' in resource group '{2}'." -f
-                $Name, $ServerName, $ResourceGroupName
+            $Name, $ServerName, $ResourceGroupName
 
-            if ($Strict.IsPresent)
-            {
+            if ($Strict.IsPresent) {
                 Stop-PSFFunction -Message $message -EnableException $EnableException -Category ObjectNotFound -Tag 'strict'
 
                 return
@@ -94,15 +90,17 @@ function Remove-SqlElasticJobAgent
             return
         }
 
-        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $Name), 'Remove Elastic Job agent'))
-        {
+        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $Name), 'Remove Elastic Job agent')) {
             return
         }
 
+        Write-PSFMessage -Level Verbose -Message ('Removing Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
+
         $null = Remove-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
-        if ($PassThru.IsPresent)
-        {
+        Write-PSFMessage -Level Verbose -Message ('Removed Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
+
+        if ($PassThru.IsPresent) {
             return $existingAgent
         }
     }

@@ -29,8 +29,7 @@
     .EXAMPLE
         Set-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -Name 'agent01' -Tag @{ Env = 'Prod' }
 #>
-function Set-SqlElasticJobAgent
-{
+function Set-SqlElasticJobAgent {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([System.Object])]
     param
@@ -61,25 +60,28 @@ function Set-SqlElasticJobAgent
         $EnableException = $true
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
-        if ($null -eq $existingAgent)
-        {
+        if ($null -eq $existingAgent) {
             Stop-PSFFunction -Message ('Elastic Job agent ''{0}'' was not found on server ''{1}'' in resource group ''{2}''.' -f
                 $Name, $ServerName, $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
 
             return
         }
 
-        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $Name), 'Update Elastic Job agent'))
-        {
+        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $Name), 'Update Elastic Job agent')) {
             return
         }
 
-        Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -Tag $Tag
+        Write-PSFMessage -Level Verbose -Message ('Updating Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
+
+        $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -Tag $Tag
+
+        Write-PSFMessage -Level Verbose -Message ('Updated Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
+
+        return $agent
     }
 }

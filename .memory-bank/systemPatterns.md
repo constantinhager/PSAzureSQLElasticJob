@@ -29,6 +29,13 @@ Diagnostics go through `Write-PSFMessage`, and domain failures in public command
 go through `Stop-PSFFunction` with a caller-controlled `-EnableException` that
 defaults to `$true`. The two private helpers deliberately still throw.
 
+Logging convention: every Azure mutation is bracketed by an intent message and a
+completion message at `Verbose`; lookups trace at `VeryVerbose`. Each message
+carries a resource tag (`agent`, `job`, `step`, `credential`, `targetgroup`,
+`target`, `server`, `database`, `environment`, `context`) and an operation tag
+(`create`, `update`, `remove`, `execution`, `lookup`, `idempotent`, `strict`), so
+`Get-PSFMessage -Tag` can slice the log either way.
+
 Every `Remove-*` command is a no-op when the resource is absent unless
 `-Strict` is supplied, and supports `-PassThru`.
 
