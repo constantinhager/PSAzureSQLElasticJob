@@ -9,27 +9,30 @@ source: repository evidence
 
 ## Current status
 
-Planning stage only. Repository contains `README.md` and the Memory Bank; no
-module code exists yet.
+First implementation slice in place: Sampler scaffold builds, and provisioning
+plus Elastic Job agent CRUD are implemented and unit tested. The remaining CRUD
+surface is not started.
 
 ## Recent milestones
 
 - 2026-08-17: Canonical Memory Bank base initialized.
-- 2026-08-17: Project scope, stack, and CRUD surface confirmed with the user
-  (PowerShell 7+, `Az.Accounts` auth reuse, Sampler scaffold, full Elastic
-  Jobs object-model CRUD, PowerShell Gallery publish target).
+- 2026-08-17: Project scope, stack, and CRUD surface confirmed with the user.
+- 2026-08-17: Sampler `SimpleModule` scaffold generated and merged; manifest
+  retargeted to PowerShell 7+ with `Az.Accounts`/`Az.Sql` dependencies.
+- 2026-08-17: Provisioning (`New-`/`Test-SqlElasticJobEnvironment`) and agent
+  CRUD implemented with 40 passing unit tests.
 
 ## Stable capabilities
 
-- None yet (no code written).
+- Idempotent provisioning of the logical SQL server, job database and Elastic
+  Job agent, with `-WhatIf` support.
+- Elastic Job agent create, read, update and delete.
+- Non-throwing `Get-SqlElasticJobAgent` usable in conditional logic.
 
 ## Open work
 
-- Scaffold the Sampler-based project structure.
-- Design the concrete cmdlet list (e.g. `New-`/`Get-`/`Set-`/`Remove-` for
-  Elastic Job Agent, Job, Job Step, Job Credential, Target Group, Schedule).
-- Implement idempotent provisioning of the Job Agent's logical SQL Server and
-  job database.
-- Implement CRUD cmdlets against the Elastic Jobs object model.
-- Add Pester tests for provisioning and CRUD logic.
-- Set up CI (provider To confirm) and PowerShell Gallery publish workflow.
+- CRUD for Jobs (`New`/`Get`/`Set`/`Remove`, plus `Start`/`Stop`).
+- CRUD for Job Steps, Job Credentials, Target Groups and Targets.
+- Integration tests against a real subscription (currently unit tests only).
+- Populate `README.md` with usage examples.
+- Confirm the GitHub Actions workflow and the PowerShell Gallery publish path.

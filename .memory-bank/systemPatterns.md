@@ -9,13 +9,19 @@ source: repository evidence
 
 ## Architecture
 
-Proposed (not yet implemented): a Sampler-scaffolded PowerShell module whose
-public cmdlets wrap Azure SQL Elastic Jobs management (via `Az.Sql`/ARM REST)
-behind approved-verb, `Az`-style names, e.g. `New-AzSqlElasticJobAgent`,
-`Get-AzSqlElasticJob`, `Set-AzSqlElasticJobStep`,
-`Remove-AzSqlElasticJobTargetGroup` (exact cmdlet names: To confirm). A private
-helper ensures the Job Agent's prerequisite logical SQL Server and job
-database exist (create-if-missing) before any Elastic Job operation runs.
+A Sampler-built PowerShell module. Public cmdlets use the `SqlElasticJob*` noun
+family so they never collide with the `Az.Sql` `AzSqlElasticJob*` cmdlets they
+wrap. Three private helpers carry the cross-cutting behaviour:
+
+- `Assert-AzContext` - fails fast with one actionable message when the caller is
+  not signed in, instead of letting an Az cmdlet fail obscurely later.
+- `Get-AzResourceIfPresent` - runs a lookup and returns `$null` for a genuinely
+  absent resource.
+- `Test-AzResourceNotFoundError` - the single place that decides whether a
+  failure means "absent" or something else.
+
+Public commands follow a consistent shape: assert context, look up current
+state, then create/update/remove only when needed, under `ShouldProcess`.
 
 ## Decisions
 
@@ -29,3 +35,9 @@ database exist (create-if-missing) before any Elastic Job operation runs.
 - Choice: See `decisions/0001-initial-scope-and-stack.md`.
 - Rationale: Confirmed directly with the user via clarifying questions before
   any code was written, to avoid guessing architecture.
+
+### Decision 3: Wrap Az.Sql rather than reimplement the Elastic Jobs API
+
+- Choice: See `decisions/0002-wrap-az-sql-and-fail-safe-lookups.md`.
+- Rationale: `Az.Sql` already exposes the whole object model; the gap this
+  module fills is idempotent provisioning and non-throwing lookups.

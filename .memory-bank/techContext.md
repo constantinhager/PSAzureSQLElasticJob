@@ -9,33 +9,35 @@ source: repository evidence
 
 ## Stack
 
-- PowerShell 7+ (target runtime for the module and its manifest).
-- Az module family for Azure calls, reusing the caller's `Az.Accounts`
-  context (`Get-AzContext`); exact submodule dependency (`Az.Sql`,
-  `Az.Accounts`, direct ARM REST) to be finalized at implementation time.
-- Sampler build framework (`build.ps1`, `RequiredModules.psd1`) for
-  scaffolding, build, and release tasks.
-- Pester for unit/integration tests; GitVersion for semantic versioning.
+- PowerShell 7+ (`PowerShellVersion = '7.0'`, `CompatiblePSEditions = @('Core')`).
+- `Az.Accounts` (>= 2.13.0) and `Az.Sql` (>= 4.0.0) as manifest `RequiredModules`.
+  The module reuses the caller's `Az.Accounts` context and never authenticates.
+- Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
+  `RequiredModules.psd1`), ModuleBuilder, InvokeBuild.
+- Pester **pinned to `[5.7.1, 6.0.0)`**; GitVersion for semantic versioning.
+- GitHub Actions as the CI provider (scaffolded via the Sampler `github` feature).
 
 ## Environment
 
-- Development machine: Windows (per session environment info).
-- Module itself targets PowerShell 7+ cross-platform (no OS-specific code
-  expected beyond what Az modules require).
+- Development machine: Windows, PowerShell 7.6.3.
+- Module targets PowerShell 7+ cross-platform; no OS-specific code beyond what
+  the Az modules require.
 
 ## Constraints
 
 - No Windows PowerShell 5.1 support.
-- Must not implement independent authentication/token logic; rely on the
-  caller already being signed in via `Az.Accounts`.
-- Elastic Job Agent provisioning must be idempotent (create-if-missing, never
-  destructive on re-run).
-- Azure region/tier availability for Elastic Jobs and exact `Az.Sql` cmdlet
-  coverage: To confirm during implementation.
+- No independent authentication logic; `Assert-AzContext` fails fast when the
+  caller is not signed in.
+- Provisioning is create-if-missing only. Existing resources are never
+  reconfigured, and the resource group is never created.
+- A "not found" lookup failure must be distinguished from an authorization
+  failure; see `Test-AzResourceNotFoundError`.
+- Elastic Jobs requires the job database at service tier S0 or higher; the
+  module defaults to S1.
 
 ## Validation
 
-- Expected Sampler convention: `./build.ps1 -Tasks test` (Pester) and
-  `./build.ps1 -Tasks build`; exact task names to confirm once the Sampler
-  scaffold is created.
-- PSScriptAnalyzer linting expected as part of the Sampler pipeline.
+- Build: `.\build.ps1 -ResolveDependency -Tasks build`
+- Test: `.\build.ps1 -Tasks test`
+- Both must be launched via the canonical detached launcher, never directly in
+  the VS Code terminal.

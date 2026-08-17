@@ -9,22 +9,29 @@ source: current task evidence
 
 ## Current focus
 
-Memory Bank populated with initial project scope for the `PSAzureSQLElasticJob`
-module. No module code has been written yet (user explicitly requested
-memory bank only, no code, for this turn).
+First implementation slice of the `PSAzureSQLElasticJob` module: Sampler scaffold
+plus idempotent environment provisioning and Elastic Job **agent** CRUD, with unit
+tests. Job, Job Step, Job Credential and Target Group CRUD are not implemented yet.
 
 ## Evidence
 
-- Repository currently contains only `README.md` (one-line description).
-- Scope and stack confirmed via clarifying questions with the user on
-  2026-08-17 (see `decisions/0001-initial-scope-and-stack.md`): PowerShell 7+
-  only, `Az.Accounts` context reuse for auth, Sampler build scaffold, full
-  Elastic Jobs object-model CRUD (Jobs, Job Steps, Job Credentials, Target
-  Groups, Schedules) plus Job Agent, PowerShell Gallery as publish target.
+- Sampler `SimpleModule` scaffold generated and merged into the repository
+  (`build.ps1`, `build.yaml`, `RequiredModules.psd1`, `GitVersion.yml`,
+  `.github/`, `.vscode/`, `source/`, `tests/`). The existing `README.md` was
+  preserved and the placeholder sample functions were not copied.
+- `Az.Sql` 7.0.0 already exposes the complete Elastic Jobs object model
+  (29 `*ElasticJob*` cmdlets, verified via `ExportedCommands`). This module's
+  value is therefore idempotent provisioning and consistent, non-throwing
+  wrappers - not reimplementing the API.
+- Implemented: `Assert-AzContext`, `Get-AzResourceIfPresent`,
+  `Test-AzResourceNotFoundError` (private); `New-SqlElasticJobEnvironment`,
+  `Test-SqlElasticJobEnvironment`, and `Get`/`New`/`Set`/`Remove-SqlElasticJobAgent`
+  (public).
+- Pester had to be pinned to 5.x. `Pester = 'latest'` resolved to 6.1.0, under
+  which Sampler's own `tests/QA/module.tests.ps1` aborts with a labelled
+  break/continue error (pester/pester#2669).
 
 ## Next step
 
-When the user requests implementation, scaffold the Sampler-based module
-structure (`build.ps1`, `RequiredModules.psd1`, `source/Public`,
-`source/Private`, Pester tests) per the `sampler-framework` skill, then design
-the cmdlet list before writing cmdlet bodies.
+Implement the remaining CRUD surface - Job, Job Step, Job Credential, Target Group
+and Target - following the same wrapper pattern, then add integration tests.
