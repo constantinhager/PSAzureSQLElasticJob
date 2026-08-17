@@ -15,7 +15,8 @@ source: repository evidence
 - Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
   `RequiredModules.psd1`), ModuleBuilder, InvokeBuild.
 - Pester **pinned to `[5.7.1, 6.0.0)`**; GitVersion for semantic versioning.
-- GitHub Actions as the CI provider (scaffolded via the Sampler `github` feature).
+- CI provider: **not configured yet**. The Sampler `github` feature produced only
+  `codecov.yml`; there is no `.github/workflows/` directory. To confirm.
 
 ## Environment
 
@@ -41,3 +42,7 @@ source: repository evidence
 - Test: `.\build.ps1 -Tasks test`
 - Both must be launched via the canonical detached launcher, never directly in
   the VS Code terminal.
+- The detached child is the MSIX-packaged `pwsh`, which resets `PATH` to two
+  entries. Restore it in the payload or the QA test's `git` call fails:
+  `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
+- Last verified run: `.\build.ps1` -> 105 tests passed, 17 tasks, 0 errors.

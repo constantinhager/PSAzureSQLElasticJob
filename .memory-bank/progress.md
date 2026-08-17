@@ -20,7 +20,7 @@ surface is not started.
 - 2026-08-17: Sampler `SimpleModule` scaffold generated and merged; manifest
   retargeted to PowerShell 7+ with `Az.Accounts`/`Az.Sql` dependencies.
 - 2026-08-17: Provisioning (`New-`/`Test-SqlElasticJobEnvironment`) and agent
-  CRUD implemented with 40 passing unit tests.
+  CRUD implemented; full `build.ps1` run green with 105 passing tests.
 
 ## Stable capabilities
 
@@ -35,4 +35,5 @@ surface is not started.
 - CRUD for Job Steps, Job Credentials, Target Groups and Targets.
 - Integration tests against a real subscription (currently unit tests only).
 - Populate `README.md` with usage examples.
-- Confirm the GitHub Actions workflow and the PowerShell Gallery publish path.
+- Add a CI workflow; the scaffold did not generate `.github/workflows/`.
+- Confirm the PowerShell Gallery publish path.
