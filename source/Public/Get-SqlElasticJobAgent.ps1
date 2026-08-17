@@ -28,8 +28,7 @@
 
         Returns every Elastic Job agent on the server.
 #>
-function Get-SqlElasticJobAgent
-{
+function Get-SqlElasticJobAgent {
     [CmdletBinding()]
     [OutputType([System.Object])]
     param
@@ -51,8 +50,7 @@ function Get-SqlElasticJobAgent
         $Name
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $agentParameters = @{
@@ -60,8 +58,7 @@ function Get-SqlElasticJobAgent
             ServerName        = $ServerName
         }
 
-        if ($PSBoundParameters.ContainsKey('Name'))
-        {
+        if ($PSBoundParameters.ContainsKey('Name')) {
             $agentParameters['Name'] = $Name
         }
 
