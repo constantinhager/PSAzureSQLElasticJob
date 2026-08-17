@@ -32,8 +32,7 @@ function Get-AzResourceIfPresent {
         $ScriptBlock
     )
 
-    try
-    {
+    try {
         # Az cmdlets report failures both ways. Merging the error stream into the
         # output keeps non-terminating errors classifiable instead of discarding
         # them, which would make an unreadable resource look like an absent one.
@@ -41,10 +40,8 @@ function Get-AzResourceIfPresent {
 
         $errorRecord = @($output).Where({ $_ -is [System.Management.Automation.ErrorRecord] }, 'First')
 
-        if ($errorRecord.Count -gt 0)
-        {
-            if (Test-AzResourceNotFoundError -ErrorRecord $errorRecord[0])
-            {
+        if ($errorRecord.Count -gt 0) {
+            if (Test-AzResourceNotFoundError -ErrorRecord $errorRecord[0]) {
                 Write-Verbose -Message ('Resource not found: {0}' -f $errorRecord[0].Exception.Message)
 
                 return $null
@@ -54,11 +51,8 @@ function Get-AzResourceIfPresent {
         }
 
         return $output
-    }
-    catch
-    {
-        if (Test-AzResourceNotFoundError -ErrorRecord $_)
-        {
+    } catch {
+        if (Test-AzResourceNotFoundError -ErrorRecord $_) {
             Write-Verbose -Message ('Resource not found: {0}' -f $_.Exception.Message)
 
             return $null

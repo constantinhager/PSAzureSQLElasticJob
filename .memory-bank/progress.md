@@ -25,6 +25,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `build.ps1` green with 322 passing tests.
 - 2026-08-17: Security review completed. Fixed a fail-open resource lookup that
   reported unreadable resources as absent; 326 tests passing.
+- 2026-08-17: Remediation pass. Tightened not-found classification, pinned every
+  GitHub Action to a commit SHA, added credential patterns to `.gitignore`;
+  332 tests passing.
 
 ## Stable capabilities
 
@@ -37,9 +40,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 
 ## Open work
 
-- Security recommendations from `assessment-log.md`: SHA-pin the workflow
-  actions, enable secret scanning and push protection, add defensive
-  `.gitignore` patterns.
+- Enable secret scanning and push protection in the repository settings
+  (FIND-2026-004; cannot be done from a commit).
 - Integration tests against a real subscription (currently unit tests only).
 - Populate `README.md` with usage examples.
 - Configure the `GitHubToken` and `GalleryApiToken` repository secrets before

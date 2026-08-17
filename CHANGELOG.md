@@ -45,10 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- For any bug fix.
-
-### Fixed
-
 - Resource lookups no longer treat an unreadable resource as an absent one. A
   non-terminating authorization or throttling error from Azure was previously
   discarded, which could make provisioning attempt to create a resource that
@@ -56,4 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- In case of vulnerabilities.
+- A permission, authentication, quota or throttling failure is never classified
+  as a missing resource, even when Azure words it as "not found or you do not
+  have access". An HTTP status now settles the classification on its own, and
+  message text is only consulted when no status is available.
+- Every GitHub Actions reference is pinned to a commit SHA, so a moved tag
+  cannot introduce new code into the job that holds the release secrets.
+- `.gitignore` now excludes common credential material.

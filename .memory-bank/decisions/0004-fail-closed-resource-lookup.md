@@ -16,13 +16,13 @@ reached `Test-AzResourceNotFoundError`; the function simply returned `$null`.
 `$null` means "resource absent" to every caller. A probe against the built module
 confirmed the consequence:
 
-| Lookup outcome | Before | After |
-|---|---|---|
-| Terminating authorization error | rethrown | rethrown |
+| Lookup outcome                      | Before                        | After    |
+| ----------------------------------- | ----------------------------- | -------- |
+| Terminating authorization error     | rethrown                      | rethrown |
 | Non-terminating authorization error | **`$null` - reported absent** | rethrown |
-| Non-terminating throttling error | **`$null` - reported absent** | rethrown |
-| Non-terminating not-found error | `$null` | `$null` |
-| Success | value | value |
+| Non-terminating throttling error    | **`$null` - reported absent** | rethrown |
+| Non-terminating not-found error     | `$null`                       | `$null`  |
+| Success                             | value                         | value    |
 
 `New-SqlElasticJobEnvironment` would therefore conclude that a server it merely
 lacked permission to read did not exist, and would try to create it. The operator

@@ -18,3 +18,4 @@ Trim entries older than 90 days.
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.
 2026-08-17 12:52 UTC | technical-writer | Added job/step/credential/target-group CRUD, GitHub Actions release workflow, and Add-OptionalParameter after finding Pester mock $PSBoundParameters is empty; 322 tests passing.
 2026-08-17 13:22 UTC | security-reviewer | Security review of source and docs; fixed fail-open resource lookup (non-terminating errors read as absent), 326 tests passing.
+2026-08-17 13:55 UTC | security-reviewer | Remediated review findings: tightened not-found classification, SHA-pinned Actions, hardened .gitignore; 332 tests passing.

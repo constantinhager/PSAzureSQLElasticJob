@@ -9,9 +9,9 @@ source: current task evidence
 
 ## Current focus
 
-Security review of the source and documentation is complete. One High finding
-(fail-open resource lookup) was fixed and verified; the rest are Medium or below
-and are recorded in `assessment-log.md`. 326 tests passing.
+Security review and remediation are complete. Every finding fixable from the
+codebase is fixed and verified; only enabling secret scanning and push protection
+remains, and that is a repository setting. 332 tests passing.
 
 ## Evidence
 
@@ -34,6 +34,5 @@ and are recorded in `assessment-log.md`. 326 tests passing.
 
 ## Next step
 
-Decide on the open recommendations in `assessment-log.md` (SHA-pin the workflow
-actions, enable secret scanning and push protection, extend `.gitignore`), then
-add integration tests against a real subscription and populate `README.md`.
+Enable secret scanning and push protection in the repository settings, then add
+integration tests against a real subscription and populate `README.md`.
