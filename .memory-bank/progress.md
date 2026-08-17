@@ -23,6 +23,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-17: Job, job step, job credential, target group and target CRUD
   implemented; GitHub Actions CI/release workflow and issue templates added;
   `build.ps1` green with 322 passing tests.
+- 2026-08-17: Security review completed. Fixed a fail-open resource lookup that
+  reported unreadable resources as absent; 326 tests passing.
 
 ## Stable capabilities
 
@@ -35,6 +37,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 
 ## Open work
 
+- Security recommendations from `assessment-log.md`: SHA-pin the workflow
+  actions, enable secret scanning and push protection, add defensive
+  `.gitignore` patterns.
 - Integration tests against a real subscription (currently unit tests only).
 - Populate `README.md` with usage examples.
 - Configure the `GitHubToken` and `GalleryApiToken` repository secrets before

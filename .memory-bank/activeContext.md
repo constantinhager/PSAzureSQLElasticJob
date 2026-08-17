@@ -9,9 +9,9 @@ source: current task evidence
 
 ## Current focus
 
-The full Elastic Jobs CRUD surface is implemented and unit tested (25 public
-commands, 322 passing tests), and a GitHub Actions CI/release workflow is in
-place. No integration tests against a real subscription yet.
+Security review of the source and documentation is complete. One High finding
+(fail-open resource lookup) was fixed and verified; the rest are Medium or below
+and are recorded in `assessment-log.md`. 326 tests passing.
 
 ## Evidence
 
@@ -34,5 +34,6 @@ place. No integration tests against a real subscription yet.
 
 ## Next step
 
-Add integration tests against a real subscription, and populate `README.md`
-with usage examples.
+Decide on the open recommendations in `assessment-log.md` (SHA-pin the workflow
+actions, enable secret scanning and push protection, extend `.gitignore`), then
+add integration tests against a real subscription and populate `README.md`.

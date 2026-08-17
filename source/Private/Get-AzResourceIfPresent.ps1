@@ -21,8 +21,7 @@
     .EXAMPLE
         Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobAgent @params }
 #>
-function Get-AzResourceIfPresent
-{
+function Get-AzResourceIfPresent {
     [CmdletBinding()]
     [OutputType([System.Object])]
     param
@@ -35,7 +34,26 @@ function Get-AzResourceIfPresent
 
     try
     {
-        return & $ScriptBlock 2>$null
+        # Az cmdlets report failures both ways. Merging the error stream into the
+        # output keeps non-terminating errors classifiable instead of discarding
+        # them, which would make an unreadable resource look like an absent one.
+        $output = & $ScriptBlock 2>&1
+
+        $errorRecord = @($output).Where({ $_ -is [System.Management.Automation.ErrorRecord] }, 'First')
+
+        if ($errorRecord.Count -gt 0)
+        {
+            if (Test-AzResourceNotFoundError -ErrorRecord $errorRecord[0])
+            {
+                Write-Verbose -Message ('Resource not found: {0}' -f $errorRecord[0].Exception.Message)
+
+                return $null
+            }
+
+            throw $errorRecord[0]
+        }
+
+        return $output
     }
     catch
     {

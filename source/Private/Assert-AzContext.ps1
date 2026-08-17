@@ -21,8 +21,7 @@
 
         Throws when the caller is not signed in; otherwise returns the context.
 #>
-function Assert-AzContext
-{
+function Assert-AzContext {
     [CmdletBinding()]
     [OutputType([System.Object])]
     param
@@ -35,14 +34,12 @@ function Assert-AzContext
 
     $context = Get-AzContext -ErrorAction SilentlyContinue
 
-    if ($null -eq $context -or $null -eq $context.Subscription)
-    {
+    if ($null -eq $context -or $null -eq $context.Subscription) {
         throw 'No Azure context found. Run Connect-AzAccount before using PSAzureSQLElasticJob.'
     }
 
     if ($PSBoundParameters.ContainsKey('SubscriptionId') -and
-        $context.Subscription.Id -ne $SubscriptionId)
-    {
+        $context.Subscription.Id -ne $SubscriptionId) {
         throw ("The current Azure context targets subscription '{0}' but '{1}' was requested. " +
             'Run Set-AzContext -Subscription {1} first.') -f $context.Subscription.Id, $SubscriptionId
     }

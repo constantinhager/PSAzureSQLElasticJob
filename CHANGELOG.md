@@ -47,7 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - For any bug fix.
 
+### Fixed
+
+- Resource lookups no longer treat an unreadable resource as an absent one. A
+  non-terminating authorization or throttling error from Azure was previously
+  discarded, which could make provisioning attempt to create a resource that
+  already existed and hide the real failure.
+
 ### Security
 
 - In case of vulnerabilities.
-

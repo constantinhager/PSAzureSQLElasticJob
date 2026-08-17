@@ -52,3 +52,9 @@ Every `Remove-*` command is a no-op when the resource is absent unless
 - Choice: See `decisions/0003-testable-optional-parameter-forwarding.md`.
 - Rationale: Pester does not populate `$PSBoundParameters` inside mocks, so the
   forwarding logic had to move into a directly testable private function.
+
+### Decision 5: Resource lookups fail closed
+
+- Choice: See `decisions/0004-fail-closed-resource-lookup.md`.
+- Rationale: Discarding the error stream made an unreadable resource look absent,
+  defeating the classifier decision 0002 relies on.

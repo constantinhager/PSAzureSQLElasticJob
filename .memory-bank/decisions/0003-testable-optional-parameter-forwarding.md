@@ -22,11 +22,11 @@ Trying to unit test that behaviour exposed a Pester limitation. Two probe runs
 against Pester 5.9.1 established that **`$PSBoundParameters` is empty inside both
 `-ParameterFilter` and `-MockWith`**:
 
-| Assertion | Result |
-|---|---|
-| `ParameterFilter { $PSBoundParameters.ContainsKey('Name') }` after supplying `Name` | fails |
+| Assertion                                                                               | Result |
+| --------------------------------------------------------------------------------------- | ------ |
+| `ParameterFilter { $PSBoundParameters.ContainsKey('Name') }` after supplying `Name`     | fails  |
 | `ParameterFilter { -not $PSBoundParameters.ContainsKey('Name') }` after omitting `Name` | passes |
-| `MockWith { $PSBoundParameters.ContainsKey('Name') }` after supplying `Name` | fails |
+| `MockWith { $PSBoundParameters.ContainsKey('Name') }` after supplying `Name`            | fails  |
 
 Only the parameter *variables* are bound in those scopes. Every
 `-not $PSBoundParameters.ContainsKey(...)` assertion therefore passes

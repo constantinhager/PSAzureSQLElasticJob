@@ -49,4 +49,4 @@ source: repository evidence
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
 - Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
   exported function; grouping several functions into one file fails the build.
-- Last verified run: `.\build.ps1` -> 322 tests passed, 17 tasks, 0 errors.
+- Last verified run: `.\build.ps1` -> 326 tests passed, 17 tasks, 0 errors.
