@@ -81,7 +81,7 @@ Every `Remove-*` command is a no-op when the resource is absent unless
 - Choice: Declare GitHub Actions permissions at the workflow level and do not
   repeat them on the deploy job.
 - Rationale: Job-level permissions replace rather than merge with global
-  permissions. Sampler release tasks still receive the `GitHubToken`
-  personal-access-token secret explicitly, because they consume that exact
-  environment variable and the automatic token cannot provide the changelog
-  pull request's downstream workflow behavior.
+  permissions. Sampler release tasks receive GitHub Actions' automatic token
+  through their required `GitHubToken` environment variable. `contents: write`
+  creates releases and `pull-requests: write` creates changelog pull requests;
+  a missing personal access token can no longer make the tasks skip silently.

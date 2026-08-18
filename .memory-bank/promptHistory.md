@@ -22,3 +22,4 @@ Trim entries older than 90 days.
 2026-08-17 14:30 UTC | software-engineer | Adopted PSFramework: Write-PSFMessage logging, Stop-PSFFunction with caller-controlled -EnableException (default $true), Set-PSFConfig provisioning defaults; 337 tests passing.
 2026-08-17 15:05 UTC | software-engineer | Extended PSFramework logging to every Azure mutation and lookup with resource/operation tags; 341 tests passing.
 2026-08-18 12:34 UTC | default | Removed the redundant deploy-level CI permissions and documented why Sampler release tasks retain the GitHubToken secret mapping.
+2026-08-18 12:34 UTC | default | Fixed a successful CI release task silently skipping when GitHubToken was unset by mapping the automatic GitHub token and granting contents write permission.

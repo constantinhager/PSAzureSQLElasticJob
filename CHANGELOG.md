@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The CI release and changelog tasks now use GitHub Actions' automatic token
+  with repository-content write access, so a successful `main` deployment
+  creates its GitHub release instead of silently skipping it when no personal
+  access token secret is configured.
 - Every Azure create, update, remove and execution call is now bracketed by an
   intent and a completion message, and every lookup is traced. Messages carry a
   resource tag and an operation tag, so `Get-PSFMessage -Tag 'agent'` or

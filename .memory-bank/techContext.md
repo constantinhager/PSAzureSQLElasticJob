@@ -19,8 +19,9 @@ source: repository evidence
 - Pester **pinned to `[5.7.1, 6.0.0)`**; GitVersion for semantic versioning.
 - CI: GitHub Actions, `.github/workflows/ci.yml` (build -> test -> deploy).
   Sampler ships no GitHub Actions template, so this came from the canonical
-  template in the `sampler-framework` skill. Requires the `GitHubToken` and
-  `GalleryApiToken` repository secrets.
+  template in the `sampler-framework` skill. Uses GitHub Actions' automatic
+  token for releases and changelog pull requests; requires only the
+  `GalleryApiToken` repository secret.
 
 ## Environment
 

@@ -9,10 +9,9 @@
 #              raise the changelog pull request.
 #
 # Required repository secrets (Settings > Secrets and variables > Actions):
-#   GitHubToken     - personal access token used to create the GitHub release
-#                     and the changelog pull request. The automatic
-#                     secrets.GITHUB_TOKEN cannot raise the changelog PR.
 #   GalleryApiToken - PowerShell Gallery API key used to publish the module.
+# GitHub Actions supplies the release and changelog tasks with its automatic
+# token through their expected GitHubToken environment variable.
 name: CI
 
 # GitHub evaluates run-name before any job starts, so it cannot contain a
@@ -39,7 +38,7 @@ permissions:
     id-token: write
     pull-requests: write
     issues: write
-    contents: read
+    contents: write
 
 env:
     buildArtifactName: output
@@ -152,8 +151,8 @@ jobs:
             - name: Publish Release
               shell: pwsh
               env:
-                  GitHubToken: ${{ secrets.GitHubToken }}
                   GalleryApiToken: ${{ secrets.GalleryApiToken }}
+                  GitHubToken: ${{ github.token }}
                   ModuleVersion: ${{ needs.build.outputs.nuGetVersion }}
                   ReleaseBranch: ${{ env.defaultBranch }}
                   MainGitBranch: ${{ env.defaultBranch }}
@@ -162,7 +161,7 @@ jobs:
             - name: Send Changelog PR
               shell: pwsh
               env:
-                  GitHubToken: ${{ secrets.GitHubToken }}
                   ReleaseBranch: ${{ env.defaultBranch }}
+                  GitHubToken: ${{ github.token }}
                   MainGitBranch: ${{ env.defaultBranch }}
               run: ./build.ps1 -Tasks Create_ChangeLog_GitHub_PR
