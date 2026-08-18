@@ -70,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Avoid duplicate Azure-context status messages during environment checks.
 - Stop provisioning after an Azure server, database or agent creation failure,
   preserving accurate creation state and logging the failed provisioning step.
 - Resource lookups no longer treat an unreadable resource as an absent one. A

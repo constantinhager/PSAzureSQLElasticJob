@@ -52,6 +52,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Replaced raw Azure not-found error messages with a concise
   absent-resource status explaining that provisioning will create it when
   needed. Full Sampler suite passed.
+- 2026-08-18: Removed the redundant public agent lookup from environment
+  checks, so Azure context is asserted and reported once. Full Sampler suite
+  passed.
 
 ## Stable capabilities
 

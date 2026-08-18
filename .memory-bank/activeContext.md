@@ -19,6 +19,9 @@ All ordinary PSFramework lifecycle and existence messages now use `Output`;
 the deeper resource lookup diagnostics remain `VeryVerbose`.
 Confirmed absent-resource lookups now emit a concise provisioning-oriented
 status instead of the raw Azure ARM error text.
+`Test-SqlElasticJobEnvironment` validates Azure context once and performs its
+agent lookup internally, avoiding a duplicate context status from the public
+agent getter.
 
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token

@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -49,6 +49,13 @@ Describe 'Test-SqlElasticJobEnvironment' {
             $result.ServerName | Should -Be 'srv'
             $result.DatabaseName | Should -Be 'jobdb'
             $result.AgentName | Should -Be 'agent01'
+        }
+
+        It 'Should not invoke the public agent lookup after validating the context' {
+            $commandPath = Join-Path $PSScriptRoot '..' '..' '..' 'source' 'Public' 'Test-SqlElasticJobEnvironment.ps1'
+            $commandContent = Get-Content -LiteralPath $commandPath -Raw
+
+            $commandContent | Should -Not -Match '\$agent\s*=\s*Get-SqlElasticJobAgent'
         }
     }
 
