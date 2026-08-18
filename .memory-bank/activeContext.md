@@ -14,6 +14,10 @@ PSFramework adopted across the module: `Write-PSFMessage` logging,
 `Set-PSFConfig` provisioning defaults. Logging now covers every Azure mutation
 and lookup, tagged by resource and operation. 341 tests passing.
 
+The CI workflow now centralizes its permissions at the workflow level. The
+deploy job inherits those permissions and retains the `GitHubToken` secret
+mapping required by Sampler's release and changelog tasks.
+
 ## Evidence
 
 - `Az.Sql` 7.0.0 exposes the whole Elastic Jobs object model, so this module

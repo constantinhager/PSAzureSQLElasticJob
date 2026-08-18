@@ -75,3 +75,13 @@ Every `Remove-*` command is a no-op when the resource is absent unless
 - Choice: See `decisions/0005-adopt-psframework.md`.
 - Rationale: Requested by the user; `-EnableException` defaults to `$true` here
   because these commands provision infrastructure and must not fail quietly.
+
+### Decision 7: Centralize CI permissions
+
+- Choice: Declare GitHub Actions permissions at the workflow level and do not
+  repeat them on the deploy job.
+- Rationale: Job-level permissions replace rather than merge with global
+  permissions. Sampler release tasks still receive the `GitHubToken`
+  personal-access-token secret explicitly, because they consume that exact
+  environment variable and the automatic token cannot provide the changelog
+  pull request's downstream workflow behavior.

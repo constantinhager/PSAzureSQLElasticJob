@@ -32,6 +32,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   337 tests passing.
 - 2026-08-17: Extended logging to every Azure mutation and lookup with resource
   and operation tags; 341 tests passing.
+- 2026-08-18: Removed the redundant deploy-job permission override; it now
+  inherits the workflow-level permissions while release tasks keep the
+  `GitHubToken` personal-access-token mapping.
 
 ## Stable capabilities
 
