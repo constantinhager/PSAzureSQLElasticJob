@@ -24,3 +24,4 @@ Trim entries older than 90 days.
 2026-08-18 12:34 UTC | default | Removed the redundant deploy-level CI permissions and documented why Sampler release tasks retain the GitHubToken secret mapping.
 2026-08-18 12:34 UTC | default | Fixed a successful CI release task silently skipping when GitHubToken was unset by mapping the automatic GitHub token and granting contents write permission.
 2026-08-18 13:15 UTC | software-engineer | Added opt-in Azure subscription integration coverage with isolated resource cleanup and a default-suite Integration tag exclusion.
+2026-08-18 15:27 UTC | software-engineer | Fixed Azure provisioning failure handling and added PSFramework progress/error logging with regression coverage.

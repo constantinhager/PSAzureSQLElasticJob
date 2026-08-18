@@ -65,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Stop provisioning after an Azure server, database or agent creation failure,
+  preserving accurate creation state and logging the failed provisioning step.
 - Resource lookups no longer treat an unreadable resource as an absent one. A
   non-terminating authorization or throttling error from Azure was previously
   discarded, which could make provisioning attempt to create a resource that

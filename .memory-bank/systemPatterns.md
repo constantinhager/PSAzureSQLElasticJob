@@ -39,6 +39,11 @@ carries a resource tag (`agent`, `job`, `step`, `credential`, `targetgroup`,
 Every `Remove-*` command is a no-op when the resource is absent unless
 `-Strict` is supplied, and supports `-PassThru`.
 
+Provisioning mutations use `-ErrorAction Stop` and wrap Azure failures in a
+PSFramework error log plus `Stop-PSFFunction`. Each catch returns immediately
+so a non-exception caller does not continue to dependent steps or receive false
+`Created*` state.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

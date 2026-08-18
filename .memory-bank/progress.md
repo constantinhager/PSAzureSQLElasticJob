@@ -41,6 +41,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Added opt-in Azure subscription lifecycle coverage. The default
   suite excludes the `Integration` tag; `build.ps1 -Tasks test` passed with 9
   tasks and 0 errors.
+- 2026-08-18: Fixed provisioning to stop on Azure server, database and agent
+  creation errors, log each current step through PSFramework, and avoid false
+  `Created*` results. Full suite passed with 344 tests.
 
 ## Stable capabilities
 
@@ -57,6 +60,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   (FIND-2026-004; cannot be done from a commit).
 - Configure the Azure integration-test environment variables and run the live
   subscription lifecycle test.
+- Retry the live environment provisioning with a globally unique logical SQL
+  server name.
 - Populate `README.md` with usage examples.
 - Configure the `GalleryApiToken` repository secret before the first release.
 - Confirm the PowerShell Gallery publish path end to end.

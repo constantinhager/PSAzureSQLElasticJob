@@ -65,8 +65,7 @@
     .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
 #>
-function New-SqlElasticJobEnvironment
-{
+function New-SqlElasticJobEnvironment {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
     [OutputType([PSCustomObject])]
     param
@@ -116,16 +115,14 @@ function New-SqlElasticJobEnvironment
         $EnableException = $true
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $resourceGroup = Get-AzResourceIfPresent -ScriptBlock {
             Get-AzResourceGroup -Name $ResourceGroupName
         }
 
-        if ($null -eq $resourceGroup)
-        {
+        if ($null -eq $resourceGroup) {
             Stop-PSFFunction -Message ('Resource group ''{0}'' was not found. Create it before provisioning an Elastic Job environment.' -f
                 $ResourceGroupName) -EnableException $EnableException -Category ObjectNotFound
 
@@ -140,36 +137,39 @@ function New-SqlElasticJobEnvironment
             Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName
         }
 
-        if ($null -eq $server)
-        {
-            if (-not $PSBoundParameters.ContainsKey('Location'))
-            {
+        if ($null -eq $server) {
+            if (-not $PSBoundParameters.ContainsKey('Location')) {
                 Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -Location was supplied.' -f $ServerName) -EnableException $EnableException -Category InvalidArgument
 
                 return
             }
 
-            if (-not $PSBoundParameters.ContainsKey('ServerAdministratorCredential'))
-            {
+            if (-not $PSBoundParameters.ContainsKey('ServerAdministratorCredential')) {
                 Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
                     $ServerName) -EnableException $EnableException -Category InvalidArgument
 
                 return
             }
 
-            if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location)))
-            {
+            if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location))) {
+                Write-PSFMessage -Level Verbose -Message ('Provisioning step 1 of 3: create logical SQL server ''{0}''.' -f $ServerName) -Tag 'environment', 'progress'
                 Write-PSFMessage -Level Verbose -Message ('Creating logical SQL server ''{0}'' in ''{1}''.' -f $ServerName, $Location) -Tag 'server', 'create'
 
-                $server = New-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Location $Location -ServerVersion $ServerVersion -SqlAdministratorCredentials $ServerAdministratorCredential
+                try {
+                    $server = New-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Location $Location -ServerVersion $ServerVersion -SqlAdministratorCredentials $ServerAdministratorCredential -ErrorAction Stop
+                } catch {
+                    $message = ('Failed to create logical SQL server ''{0}'': {1}' -f $ServerName, $_.Exception.Message)
+                    Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'server', 'create'
+                    Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                    return
+                }
 
                 Write-PSFMessage -Level Verbose -Message ('Created logical SQL server ''{0}''.' -f $ServerName) -Tag 'server', 'create'
 
                 $createdServer = $true
             }
-        }
-        else
-        {
+        } else {
             Write-PSFMessage -Level Verbose -Message ('Logical SQL server ''{0}'' already exists.' -f $ServerName) -Tag 'idempotent'
         }
 
@@ -177,43 +177,53 @@ function New-SqlElasticJobEnvironment
             Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName
         }
 
-        if ($null -eq $database)
-        {
+        if ($null -eq $database) {
             if ($PSCmdlet.ShouldProcess(
                     ('{0}/{1}' -f $ServerName, $DatabaseName),
-                    ("Create job database at service objective '{0}'" -f $ServiceObjectiveName)))
-            {
+                    ("Create job database at service objective '{0}'" -f $ServiceObjectiveName))) {
+                Write-PSFMessage -Level Verbose -Message ('Provisioning step 2 of 3: create job database ''{0}''.' -f $DatabaseName) -Tag 'environment', 'progress'
                 Write-PSFMessage -Level Verbose -Message ('Creating job database ''{0}'' at service objective ''{1}''.' -f $DatabaseName, $ServiceObjectiveName) -Tag 'database', 'create'
 
-                $database = New-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -RequestedServiceObjectiveName $ServiceObjectiveName
+                try {
+                    $database = New-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -RequestedServiceObjectiveName $ServiceObjectiveName -ErrorAction Stop
+                } catch {
+                    $message = ('Failed to create job database ''{0}'': {1}' -f $DatabaseName, $_.Exception.Message)
+                    Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'database', 'create'
+                    Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                    return
+                }
 
                 Write-PSFMessage -Level Verbose -Message ('Created job database ''{0}''.' -f $DatabaseName) -Tag 'database', 'create'
 
                 $createdDatabase = $true
             }
-        }
-        else
-        {
+        } else {
             Write-PSFMessage -Level Verbose -Message ('Job database ''{0}'' already exists.' -f $DatabaseName) -Tag 'idempotent'
         }
 
         $agent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
 
-        if ($null -eq $agent)
-        {
-            if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $AgentName), 'Create Elastic Job agent'))
-            {
+        if ($null -eq $agent) {
+            if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $AgentName), 'Create Elastic Job agent')) {
+                Write-PSFMessage -Level Verbose -Message ('Provisioning step 3 of 3: create Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'environment', 'progress'
                 Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
-                $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName
+                try {
+                    $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName -ErrorAction Stop
+                } catch {
+                    $message = ('Failed to create Elastic Job agent ''{0}'': {1}' -f $AgentName, $_.Exception.Message)
+                    Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'agent', 'create'
+                    Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                    return
+                }
 
                 Write-PSFMessage -Level Verbose -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 $createdAgent = $true
             }
-        }
-        else
-        {
+        } else {
             Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
         }
 
