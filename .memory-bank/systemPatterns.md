@@ -85,3 +85,12 @@ Every `Remove-*` command is a no-op when the resource is absent unless
   through their required `GitHubToken` environment variable. `contents: write`
   creates releases and `pull-requests: write` creates changelog pull requests;
   a missing personal access token can no longer make the tasks skip silently.
+
+### Decision 8: Opt-in Azure subscription integration tests
+
+- Choice: Keep real-Azure tests under `tests/Integration`, tag them
+  `Integration`, and exclude that tag from the default Sampler test workflow.
+- Rationale: The tests create and remove uniquely named Elastic Job resources
+  but require a pre-existing resource group, logical SQL server and job
+  database. An explicit tagged run prevents normal local and CI tests from
+  requiring Azure credentials or incurring Azure changes.

@@ -38,6 +38,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Fixed the green-but-no-release workflow outcome by mapping
   GitHub Actions' automatic token to Sampler's `GitHubToken` input and granting
   `contents: write` at the workflow level.
+- 2026-08-18: Added opt-in Azure subscription lifecycle coverage. The default
+  suite excludes the `Integration` tag; `build.ps1 -Tasks test` passed with 9
+  tasks and 0 errors.
 
 ## Stable capabilities
 
@@ -52,7 +55,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 
 - Enable secret scanning and push protection in the repository settings
   (FIND-2026-004; cannot be done from a commit).
-- Integration tests against a real subscription (currently unit tests only).
+- Configure the Azure integration-test environment variables and run the live
+  subscription lifecycle test.
 - Populate `README.md` with usage examples.
 - Configure the `GalleryApiToken` repository secret before the first release.
 - Confirm the PowerShell Gallery publish path end to end.
