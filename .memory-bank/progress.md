@@ -35,6 +35,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Removed the redundant deploy-job permission override; it now
   inherits the workflow-level permissions while release tasks keep the
   `GitHubToken` personal-access-token mapping.
+- 2026-08-18: Fixed the green-but-no-release workflow outcome by mapping
+  GitHub Actions' automatic token to Sampler's `GitHubToken` input and granting
+  `contents: write` at the workflow level.
 
 ## Stable capabilities
 
@@ -51,6 +54,5 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   (FIND-2026-004; cannot be done from a commit).
 - Integration tests against a real subscription (currently unit tests only).
 - Populate `README.md` with usage examples.
-- Configure the `GitHubToken` and `GalleryApiToken` repository secrets before
-  the first release.
+- Configure the `GalleryApiToken` repository secret before the first release.
 - Confirm the PowerShell Gallery publish path end to end.

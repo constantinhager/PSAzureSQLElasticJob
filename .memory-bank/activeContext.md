@@ -15,8 +15,9 @@ PSFramework adopted across the module: `Write-PSFMessage` logging,
 and lookup, tagged by resource and operation. 341 tests passing.
 
 The CI workflow now centralizes its permissions at the workflow level. The
-deploy job inherits those permissions and retains the `GitHubToken` secret
-mapping required by Sampler's release and changelog tasks.
+deploy job inherits those permissions and maps GitHub Actions' automatic token
+to the `GitHubToken` environment variable required by Sampler's release and
+changelog tasks.
 
 ## Evidence
 
