@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -40,7 +40,7 @@ Describe 'Module logging' {
             $null = New-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -DatabaseName 'jobdb' -Name 'log-probe-agent'
 
             $logged = Get-PSFMessage -Tag 'create' |
-                Where-Object -FilterScript { $_.Message -like '*log-probe-agent*' }
+            Where-Object -FilterScript { $_.Message -like '*log-probe-agent*' }
 
             $logged | Should -Not -BeNullOrEmpty
             ($logged.Message -join ' ') | Should -BeLike '*Creating Elastic Job agent*'
@@ -51,8 +51,8 @@ Describe 'Module logging' {
             $null = New-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -DatabaseName 'jobdb' -Name 'log-attribution-agent'
 
             $logged = Get-PSFMessage -Tag 'create' |
-                Where-Object -FilterScript { $_.Message -like '*log-attribution-agent*' } |
-                    Select-Object -First 1
+            Where-Object -FilterScript { $_.Message -like '*log-attribution-agent*' } |
+            Select-Object -First 1
 
             $logged.FunctionName | Should -Be 'New-SqlElasticJobAgent'
         }
@@ -71,12 +71,12 @@ Describe 'Module logging' {
             $null = New-SqlElasticJobAgent -ResourceGroupName 'rg' -ServerName 'srv' -DatabaseName 'jobdb' -Name 'existing-probe-agent'
 
             $idempotent = Get-PSFMessage -Tag 'idempotent' |
-                Where-Object -FilterScript { $_.Message -like '*existing-probe-agent*' }
+            Where-Object -FilterScript { $_.Message -like '*existing-probe-agent*' }
 
             $idempotent | Should -Not -BeNullOrEmpty
 
             $created = Get-PSFMessage -Tag 'create' |
-                Where-Object -FilterScript { $_.Message -like '*existing-probe-agent*' }
+            Where-Object -FilterScript { $_.Message -like '*existing-probe-agent*' }
 
             $created | Should -BeNullOrEmpty
         }
@@ -93,11 +93,19 @@ Describe 'Module logging' {
             $null = Get-SqlElasticJobAgent @script:agentParameters -Name 'agent01'
 
             $logged = Get-PSFMessage -Tag 'lookup' |
-                Where-Object -FilterScript { $_.Message -like '*Looking up Elastic Job agent*' } |
-                    Select-Object -Last 1
+            Where-Object -FilterScript { $_.Message -like '*Looking up Elastic Job agent*' } |
+            Select-Object -Last 1
 
             $logged | Should -Not -BeNullOrEmpty
             $logged.Level | Should -Be 'VeryVerbose'
         }
+    }
+
+    It 'Should use Output for ordinary module messages' {
+        $sourcePath = Join-Path $PSScriptRoot '..' '..' 'source'
+        $verboseMessages = Get-ChildItem -Path $sourcePath -Filter '*.ps1' -Recurse |
+        Select-String -Pattern 'Write-PSFMessage\s+-Level\s+Verbose'
+
+        $verboseMessages | Should -BeNullOrEmpty
     }
 }

@@ -76,11 +76,11 @@ function Set-SqlElasticJobAgent {
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Updating Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
+        Write-PSFMessage -Level Output -Message ('Updating Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
 
         $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -Tag $Tag
 
-        Write-PSFMessage -Level Verbose -Message ('Updated Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
+        Write-PSFMessage -Level Output -Message ('Updated Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
 
         return $agent
     }

@@ -95,7 +95,7 @@ function Remove-SqlElasticJobCredential
                 return
             }
 
-            Write-PSFMessage -Level Verbose -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
 
             return
         }
@@ -105,11 +105,11 @@ function Remove-SqlElasticJobCredential
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Removing Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removing Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
 
         $null = Remove-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
 
-        Write-PSFMessage -Level Verbose -Message ('Removed Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removed Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
 
         if ($PassThru.IsPresent)
         {

@@ -185,11 +185,11 @@ function Set-SqlElasticJobStep
 
         $stepParameters = Add-OptionalParameter -Parameter $stepParameters -BoundParameter $PSBoundParameters -Name $optionalParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Updating step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
+        Write-PSFMessage -Level Output -Message ('Updating step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
 
         $step = Set-AzSqlElasticJobStep @stepParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Updated step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
+        Write-PSFMessage -Level Output -Message ('Updated step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
 
         return $step
     }

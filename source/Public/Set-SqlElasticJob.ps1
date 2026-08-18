@@ -150,11 +150,11 @@ function Set-SqlElasticJob
         # disable a job while omitting it leaves the schedule untouched.
         $jobParameters = Add-OptionalParameter -Parameter $jobParameters -BoundParameter $PSBoundParameters -Name 'Description', 'Enable', 'RunOnce', 'IntervalType', 'IntervalCount', 'StartTime', 'EndTime'
 
-        Write-PSFMessage -Level Verbose -Message ('Updating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
+        Write-PSFMessage -Level Output -Message ('Updating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
 
         $job = Set-AzSqlElasticJob @jobParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Updated Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
+        Write-PSFMessage -Level Output -Message ('Updated Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
 
         return $job
     }

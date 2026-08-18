@@ -45,7 +45,7 @@ function Get-AzResourceIfPresent {
 
         if ($errorRecord.Count -gt 0) {
             if (Test-AzResourceNotFoundError -ErrorRecord $errorRecord[0]) {
-                Write-PSFMessage -Level Verbose -Message ('Resource not found: {0}' -f $errorRecord[0].Exception.Message) -Tag 'lookup'
+                Write-PSFMessage -Level Output -Message ('Resource not found: {0}' -f $errorRecord[0].Exception.Message) -Tag 'lookup'
 
                 return $null
             }
@@ -56,7 +56,7 @@ function Get-AzResourceIfPresent {
         return $output
     } catch {
         if (Test-AzResourceNotFoundError -ErrorRecord $_) {
-            Write-PSFMessage -Level Verbose -Message ('Resource not found: {0}' -f $_.Exception.Message) -Tag 'lookup'
+            Write-PSFMessage -Level Output -Message ('Resource not found: {0}' -f $_.Exception.Message) -Tag 'lookup'
 
             return $null
         }

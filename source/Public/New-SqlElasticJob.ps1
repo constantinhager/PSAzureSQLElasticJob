@@ -131,7 +131,7 @@ function New-SqlElasticJob
 
         if ($null -ne $existingJob)
         {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingJob
         }
@@ -150,11 +150,11 @@ function New-SqlElasticJob
 
         $jobParameters = Add-OptionalParameter -Parameter $jobParameters -BoundParameter $PSBoundParameters -Name 'Description', 'Enable', 'RunOnce', 'IntervalType', 'IntervalCount', 'StartTime', 'EndTime'
 
-        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
+        Write-PSFMessage -Level Output -Message ('Creating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 
         $job = New-AzSqlElasticJob @jobParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
+        Write-PSFMessage -Level Output -Message ('Created Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 
         return $job
     }

@@ -152,8 +152,8 @@ function New-SqlElasticJobEnvironment {
             }
 
             if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location))) {
-                Write-PSFMessage -Level Verbose -Message ('Provisioning step 1 of 3: create logical SQL server ''{0}''.' -f $ServerName) -Tag 'environment', 'progress'
-                Write-PSFMessage -Level Verbose -Message ('Creating logical SQL server ''{0}'' in ''{1}''.' -f $ServerName, $Location) -Tag 'server', 'create'
+                Write-PSFMessage -Level Output -Message ('Provisioning step 1 of 3: create logical SQL server ''{0}''.' -f $ServerName) -Tag 'environment', 'progress'
+                Write-PSFMessage -Level Output -Message ('Creating logical SQL server ''{0}'' in ''{1}''.' -f $ServerName, $Location) -Tag 'server', 'create'
 
                 try {
                     $server = New-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Location $Location -ServerVersion $ServerVersion -SqlAdministratorCredentials $ServerAdministratorCredential -ErrorAction Stop
@@ -165,12 +165,12 @@ function New-SqlElasticJobEnvironment {
                     return
                 }
 
-                Write-PSFMessage -Level Verbose -Message ('Created logical SQL server ''{0}''.' -f $ServerName) -Tag 'server', 'create'
+                Write-PSFMessage -Level Output -Message ('Created logical SQL server ''{0}''.' -f $ServerName) -Tag 'server', 'create'
 
                 $createdServer = $true
             }
         } else {
-            Write-PSFMessage -Level Verbose -Message ('Logical SQL server ''{0}'' already exists.' -f $ServerName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Logical SQL server ''{0}'' already exists.' -f $ServerName) -Tag 'idempotent'
         }
 
         $database = Get-AzResourceIfPresent -ScriptBlock {
@@ -181,8 +181,8 @@ function New-SqlElasticJobEnvironment {
             if ($PSCmdlet.ShouldProcess(
                     ('{0}/{1}' -f $ServerName, $DatabaseName),
                     ("Create job database at service objective '{0}'" -f $ServiceObjectiveName))) {
-                Write-PSFMessage -Level Verbose -Message ('Provisioning step 2 of 3: create job database ''{0}''.' -f $DatabaseName) -Tag 'environment', 'progress'
-                Write-PSFMessage -Level Verbose -Message ('Creating job database ''{0}'' at service objective ''{1}''.' -f $DatabaseName, $ServiceObjectiveName) -Tag 'database', 'create'
+                Write-PSFMessage -Level Output -Message ('Provisioning step 2 of 3: create job database ''{0}''.' -f $DatabaseName) -Tag 'environment', 'progress'
+                Write-PSFMessage -Level Output -Message ('Creating job database ''{0}'' at service objective ''{1}''.' -f $DatabaseName, $ServiceObjectiveName) -Tag 'database', 'create'
 
                 try {
                     $database = New-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -RequestedServiceObjectiveName $ServiceObjectiveName -ErrorAction Stop
@@ -194,20 +194,20 @@ function New-SqlElasticJobEnvironment {
                     return
                 }
 
-                Write-PSFMessage -Level Verbose -Message ('Created job database ''{0}''.' -f $DatabaseName) -Tag 'database', 'create'
+                Write-PSFMessage -Level Output -Message ('Created job database ''{0}''.' -f $DatabaseName) -Tag 'database', 'create'
 
                 $createdDatabase = $true
             }
         } else {
-            Write-PSFMessage -Level Verbose -Message ('Job database ''{0}'' already exists.' -f $DatabaseName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Job database ''{0}'' already exists.' -f $DatabaseName) -Tag 'idempotent'
         }
 
         $agent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
 
         if ($null -eq $agent) {
             if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $ServerName, $AgentName), 'Create Elastic Job agent')) {
-                Write-PSFMessage -Level Verbose -Message ('Provisioning step 3 of 3: create Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'environment', 'progress'
-                Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
+                Write-PSFMessage -Level Output -Message ('Provisioning step 3 of 3: create Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'environment', 'progress'
+                Write-PSFMessage -Level Output -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 try {
                     $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName -ErrorAction Stop
@@ -219,12 +219,12 @@ function New-SqlElasticJobEnvironment {
                     return
                 }
 
-                Write-PSFMessage -Level Verbose -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
+                Write-PSFMessage -Level Output -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 $createdAgent = $true
             }
         } else {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
         }
 
         if (($null -ne $server) -and ($null -ne $database) -and ($null -ne $agent)) {

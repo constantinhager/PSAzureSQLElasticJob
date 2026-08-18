@@ -101,7 +101,7 @@ function Remove-SqlElasticJobStep
                 return
             }
 
-            Write-PSFMessage -Level Verbose -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
 
             return
         }
@@ -111,11 +111,11 @@ function Remove-SqlElasticJobStep
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Removing step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removing step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
 
         $null = Remove-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
 
-        Write-PSFMessage -Level Verbose -Message ('Removed step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removed step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
 
         if ($PassThru.IsPresent)
         {

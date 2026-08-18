@@ -72,10 +72,10 @@ function Stop-SqlElasticJob
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Stopping execution ''{0}'' of Elastic Job ''{1}''.' -f $JobExecutionId, $Name) -Tag 'job', 'execution'
+        Write-PSFMessage -Level Output -Message ('Stopping execution ''{0}'' of Elastic Job ''{1}''.' -f $JobExecutionId, $Name) -Tag 'job', 'execution'
 
         Stop-AzSqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $Name -JobExecutionId $JobExecutionId
 
-        Write-PSFMessage -Level Verbose -Message ('Stopped execution ''{0}'' of Elastic Job ''{1}''.' -f $JobExecutionId, $Name) -Tag 'job', 'execution'
+        Write-PSFMessage -Level Output -Message ('Stopped execution ''{0}'' of Elastic Job ''{1}''.' -f $JobExecutionId, $Name) -Tag 'job', 'execution'
     }
 }

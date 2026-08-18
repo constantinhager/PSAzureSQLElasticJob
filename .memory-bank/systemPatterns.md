@@ -48,6 +48,10 @@ so a non-exception caller does not continue to dependent steps or receive false
 summary after all resources are available. It names a fully reused environment
 and otherwise lists the components created in that invocation.
 
+Ordinary lifecycle, mutation and idempotency messages use the PSFramework
+`Output` level so callers see progress without `-Verbose`. Keep detailed lookup
+diagnostics at `VeryVerbose`.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

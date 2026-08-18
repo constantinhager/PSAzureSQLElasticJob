@@ -92,11 +92,11 @@ function Set-SqlElasticJobCredential
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Rotating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
+        Write-PSFMessage -Level Output -Message ('Rotating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
 
         $jobCredential = Set-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
 
-        Write-PSFMessage -Level Verbose -Message ('Rotated Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
+        Write-PSFMessage -Level Output -Message ('Rotated Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
 
         return $jobCredential
     }

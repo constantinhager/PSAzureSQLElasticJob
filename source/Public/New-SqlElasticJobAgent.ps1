@@ -62,7 +62,7 @@ function New-SqlElasticJobAgent {
         $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
         if ($null -ne $existingAgent) {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists on server ''{1}''.' -f $Name, $ServerName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already exists on server ''{1}''.' -f $Name, $ServerName) -Tag 'idempotent'
 
             return $existingAgent
         }
@@ -73,11 +73,11 @@ function New-SqlElasticJobAgent {
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job agent ''{0}'' on server ''{1}'' backed by database ''{2}''.' -f $Name, $ServerName, $DatabaseName) -Tag 'agent', 'create'
+        Write-PSFMessage -Level Output -Message ('Creating Elastic Job agent ''{0}'' on server ''{1}'' backed by database ''{2}''.' -f $Name, $ServerName, $DatabaseName) -Tag 'agent', 'create'
 
         $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $Name
 
-        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'create'
+        Write-PSFMessage -Level Output -Message ('Created Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'create'
 
         return $agent
     }

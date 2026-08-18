@@ -61,7 +61,7 @@ function New-SqlElasticJobTargetGroup
 
         if ($null -ne $existingTargetGroup)
         {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job target group ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job target group ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingTargetGroup
         }
@@ -71,11 +71,11 @@ function New-SqlElasticJobTargetGroup
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
+        Write-PSFMessage -Level Output -Message ('Creating Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
 
         $targetGroup = New-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
 
-        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
+        Write-PSFMessage -Level Output -Message ('Created Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
 
         return $targetGroup
     }

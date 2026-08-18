@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Make ordinary Elastic Job lifecycle and existence messages visible by default.
 - `New-SqlElasticJobEnvironment` now reports whether it reused an existing
   environment or which resources it created.
 - The CI release and changelog tasks now use GitHub Actions' automatic token

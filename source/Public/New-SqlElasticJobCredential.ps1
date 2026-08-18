@@ -75,7 +75,7 @@ function New-SqlElasticJobCredential
 
         if ($null -ne $existingCredential)
         {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job credential ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job credential ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingCredential
         }
@@ -85,11 +85,11 @@ function New-SqlElasticJobCredential
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Creating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
+        Write-PSFMessage -Level Output -Message ('Creating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
 
         $jobCredential = New-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
 
-        Write-PSFMessage -Level Verbose -Message ('Created Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
+        Write-PSFMessage -Level Output -Message ('Created Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
 
         return $jobCredential
     }

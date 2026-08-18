@@ -46,6 +46,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `Created*` results. Full suite passed with 344 tests.
 - 2026-08-18: Added a caller-visible PSFramework completion summary for
   `New-SqlElasticJobEnvironment`; the full Sampler suite passed with 344 tests.
+- 2026-08-18: Promoted all ordinary PSFramework lifecycle and existence
+  messages to `Output`; retained `VeryVerbose` lookup diagnostics and added a
+  source-level regression guard. Full Sampler suite passed.
 
 ## Stable capabilities
 
