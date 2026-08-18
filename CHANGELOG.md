@@ -35,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replace raw Azure not-found errors with a concise status explaining that
+  provisioning will create an absent resource when needed.
+- Make ordinary Elastic Job lifecycle and existence messages visible by default.
+- `New-SqlElasticJobEnvironment` now reports whether it reused an existing
+  environment or which resources it created.
 - The CI release and changelog tasks now use GitHub Actions' automatic token
   with repository-content write access, so a successful `main` deployment
   creates its GitHub release instead of silently skipping it when no personal
@@ -65,6 +70,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Avoid duplicate Azure-context status messages during environment checks.
+- Stop provisioning after an Azure server, database or agent creation failure,
+  preserving accurate creation state and logging the failed provisioning step.
 - Resource lookups no longer treat an unreadable resource as an absent one. A
   non-terminating authorization or throttling error from Azure was previously
   discarded, which could make provisioning attempt to create a resource that

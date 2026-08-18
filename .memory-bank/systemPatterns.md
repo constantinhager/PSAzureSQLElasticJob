@@ -39,6 +39,26 @@ carries a resource tag (`agent`, `job`, `step`, `credential`, `targetgroup`,
 Every `Remove-*` command is a no-op when the resource is absent unless
 `-Strict` is supplied, and supports `-PassThru`.
 
+Provisioning mutations use `-ErrorAction Stop` and wrap Azure failures in a
+PSFramework error log plus `Stop-PSFFunction`. Each catch returns immediately
+so a non-exception caller does not continue to dependent steps or receive false
+`Created*` state.
+
+`New-SqlElasticJobEnvironment` emits an `Output`-level PSFramework completion
+summary after all resources are available. It names a fully reused environment
+and otherwise lists the components created in that invocation.
+
+Ordinary lifecycle, mutation and idempotency messages use the PSFramework
+`Output` level so callers see progress without `-Verbose`. Keep detailed lookup
+diagnostics at `VeryVerbose`.
+
+When a lookup confirms that a resource is absent, report a concise
+provisioning-oriented status rather than Azure's raw not-found exception text.
+
+Composite public commands validate Azure context at their boundary, then use
+private helpers and direct Az cmdlets for nested lookups. Do not call another
+public command when it would repeat the same context assertion.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

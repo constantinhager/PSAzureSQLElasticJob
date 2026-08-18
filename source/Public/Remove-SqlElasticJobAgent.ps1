@@ -85,7 +85,7 @@ function Remove-SqlElasticJobAgent {
                 return
             }
 
-            Write-PSFMessage -Level Verbose -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
 
             return
         }
@@ -94,11 +94,11 @@ function Remove-SqlElasticJobAgent {
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Removing Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removing Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
 
         $null = Remove-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
 
-        Write-PSFMessage -Level Verbose -Message ('Removed Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removed Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
 
         if ($PassThru.IsPresent) {
             return $existingAgent

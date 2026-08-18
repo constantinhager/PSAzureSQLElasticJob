@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -27,6 +27,14 @@ Describe 'Get-AzResourceIfPresent' {
 
             $result | Should -BeNullOrEmpty
         }
+    }
+
+    It 'Should report that provisioning may create a missing resource' {
+        $helperPath = Join-Path $PSScriptRoot '..' '..' '..' 'source' 'Private' 'Get-AzResourceIfPresent.ps1'
+        $helperContent = Get-Content -LiteralPath $helperPath -Raw
+        $message = 'Resource is absent. Provisioning will create it when needed.'
+
+        ([regex]::Matches($helperContent, [regex]::Escape($message))).Count | Should -Be 2
     }
 
     It 'Should rethrow an authorization failure instead of reporting absence' {

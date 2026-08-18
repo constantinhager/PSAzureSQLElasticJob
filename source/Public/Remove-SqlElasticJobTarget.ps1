@@ -123,11 +123,11 @@ function Remove-SqlElasticJobTarget
             return
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Removing target server ''{0}'' from target group ''{1}'' on agent ''{2}''.' -f $TargetServerName, $TargetGroupName, $AgentName) -Tag 'target', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removing target server ''{0}'' from target group ''{1}'' on agent ''{2}''.' -f $TargetServerName, $TargetGroupName, $AgentName) -Tag 'target', 'remove'
 
         $targetGroup = Remove-AzSqlElasticJobTarget @targetParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Removed target server ''{0}'' from target group ''{1}''.' -f $TargetServerName, $TargetGroupName) -Tag 'target', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removed target server ''{0}'' from target group ''{1}''.' -f $TargetServerName, $TargetGroupName) -Tag 'target', 'remove'
 
         return $targetGroup
     }

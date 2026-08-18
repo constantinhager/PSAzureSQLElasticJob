@@ -101,7 +101,7 @@ function Remove-SqlElasticJobTargetGroup
                 return
             }
 
-            Write-PSFMessage -Level Verbose -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('{0} Nothing to remove.' -f $message) -Tag 'idempotent'
 
             return
         }
@@ -120,11 +120,11 @@ function Remove-SqlElasticJobTargetGroup
 
         $removeParameters = Add-OptionalParameter -Parameter $removeParameters -BoundParameter $PSBoundParameters -Name 'Force'
 
-        Write-PSFMessage -Level Verbose -Message ('Removing Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removing Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
 
         $null = Remove-AzSqlElasticJobTargetGroup @removeParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Removed Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
+        Write-PSFMessage -Level Output -Message ('Removed Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
 
         if ($PassThru.IsPresent)
         {

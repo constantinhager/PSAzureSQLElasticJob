@@ -144,7 +144,7 @@ function Add-SqlElasticJobStep
 
         if ($null -ne $existingStep)
         {
-            Write-PSFMessage -Level Verbose -Message ('Elastic Job step ''{0}'' already exists on job ''{1}''.' -f $Name, $JobName) -Tag 'idempotent'
+            Write-PSFMessage -Level Output -Message ('Elastic Job step ''{0}'' already exists on job ''{1}''.' -f $Name, $JobName) -Tag 'idempotent'
 
             return $existingStep
         }
@@ -176,11 +176,11 @@ function Add-SqlElasticJobStep
 
         $stepParameters = Add-OptionalParameter -Parameter $stepParameters -BoundParameter $PSBoundParameters -Name $optionalParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Adding step ''{0}'' to Elastic Job ''{1}'' against target group ''{2}''.' -f $Name, $JobName, $TargetGroupName) -Tag 'step', 'create'
+        Write-PSFMessage -Level Output -Message ('Adding step ''{0}'' to Elastic Job ''{1}'' against target group ''{2}''.' -f $Name, $JobName, $TargetGroupName) -Tag 'step', 'create'
 
         $step = Add-AzSqlElasticJobStep @stepParameters
 
-        Write-PSFMessage -Level Verbose -Message ('Added step ''{0}'' to Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'create'
+        Write-PSFMessage -Level Output -Message ('Added step ''{0}'' to Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'create'
 
         return $step
     }

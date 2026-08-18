@@ -73,10 +73,12 @@ function Test-SqlElasticJobEnvironment
                 Get-AzSqlDatabase -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName
             }
 
-            $agent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
+            $agent = Get-AzResourceIfPresent -ScriptBlock {
+                Get-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
+            }
         }
 
-        Write-PSFMessage -Level Verbose -Message ('Environment check for agent ''{0}'': server {1}, database {2}, agent {3}.' -f
+        Write-PSFMessage -Level Output -Message ('Environment check for agent ''{0}'': server {1}, database {2}, agent {3}.' -f
             $AgentName,
             $(if ($null -ne $server) { 'present' } else { 'absent' }),
             $(if ($null -ne $database) { 'present' } else { 'absent' }),

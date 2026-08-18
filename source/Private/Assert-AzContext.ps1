@@ -48,7 +48,7 @@ function Assert-AzContext {
             'Run Set-AzContext -Subscription {1} first.') -f $context.Subscription.Id, $SubscriptionId
     }
 
-    Write-PSFMessage -Level Verbose -Message ('Using Azure context for subscription ''{0}''.' -f $context.Subscription.Id) -Tag 'context'
+    Write-PSFMessage -Level Output -Message ('Using Azure context for subscription ''{0}''.' -f $context.Subscription.Id) -Tag 'context'
 
     return $context
 }

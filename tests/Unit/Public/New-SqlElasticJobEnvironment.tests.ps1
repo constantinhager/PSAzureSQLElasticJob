@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -87,12 +87,12 @@ Describe 'New-SqlElasticJobEnvironment' {
 
         It 'Should refuse to create a server without a location' {
             { New-SqlElasticJobEnvironment @script:baseParameters -ServerAdministratorCredential $script:credential -Confirm:$false } |
-                Should -Throw -ExpectedMessage '*-Location*'
+            Should -Throw -ExpectedMessage '*-Location*'
         }
 
         It 'Should refuse to create a server without an administrator credential' {
             { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -Confirm:$false } |
-                Should -Throw -ExpectedMessage '*-ServerAdministratorCredential*'
+            Should -Throw -ExpectedMessage '*-ServerAdministratorCredential*'
         }
     }
 
@@ -152,6 +152,62 @@ Describe 'New-SqlElasticJobEnvironment' {
         }
     }
 
+    Context 'When server creation fails' {
+        BeforeAll {
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith { throw 'Server does not exist.' }
+            Mock -CommandName New-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                Write-Error 'Server name is already in use.'
+            }
+        }
+
+        It 'Should stop without marking the server as created or creating dependent resources' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -ServerAdministratorCredential $script:credential -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Server name is already in use*'
+
+            Should -Invoke -CommandName New-AzSqlDatabase -ModuleName $script:moduleName -Times 0 -Exactly
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+    }
+
+    Context 'When database creation fails' {
+        BeforeAll {
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ServerName = 'srv' }
+            }
+            Mock -CommandName Get-AzSqlDatabase -ModuleName $script:moduleName -MockWith { throw 'Database does not exist.' }
+            Mock -CommandName New-AzSqlDatabase -ModuleName $script:moduleName -MockWith {
+                Write-Error 'Database provisioning failed.'
+            }
+        }
+
+        It 'Should stop without marking the database as created or creating an agent' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Database provisioning failed*'
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+    }
+
+    Context 'When agent creation fails' {
+        BeforeAll {
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ServerName = 'srv' }
+            }
+            Mock -CommandName Get-AzSqlDatabase -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ DatabaseName = 'jobdb' }
+            }
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith { throw 'Agent does not exist.' }
+            Mock -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                Write-Error 'Agent provisioning failed.'
+            }
+        }
+
+        It 'Should stop without marking the agent as created' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Agent provisioning failed*'
+        }
+    }
+
     Context 'When the resource group does not exist' {
         BeforeAll {
             Mock -CommandName Get-AzResourceGroup -ModuleName $script:moduleName -MockWith {
@@ -161,7 +217,7 @@ Describe 'New-SqlElasticJobEnvironment' {
 
         It 'Should throw and create nothing' {
             { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -ServerAdministratorCredential $script:credential -Confirm:$false } |
-                Should -Throw -ExpectedMessage '*Resource group*'
+            Should -Throw -ExpectedMessage '*Resource group*'
 
             Should -Invoke -CommandName New-AzSqlServer -ModuleName $script:moduleName -Times 0 -Exactly
         }
@@ -176,7 +232,7 @@ Describe 'New-SqlElasticJobEnvironment' {
 
         It 'Should surface the authorization error instead of trying to create the server' {
             { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -ServerAdministratorCredential $script:credential -Confirm:$false } |
-                Should -Throw -ExpectedMessage '*authorization*'
+            Should -Throw -ExpectedMessage '*authorization*'
 
             Should -Invoke -CommandName New-AzSqlServer -ModuleName $script:moduleName -Times 0 -Exactly
         }
