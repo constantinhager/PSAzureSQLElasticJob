@@ -52,6 +52,9 @@ Ordinary lifecycle, mutation and idempotency messages use the PSFramework
 `Output` level so callers see progress without `-Verbose`. Keep detailed lookup
 diagnostics at `VeryVerbose`.
 
+When a lookup confirms that a resource is absent, report a concise
+provisioning-oriented status rather than Azure's raw not-found exception text.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

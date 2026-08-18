@@ -29,6 +29,14 @@ Describe 'Get-AzResourceIfPresent' {
         }
     }
 
+    It 'Should report that provisioning may create a missing resource' {
+        $helperPath = Join-Path $PSScriptRoot '..' '..' '..' 'source' 'Private' 'Get-AzResourceIfPresent.ps1'
+        $helperContent = Get-Content -LiteralPath $helperPath -Raw
+        $message = 'Resource is absent. Provisioning will create it when needed.'
+
+        ([regex]::Matches($helperContent, [regex]::Escape($message))).Count | Should -Be 2
+    }
+
     It 'Should rethrow an authorization failure instead of reporting absence' {
         InModuleScope -ModuleName $script:moduleName {
             {

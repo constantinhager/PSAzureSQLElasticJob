@@ -49,6 +49,9 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Promoted all ordinary PSFramework lifecycle and existence
   messages to `Output`; retained `VeryVerbose` lookup diagnostics and added a
   source-level regression guard. Full Sampler suite passed.
+- 2026-08-18: Replaced raw Azure not-found error messages with a concise
+  absent-resource status explaining that provisioning will create it when
+  needed. Full Sampler suite passed.
 
 ## Stable capabilities
 

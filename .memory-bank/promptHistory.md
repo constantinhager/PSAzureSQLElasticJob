@@ -27,3 +27,4 @@ Trim entries older than 90 days.
 2026-08-18 15:27 UTC | software-engineer | Fixed Azure provisioning failure handling and added PSFramework progress/error logging with regression coverage.
 2026-08-18 15:50 UTC | software-engineer | Added caller-visible PSFramework environment reuse and creation summaries.
 2026-08-18 16:02 UTC | software-engineer | Promoted ordinary PSFramework lifecycle and existence messages to Output with a regression guard.
+2026-08-18 16:06 UTC | software-engineer | Replaced raw Azure not-found messages with a concise provisioning-oriented absent-resource status.

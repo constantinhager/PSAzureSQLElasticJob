@@ -17,6 +17,8 @@ passes with 344 tests. It also emits an `Output`-level completion summary that
 states whether it reused the environment or which components it created.
 All ordinary PSFramework lifecycle and existence messages now use `Output`;
 the deeper resource lookup diagnostics remain `VeryVerbose`.
+Confirmed absent-resource lookups now emit a concise provisioning-oriented
+status instead of the raw Azure ARM error text.
 
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token

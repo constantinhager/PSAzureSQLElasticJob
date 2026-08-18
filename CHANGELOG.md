@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Replace raw Azure not-found errors with a concise status explaining that
+  provisioning will create an absent resource when needed.
 - Make ordinary Elastic Job lifecycle and existence messages visible by default.
 - `New-SqlElasticJobEnvironment` now reports whether it reused an existing
   environment or which resources it created.
