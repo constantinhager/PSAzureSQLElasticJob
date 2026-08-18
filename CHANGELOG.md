@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `New-SqlElasticJobEnvironment` now reports whether it reused an existing
+  environment or which resources it created.
 - The CI release and changelog tasks now use GitHub Actions' automatic token
   with repository-content write access, so a successful `main` deployment
   creates its GitHub release instead of silently skipping it when no personal

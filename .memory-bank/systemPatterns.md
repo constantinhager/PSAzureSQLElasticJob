@@ -44,6 +44,10 @@ PSFramework error log plus `Stop-PSFFunction`. Each catch returns immediately
 so a non-exception caller does not continue to dependent steps or receive false
 `Created*` state.
 
+`New-SqlElasticJobEnvironment` emits an `Output`-level PSFramework completion
+summary after all resources are available. It names a fully reused environment
+and otherwise lists the components created in that invocation.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

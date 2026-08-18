@@ -44,6 +44,8 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Fixed provisioning to stop on Azure server, database and agent
   creation errors, log each current step through PSFramework, and avoid false
   `Created*` results. Full suite passed with 344 tests.
+- 2026-08-18: Added a caller-visible PSFramework completion summary for
+  `New-SqlElasticJobEnvironment`; the full Sampler suite passed with 344 tests.
 
 ## Stable capabilities
 

@@ -227,6 +227,28 @@ function New-SqlElasticJobEnvironment {
             Write-PSFMessage -Level Verbose -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
         }
 
+        if (($null -ne $server) -and ($null -ne $database) -and ($null -ne $agent)) {
+            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent)) {
+                Write-PSFMessage -Level Output -Message ('Elastic Job environment already exists on server ''{0}'' with database ''{1}'' and agent ''{2}''. No changes were made.' -f $ServerName, $DatabaseName, $AgentName) -Tag 'environment', 'idempotent'
+            } else {
+                $createdResources = @()
+
+                if ($createdServer) {
+                    $createdResources += 'server'
+                }
+
+                if ($createdDatabase) {
+                    $createdResources += 'database'
+                }
+
+                if ($createdAgent) {
+                    $createdResources += 'agent'
+                }
+
+                Write-PSFMessage -Level Output -Message ('Elastic Job environment is ready. Created: {0}.' -f ($createdResources -join ', ')) -Tag 'environment', 'create'
+            }
+        }
+
         [PSCustomObject]@{
             ResourceGroupName = $ResourceGroupName
             ServerName        = $ServerName

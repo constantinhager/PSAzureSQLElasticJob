@@ -13,7 +13,8 @@ source: current task evidence
 server, database or agent. Each provisioning step emits a PSFramework progress
 message, converts non-terminating Azure errors to terminating failures, and
 never returns misleading `Created*` state after failure. The full Sampler suite
-passes with 344 tests.
+passes with 344 tests. It also emits an `Output`-level completion summary that
+states whether it reused the environment or which components it created.
 
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
