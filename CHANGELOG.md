@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Opt-in Azure subscription integration tests that validate the Elastic Job
+  lifecycle while preserving the supplied resource group, server and database.
 - Sampler-based project scaffold with GitVersion, Pester 5 and GitHub Actions.
 - `New-SqlElasticJobEnvironment` to provision the logical SQL server, job
   database and Elastic Job agent, creating only the parts that are missing.

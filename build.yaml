@@ -99,6 +99,7 @@ Pester:
     Filter:
       Tag:
       ExcludeTag:
+        - Integration
         #- helpQuality
         #- FunctionalQuality
         #- TestQuality

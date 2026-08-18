@@ -9,10 +9,11 @@ source: current task evidence
 
 ## Current focus
 
-PSFramework adopted across the module: `Write-PSFMessage` logging,
-`Stop-PSFFunction` flow control with a caller-controlled `-EnableException`, and
-`Set-PSFConfig` provisioning defaults. Logging now covers every Azure mutation
-and lookup, tagged by resource and operation. 341 tests passing.
+Opt-in integration coverage now exercises a real Azure SQL Elastic Job
+lifecycle. It requires a caller-supplied resource group, logical SQL server and
+S0-or-higher job database, creates uniquely named Elastic Job resources, and
+removes only those test resources in reverse dependency order. The default
+Sampler suite excludes the `Integration` tag and remains credential-free.
 
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
@@ -37,8 +38,12 @@ changelog tasks.
   `sampler-framework` skill, adapted to this module.
 - Pester 5 does not populate `$PSBoundParameters` inside `ParameterFilter` or
   `MockWith`; see `decisions/0003-testable-optional-parameter-forwarding.md`.
+- `tests/Integration/ElasticJobLifecycle.tests.ps1` runs only with the
+  `Integration` tag and validates a caller-provided server/database before
+  provisioning its unique agent, job, target group, target and step.
 
 ## Next step
 
-Enable secret scanning and push protection in the repository settings, then add
-integration tests against a real subscription and populate `README.md`.
+Enable secret scanning and push protection in the repository settings, configure
+the three integration-test environment variables, then run the live lifecycle
+test and populate `README.md`.
