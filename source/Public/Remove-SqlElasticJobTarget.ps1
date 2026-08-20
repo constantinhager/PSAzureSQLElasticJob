@@ -45,8 +45,7 @@
     .EXAMPLE
         Remove-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb'
 #>
-function Remove-SqlElasticJobTarget
-{
+function Remove-SqlElasticJobTarget {
     # RefreshCredentialName names an existing job credential; it never carries a secret.
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'RefreshCredentialName', Justification = 'The parameter is the name of a job credential, not a password.')]
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High', DefaultParameterSetName = 'SqlDatabase')]
@@ -102,8 +101,7 @@ function Remove-SqlElasticJobTarget
         $RefreshCredentialName
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $targetParameters = @{
@@ -115,18 +113,15 @@ function Remove-SqlElasticJobTarget
         }
 
         # Local parameter names carry a Target* prefix for clarity; Azure's own parameter names do not.
-        if ($PSBoundParameters.ContainsKey('TargetDatabaseName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetDatabaseName')) {
             $targetParameters['DatabaseName'] = $TargetDatabaseName
         }
 
-        if ($PSBoundParameters.ContainsKey('TargetElasticPoolName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetElasticPoolName')) {
             $targetParameters['ElasticPoolName'] = $TargetElasticPoolName
         }
 
-        if ($PSBoundParameters.ContainsKey('TargetShardMapName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetShardMapName')) {
             $targetParameters['ShardMapName'] = $TargetShardMapName
         }
 
@@ -134,8 +129,7 @@ function Remove-SqlElasticJobTarget
 
         if (-not $PSCmdlet.ShouldProcess(
                 ('{0}/{1}' -f $AgentName, $TargetGroupName),
-                'Remove target from Elastic Job target group'))
-        {
+                'Remove target from Elastic Job target group')) {
             return
         }
 

@@ -64,8 +64,7 @@
 
         Excludes one database from a broader server-level inclusion.
 #>
-function Add-SqlElasticJobTarget
-{
+function Add-SqlElasticJobTarget {
     # RefreshCredentialName names an existing job credential; it never carries a secret.
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidUsingPlainTextForPassword', 'RefreshCredentialName', Justification = 'The parameter is the name of a job credential, not a password.')]
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium', DefaultParameterSetName = 'SqlDatabase')]
@@ -125,8 +124,7 @@ function Add-SqlElasticJobTarget
         $Exclude
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $targetParameters = @{
@@ -138,18 +136,15 @@ function Add-SqlElasticJobTarget
         }
 
         # Local parameter names carry a Target* prefix for clarity; Azure's own parameter names do not.
-        if ($PSBoundParameters.ContainsKey('TargetDatabaseName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetDatabaseName')) {
             $targetParameters['DatabaseName'] = $TargetDatabaseName
         }
 
-        if ($PSBoundParameters.ContainsKey('TargetElasticPoolName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetElasticPoolName')) {
             $targetParameters['ElasticPoolName'] = $TargetElasticPoolName
         }
 
-        if ($PSBoundParameters.ContainsKey('TargetShardMapName'))
-        {
+        if ($PSBoundParameters.ContainsKey('TargetShardMapName')) {
             $targetParameters['ShardMapName'] = $TargetShardMapName
         }
 
@@ -157,8 +152,7 @@ function Add-SqlElasticJobTarget
 
         $action = if ($Exclude.IsPresent) { 'Exclude target from Elastic Job target group' } else { 'Add target to Elastic Job target group' }
 
-        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $TargetGroupName), $action))
-        {
+        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $TargetGroupName), $action)) {
             return
         }
 
