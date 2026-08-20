@@ -37,7 +37,7 @@ AfterAll {
                 Remove-SqlElasticJobStep -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -JobName $script:jobName -Name $script:stepName -ErrorAction Stop
             },
             {
-                Remove-SqlElasticJobTarget -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -TargetGroupName $script:targetGroupName -TargetServerName $script:serverName -DatabaseName $script:databaseName -ErrorAction Stop
+                Remove-SqlElasticJobTarget -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -TargetGroupName $script:targetGroupName -TargetServerName $script:serverName -TargetDatabaseName $script:databaseName -ErrorAction Stop
             },
             {
                 Remove-SqlElasticJob -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -Name $script:jobName -Force -ErrorAction Stop
@@ -82,7 +82,7 @@ Describe 'Azure SQL Elastic Job lifecycle' -Tag 'Integration' {
         $targetGroup = New-SqlElasticJobTargetGroup -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -Name $script:targetGroupName
         $targetGroup | Should -Not -BeNullOrEmpty
 
-        $target = Add-SqlElasticJobTarget -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -TargetGroupName $script:targetGroupName -TargetServerName $script:serverName -DatabaseName $script:databaseName
+        $target = Add-SqlElasticJobTarget -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -TargetGroupName $script:targetGroupName -TargetServerName $script:serverName -TargetDatabaseName $script:databaseName
         $target | Should -Not -BeNullOrEmpty
 
         $step = Add-SqlElasticJobStep -ResourceGroupName $script:resourceGroupName -ServerName $script:serverName -AgentName $script:agentName -JobName $script:jobName -Name $script:stepName -TargetGroupName $script:targetGroupName -CommandText 'SELECT 1;'

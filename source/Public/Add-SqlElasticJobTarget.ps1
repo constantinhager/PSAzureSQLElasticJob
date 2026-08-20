@@ -29,14 +29,14 @@
     .PARAMETER TargetServerName
         The server being targeted.
 
-    .PARAMETER DatabaseName
+    .PARAMETER TargetDatabaseName
         The database being targeted, or the shard map manager database when
-        -ShardMapName is used.
+        -TargetShardMapName is used.
 
-    .PARAMETER ElasticPoolName
+    .PARAMETER TargetElasticPoolName
         The elastic pool being targeted.
 
-    .PARAMETER ShardMapName
+    .PARAMETER TargetShardMapName
         The shard map being targeted.
 
     .PARAMETER RefreshCredentialName
@@ -50,7 +50,7 @@
         Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobTargetGroupModel
 
     .EXAMPLE
-        Add-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -DatabaseName 'AppDb'
+        Add-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb'
 
         Adds a single database to the target group.
 
@@ -60,7 +60,7 @@
         Adds every database on a server, refreshed using the supplied credential.
 
     .EXAMPLE
-        Add-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -DatabaseName 'AppDb' -Exclude
+        Add-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -Exclude
 
         Excludes one database from a broader server-level inclusion.
 #>
@@ -102,17 +102,17 @@ function Add-SqlElasticJobTarget
         [Parameter(Mandatory, ParameterSetName = 'SqlShardMap', ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $DatabaseName,
+        $TargetDatabaseName,
 
         [Parameter(ParameterSetName = 'SqlServerOrElasticPool', ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ElasticPoolName,
+        $TargetElasticPoolName,
 
         [Parameter(Mandatory, ParameterSetName = 'SqlShardMap', ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ShardMapName,
+        $TargetShardMapName,
 
         [Parameter(ParameterSetName = 'SqlServerOrElasticPool', ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'SqlShardMap', ValueFromPipelineByPropertyName)]
@@ -137,7 +137,23 @@ function Add-SqlElasticJobTarget
             ServerName        = $TargetServerName
         }
 
-        $targetParameters = Add-OptionalParameter -Parameter $targetParameters -BoundParameter $PSBoundParameters -Name 'DatabaseName', 'ElasticPoolName', 'ShardMapName', 'RefreshCredentialName', 'Exclude'
+        # Local parameter names carry a Target* prefix for clarity; Azure's own parameter names do not.
+        if ($PSBoundParameters.ContainsKey('TargetDatabaseName'))
+        {
+            $targetParameters['DatabaseName'] = $TargetDatabaseName
+        }
+
+        if ($PSBoundParameters.ContainsKey('TargetElasticPoolName'))
+        {
+            $targetParameters['ElasticPoolName'] = $TargetElasticPoolName
+        }
+
+        if ($PSBoundParameters.ContainsKey('TargetShardMapName'))
+        {
+            $targetParameters['ShardMapName'] = $TargetShardMapName
+        }
+
+        $targetParameters = Add-OptionalParameter -Parameter $targetParameters -BoundParameter $PSBoundParameters -Name 'RefreshCredentialName', 'Exclude'
 
         $action = if ($Exclude.IsPresent) { 'Exclude target from Elastic Job target group' } else { 'Add target to Elastic Job target group' }
 

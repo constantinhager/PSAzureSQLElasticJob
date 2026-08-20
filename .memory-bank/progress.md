@@ -86,6 +86,10 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   the identity) rather than only "assigned during this call", so an idempotent
   re-run against an agent that already has the identity now correctly reports
   `$true`. Full Sampler suite passed with 380 tests.
+- 2026-08-20: Renamed `Add-`/`Remove-SqlElasticJobTarget`'s `-DatabaseName`/
+  `-ElasticPoolName`/`-ShardMapName` to `-TargetDatabaseName`/
+  `-TargetElasticPoolName`/`-TargetShardMapName` for consistency with
+  `-TargetServerName`. Full Sampler suite passed with 380 tests.
 
 ## Stable capabilities
 
