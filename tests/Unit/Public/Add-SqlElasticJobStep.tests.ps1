@@ -93,5 +93,13 @@ Describe 'Add-SqlElasticJobStep' {
 
             Should -Invoke -CommandName Add-AzSqlElasticJobStep -ModuleName $script:moduleName -Times 0 -Exactly
         }
+
+        It 'Should throw instead of reporting success when Azure reports a non-terminating error' {
+            Mock -CommandName Add-AzSqlElasticJobStep -ModuleName $script:moduleName -MockWith {
+                Write-Error "The requested resource of type 'Microsoft.Sql/servers/jobAgents/jobs' with name 'nightly' was not found."
+            }
+
+            { Add-SqlElasticJobStep @script:stepParameters } | Should -Throw -ExpectedMessage '*was not found*'
+        }
     }
 }

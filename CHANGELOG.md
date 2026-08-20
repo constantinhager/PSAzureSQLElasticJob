@@ -70,6 +70,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   assigned, instead of only whether this call performed the assignment. It
   previously reported `$false` for an idempotent re-run even though the agent
   already had the identity.
+- `Add-SqlElasticJobStep` no longer logs the Azure context twice (it looked up
+  the existing step via the public `Get-SqlElasticJobStep`, which asserts the
+  context again) and now forces `-ErrorAction Stop` on `Add-AzSqlElasticJobStep`,
+  so a non-terminating Azure error (e.g. the job does not exist) throws instead
+  of being silently swallowed and reported as a false success.
 
 ### Changed
 

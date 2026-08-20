@@ -102,6 +102,13 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   pipeline outputs (an uncaptured `Disconnect-DbaInstance` call leaked a
   second output) by consolidating to one `ShouldProcess` and suppressing that
   call's output. Full Sampler suite passed with 406 tests.
+- 2026-08-20: Fixed `Add-SqlElasticJobStep`: it logged the Azure context twice
+  (called the public `Get-SqlElasticJobStep` getter, which asserts context
+  again) and swallowed a non-terminating `Add-AzSqlElasticJobStep` error
+  (missing `-ErrorAction Stop`), printing a false success message when the job
+  did not exist. Fixed both; an audit found the same two-bug pattern latent in
+  ~14 other CRUD commands, not yet fixed (see Open work). Full Sampler suite
+  passed with 407 tests.
 
 ## Stable capabilities
 
@@ -113,6 +120,17 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - Consistent `-Strict` and `-PassThru` semantics on every `Remove-*` command.
 
 ## Open work
+
+- Audit and fix the same two-bug pattern found in `Add-SqlElasticJobStep`
+  (duplicate `Assert-AzContext` via a sibling public `Get-*` getter; missing
+  `-ErrorAction Stop` on the Az mutation) across the rest of the CRUD surface:
+  `Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
+  `New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
+  `Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
+  `Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
+  `Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
+  `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
+  `Set-SqlElasticJobStep`.
 
 - Enable secret scanning and push protection in the repository settings
   (FIND-2026-004; cannot be done from a commit).

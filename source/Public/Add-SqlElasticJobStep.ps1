@@ -140,7 +140,7 @@ function Add-SqlElasticJobStep
     {
         $null = Assert-AzContext
 
-        $existingStep = Get-SqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
+        $existingStep = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name }
 
         if ($null -ne $existingStep)
         {
@@ -178,7 +178,7 @@ function Add-SqlElasticJobStep
 
         Write-PSFMessage -Level Output -Message ('Adding step ''{0}'' to Elastic Job ''{1}'' against target group ''{2}''.' -f $Name, $JobName, $TargetGroupName) -Tag 'step', 'create'
 
-        $step = Add-AzSqlElasticJobStep @stepParameters
+        $step = Add-AzSqlElasticJobStep @stepParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Added step ''{0}'' to Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'create'
 

@@ -208,6 +208,31 @@ deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and
 changelog tasks.
 
+A live run of `Add-SqlElasticJobStep` against a job that did not exist yet
+surfaced the same two bugs as `New-SqlElasticJobUserAssignedIdentity` earlier:
+it logged "Using Azure context" twice (it called the public
+`Get-SqlElasticJobStep` for its idempotency check, which itself calls
+`Assert-AzContext`), and it called `Add-AzSqlElasticJobStep` without
+`-ErrorAction Stop`, so Azure's non-terminating "job not found" error was
+swallowed and the function printed a false "Added step..." success message.
+Fixed by looking up the step inline (`Get-AzResourceIfPresent` wrapping
+`Get-AzSqlElasticJobStep` directly, mirroring `Get-SqlElasticJobStep`'s own
+body) and adding `-ErrorAction Stop`.
+
+**Open item, not yet fixed**: an audit found this exact two-bug pattern
+(duplicate `Assert-AzContext` via calling a sibling public `Get-*` getter, and
+missing `-ErrorAction Stop` on the Az mutation call) across essentially every
+simple CRUD command: `Add-SqlElasticJobTarget`, `New-SqlElasticJob`,
+`New-SqlElasticJobAgent`, `New-SqlElasticJobCredential`,
+`New-SqlElasticJobTargetGroup`, `Remove-SqlElasticJob`,
+`Remove-SqlElasticJobAgent`, `Remove-SqlElasticJobCredential`,
+`Remove-SqlElasticJobStep`, `Remove-SqlElasticJobTargetGroup`,
+`Set-SqlElasticJob`, `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
+`Set-SqlElasticJobStep`. Only `Add-SqlElasticJobStep` was fixed (the reported
+instance); the others are unchanged and still have both bugs latent. This is a
+good candidate for a dedicated follow-up pass across the whole CRUD surface
+rather than a one-off fix, since it touches ~14 files and their tests.
+
 ## Evidence
 
 - `Az.Sql` 7.0.0 exposes the whole Elastic Jobs object model, so this module
