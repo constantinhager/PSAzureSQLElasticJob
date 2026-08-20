@@ -232,6 +232,41 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   user: run 32383793291), not locally. Full Sampler suite still passed with
   443 tests locally (this task itself can't be exercised without actually
   publishing, so the real validation is the next CI run on the PR).
+- 2026-08-20: **CORRECTION** - the `ExternalModuleDependencies` fix above did
+  NOT resolve the CI failure; the exact same error recurred on the next push
+  (run 32385654684), and this time it WAS reproducible locally, via
+  `.\build.ps1 -Tasks pack` (the default `.\build.ps1` never runs the `pack`
+  workflow, only `build`+`test` - use `-Tasks pack` specifically to exercise
+  `package_module_nupkg` locally instead of waiting on CI round-trips).
+  Root cause, found by reading Sampler's own
+  `release.module.build.ps1` (`output/RequiredModules/Sampler/<version>/tasks/`
+  locally): the `package_module_nupkg` task loops over the BUILT module's
+  OWN `RequiredModules` array and calls
+  `Publish-Module -Repository output -Path $module.ModuleBase` for each one,
+  republishing every direct dependency into a throwaway local PSRepository
+  folder so the final `Publish-Module` call for our own module can validate
+  against it. `ExternalModuleDependencies` only affects the manifest of the
+  module *being published* (ours) - it does nothing for a THIRD PARTY
+  module's (dbatools's) own nested `RequiredModules` entry
+  (`dbatools.library`), which this loop never publishes at all since it
+  isn't in *our* `RequiredModules` list. When the loop reaches `dbatools`
+  and calls `Publish-Module -Repository output -Path <dbatools path>`,
+  THAT call recursively validates dbatools's own `dbatools.library`
+  requirement against the (still-empty-of-it) `output` repo and fails.
+  Real fix: add `dbatools.library` as an explicit `RequiredModules` entry in
+  OUR manifest too (version pinned to what `dbatools`'s own manifest
+  requires - checked via
+  `Select-String -Path .../dbatools.psd1 -Pattern library` locally, found
+  `ModuleVersion = '2026.5.3'`), **and put it BEFORE `dbatools` in the
+  array** - Sampler's loop processes the array in declared order, and
+  `dbatools`'s own dependency check only succeeds if `dbatools.library` was
+  already published to `output` in an earlier loop iteration. Verified with
+  `.\build.ps1 -Tasks pack` locally: failed with `dbatools.library` still
+  after `dbatools` in the array (identical error, reproduced exactly),
+  succeeded ("Packaged PSAzureSQLElasticJob NuGet package") once reordered.
+  Kept the `ExternalModuleDependencies` entry too since it's still correct
+  guidance for the real PSGallery publish step. Full Sampler suite (regular
+  `build`+`test`) still passed with 443 tests.
 
 ## Stable capabilities
 

@@ -94,6 +94,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- CI release/packaging step still failing with "PowerShellGet cannot resolve
+  the module dependency 'dbatools.library'" after the previous
+  `ExternalModuleDependencies` fix - that setting only covers the real
+  PSGallery publish step, not Sampler's `package_module_nupkg` task, which
+  separately re-publishes every direct `RequiredModules` entry into a local
+  `output` repository before validating the built module against it, and
+  never touches transitive dependencies (`dbatools.library` is `dbatools`'s
+  own dependency, not ours). Fixed by adding `dbatools.library` as an
+  explicit `RequiredModules` entry, positioned *before* `dbatools` in the
+  array so it gets published to that local repository first - order matters
+  because Sampler's task processes the array in sequence and `dbatools`'s
+  own publish step validates its `dbatools.library` requirement against
+  whatever is already there. Reproduced and verified the fix locally with
+  `.\build.ps1 -Tasks pack` before pushing.
 - CI release/packaging step failing with "PowerShellGet cannot resolve the
   module dependency 'dbatools.library'" - declared it under
   `PrivateData.PSData.ExternalModuleDependencies` in the module manifest so

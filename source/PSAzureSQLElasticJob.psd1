@@ -56,6 +56,7 @@
         @{ ModuleName = 'Az.Sql'; ModuleVersion = '4.0.0' }
         @{ ModuleName = 'Az.ManagedServiceIdentity'; ModuleVersion = '2.0.0' }
         @{ ModuleName = 'Az.Resources'; ModuleVersion = '6.0.0' }
+        @{ ModuleName = 'dbatools.library'; ModuleVersion = '2026.5.3' }
         @{ ModuleName = 'dbatools'; ModuleVersion = '2.1.0' }
         @{ ModuleName = 'PSFramework'; ModuleVersion = '1.9.310' }
     )
@@ -152,7 +153,7 @@
             # RequireLicenseAcceptance = $false
 
             # External dependent modules of this module
-            ExternalModuleDependencies = @('dbatools.library')
+            ExternalModuleDependencies = @('')
 
         } # End of PSData hashtable
 
