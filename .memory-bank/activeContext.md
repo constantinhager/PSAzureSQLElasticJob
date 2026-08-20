@@ -231,19 +231,49 @@ one execution. Same dbatools/Azure AD access token connection pattern as
 which cannot be parameterized. The execution-ID *value* itself, unlike
 identifiers, genuinely can be parameterized, so it's passed via
 `Invoke-DbaQuery -SqlParameter @{ ExecutionId = $JobExecutionId }` rather than
-string interpolation. Per Microsoft's Elastic Jobs docs
-(`elastic-jobs-tsql-create-manage`), the output table - whether auto-created
-by the job step or pre-created manually - carries an `internal_execution_id`
-(`uniqueidentifier`) column that is the only reliable join key back to a
-specific run; that's the column `Start-SqlElasticJob`'s `JobExecutionId`
-return value correlates against. Defaulted to that column name via
-`-ExecutionIdColumnName`, overridable in case a manually pre-created table
-used a different name.
+string interpolation.
+IMPORTANT CORRECTION (verified live against a real job/output table): the
+first design assumed Azure's system-managed `internal_execution_id` column
+(auto-populated when a table is auto-created via `-OutputDatabaseObject`/
+`-OutputTableName`) equals the `JobExecutionId` `Start-SqlElasticJob`/
+`Get-AzSqlElasticJobExecution` return. Live-tested and confirmed FALSE: for
+6 successful executions of the same job, the table had exactly 6 distinct
+`internal_execution_id` values, but NONE of them matched any of the job's own
+`JobExecutionId` values (checked at job-level, step-level via
+`Get-AzSqlElasticJobStepExecution`, and target-level via
+`Get-AzSqlElasticJobTargetExecution` - all three expose the same
+`JobExecutionId`, none of which appear in the output table). The counts
+lined up (6 executions = 6 distinct ids) but the GUIDs themselves are a
+different, internal-only identifier not exposed by any public API. The MS
+docs sentence about `internal_execution_id` correlating to
+`$(job_execution_id)` applies only when the step's own `CommandText`
+explicitly does `SELECT $(job_execution_id) AS <col>, ...` - it is NOT true
+of Azure's automatic/system-managed output column. Fixed by changing
+`Get-SqlElasticJobExecutionOutput`'s default `-ExecutionIdColumnName` to
+`JobExecutionId` and requiring the job step to explicitly select
+`$(job_execution_id) AS JobExecutionId` in its `CommandText` (documented in
+both `Get-SqlElasticJobExecutionOutput` and `Add-SqlElasticJobStep`'s
+`WithOutputDb` example). This is the only mechanism Microsoft actually
+guarantees for output-row-to-execution correlation.
+Per Microsoft's Elastic Jobs docs (`elastic-jobs-tsql-create-manage`), the
+`$(job_execution_id)` built-in scripting variable is meant for exactly this:
+"group all results from the same job execution together."
 Pester note: `Invoke-DbaQuery`'s `-SqlParameter` is typed `[PSObject[]]`, not
 `[Hashtable]`, so passing a hashtable literal gets wrapped in a one-element
 array; access it in a mock `-ParameterFilter` as `$SqlParameter[0]['Key']`,
 not `$SqlParameter['Key']` (the latter silently fails to match, since arrays
 don't support string indexers).
+Debugging note: `Get-AzAccessToken` on newer Az.Accounts versions (5.x here)
+returns a `PSSecureAccessToken` (SecureString-backed `.Token`) by default,
+even with `-AsSecureString:$false` (parameter appears to be ignored/no-op in
+this version) - `[System.Net.NetworkCredential]::new('', $token.Token).Password`
+extracts the plain string when needed for ad-hoc diagnostics. Also: a
+"Login failed for user '<token-identified principal>'. The server is not
+currently configured to accept this token." error against a specific server
+usually means that server has no Microsoft Entra admin configured
+(`Get-AzSqlServerActiveDirectoryAdministrator` returns nothing) - unrelated
+to the SQL parameter/token type; check the target server's Entra admin
+config first.
 
 A live run of `Add-SqlElasticJobStep` against a job that did not exist yet
 surfaced the same two bugs as `New-SqlElasticJobUserAssignedIdentity` earlier:

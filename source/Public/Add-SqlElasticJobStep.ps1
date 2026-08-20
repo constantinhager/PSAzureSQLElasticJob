@@ -75,10 +75,13 @@
 
     .EXAMPLE
         $outputDatabase = Get-AzSqlDatabase -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'reporting'
-        Add-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-report' -Name 'collect-counts' -TargetGroupName 'all-databases' -CredentialName 'jobuser' -CommandText 'SELECT COUNT(*) AS RowCount FROM dbo.Orders' -OutputDatabaseObject $outputDatabase -OutputTableName 'OrderCounts'
+        Add-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-report' -Name 'collect-counts' -TargetGroupName 'all-databases' -CredentialName 'jobuser' -CommandText 'SELECT $(job_execution_id) AS JobExecutionId, COUNT(*) AS RowCount FROM dbo.Orders' -OutputDatabaseObject $outputDatabase -OutputTableName 'OrderCounts'
 
         Writes each target's query result into the 'OrderCounts' table of the
-        'reporting' database.
+        'reporting' database. Selecting $(job_execution_id) AS JobExecutionId
+        lets Get-SqlElasticJobExecutionOutput filter the output table for a
+        specific run - Azure's own system-managed output column does not
+        correlate to the JobExecutionId Start-SqlElasticJob returns.
 #>
 function Add-SqlElasticJobStep {
     # CredentialName/OutputCredentialName name existing job credentials; neither carries a secret.

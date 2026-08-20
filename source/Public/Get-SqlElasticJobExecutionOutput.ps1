@@ -4,12 +4,15 @@
 
     .DESCRIPTION
         Elastic Job steps configured with an output table (-OutputDatabaseObject/
-        -OutputTableName on Add-SqlElasticJobStep) write their query results there,
-        tagged per execution. The only reliable way to correlate those rows back
-        to a specific run is the execution's ID - the same value
-        Start-SqlElasticJob returns as JobExecutionId - which Azure records in an
-        'internal_execution_id' column, whether the table was auto-created by the
-        job step or created ahead of time following Microsoft's documented schema.
+        -OutputTableName on Add-SqlElasticJobStep) write their query results there.
+        The system-managed 'internal_execution_id' column Azure populates on that
+        table does NOT correspond to the JobExecutionId Start-SqlElasticJob
+        returns, so it cannot be used to filter for one run's rows. The only
+        reliable correlation Microsoft documents is the $(job_execution_id)
+        built-in scripting variable, which must be selected explicitly by the
+        step's own CommandText, for example:
+        'SELECT $(job_execution_id) AS JobExecutionId, * FROM dbo.MyTable'.
+        This command filters the output table on that column instead.
 
         Connects using an Azure AD access token obtained from the caller's
         signed-in Az context, so no separate SQL credential is needed.
@@ -32,8 +35,8 @@
         The execution to retrieve output for, as returned by Start-SqlElasticJob.
 
     .PARAMETER ExecutionIdColumnName
-        The output table column that stores the execution ID. Defaults to
-        'internal_execution_id', the column Elastic Jobs itself expects.
+        The output table column that stores the $(job_execution_id) value the
+        step's CommandText selected. Defaults to 'JobExecutionId'.
 
     .PARAMETER EnableException
         Whether a failure raises a terminating exception. Defaults to $true.
@@ -43,10 +46,12 @@
         System.Object
 
     .EXAMPLE
+        Add-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-report' -Name 'collect-counts' -TargetGroupName 'all-databases' -CommandText 'SELECT $(job_execution_id) AS JobExecutionId, COUNT(*) AS RowCount FROM dbo.Orders' -OutputDatabaseObject $outputDatabase -OutputTableName 'OrderCounts'
         $execution = Start-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'nightly-report' -Wait
         Get-SqlElasticJobExecutionOutput -OutputServerName 'sql-reporting' -OutputDatabaseName 'reporting' -OutputTableName 'OrderCounts' -JobExecutionId $execution.JobExecutionId
 
-        Retrieves the rows the job's most recent execution wrote to the output table.
+        Retrieves the rows the job's most recent execution wrote to the output table,
+        relying on the step's CommandText having selected $(job_execution_id) AS JobExecutionId.
 #>
 function Get-SqlElasticJobExecutionOutput {
     [CmdletBinding()]
@@ -81,7 +86,7 @@ function Get-SqlElasticJobExecutionOutput {
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
-        $ExecutionIdColumnName = 'internal_execution_id',
+        $ExecutionIdColumnName = 'JobExecutionId',
 
         [Parameter()]
         [System.Boolean]

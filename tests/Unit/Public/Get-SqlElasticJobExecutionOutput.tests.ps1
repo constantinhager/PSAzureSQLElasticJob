@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -54,7 +54,7 @@ Describe 'Get-SqlElasticJobExecutionOutput' {
         $null = Get-SqlElasticJobExecutionOutput @script:baseParameters
 
         Should -Invoke -CommandName Invoke-DbaQuery -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
-            $Query -like '*[[]dbo[]].[[]OrderCounts[]]*internal_execution_id*' -and $SqlParameter[0]['ExecutionId'] -eq $script:jobExecutionId
+            $Query -like '*[[]dbo[]].[[]OrderCounts[]]*JobExecutionId*' -and $SqlParameter[0]['ExecutionId'] -eq $script:jobExecutionId
         }
     }
 

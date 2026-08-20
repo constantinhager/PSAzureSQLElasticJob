@@ -120,6 +120,15 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `JobExecutionId`. Same dbatools/Azure AD token connection pattern as
   `Grant-SqlElasticJobTargetDatabaseAccess`. Full Sampler suite passed with
   423 tests.
+- 2026-08-20: Live-tested `Get-SqlElasticJobExecutionOutput` against a real
+  job/output table and found `internal_execution_id` does NOT match
+  `JobExecutionId` (verified at job/step/target execution level - none of 6
+  distinct table IDs matched any of the job's 6 successful execution IDs,
+  despite the counts lining up). Fixed by switching to an explicit
+  `$(job_execution_id) AS JobExecutionId` column the step's `CommandText`
+  must select, changing the default `-ExecutionIdColumnName` to
+  `JobExecutionId` and updating `Add-SqlElasticJobStep`'s `WithOutputDb`
+  example accordingly. Full Sampler suite still passed with 423 tests.
 
 ## Stable capabilities
 
