@@ -152,7 +152,7 @@
             # RequireLicenseAcceptance = $false
 
             # External dependent modules of this module
-            # ExternalModuleDependencies = @()
+            ExternalModuleDependencies = @('dbatools.library')
 
         } # End of PSData hashtable
 

@@ -34,6 +34,7 @@ Trim entries older than 90 days.
 2026-08-20 16:10 UTC | default | Added Format.ps1xml table views for the 3 PSCustomObject-returning commands (Environment*/TargetDatabaseAccess results)
 2026-08-20 16:30 UTC | default | Added PSFramework TEPP tab completion across the module; fixed Az.Sql model property-name bug (.Name doesn't exist) and a flaky Hashtable-order test found while verifying it
 2026-08-20 16:50 UTC | default | Added custom step Format.ps1xml view via Update-FormatData -PrependPath to override Az.Sql's default and stop CommandText from wrapping
+2026-08-20 17:15 UTC | default | Fixed CI-only release failure: declared dbatools.library under ExternalModuleDependencies so PowerShellGet stops trying to resolve it
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.

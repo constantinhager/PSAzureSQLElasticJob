@@ -94,6 +94,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- CI release/packaging step failing with "PowerShellGet cannot resolve the
+  module dependency 'dbatools.library'" - declared it under
+  `PrivateData.PSData.ExternalModuleDependencies` in the module manifest so
+  PowerShellGet no longer tries to resolve it from the local build
+  repository. Not reproducible locally since a plain `.\build.ps1` never
+  runs the `package_module_nupkg`/release tasks that validate this.
 - `Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
   `New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
   `Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,

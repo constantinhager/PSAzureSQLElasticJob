@@ -219,6 +219,19 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   exists, renders as one line, truncates `CommandText`, and doesn't leak the
   `AzureSqlElasticJobStepOutputModel` type name. Full Sampler suite passed
   with 443 tests.
+- 2026-08-20: Fixed a CI-only failure (never reproducible locally) in the
+  `package_module_nupkg`/release Sampler task: `Publish-PSArtifactUtility`
+  couldn't resolve `dbatools`'s own dependency `dbatools.library` against
+  the local build-output PSRepository. `dbatools.library` is a large native
+  binary package, not something we vendor or want PowerShellGet to try to
+  validate/publish as part of our own dependency chain. Fixed by declaring
+  it under `PrivateData.PSData.ExternalModuleDependencies` in the module
+  manifest - exactly what PowerShellGet's own error message suggested. A
+  plain `.\build.ps1` never runs the release/package tasks, which is why
+  this only ever surfaced in the GitHub Actions pipeline (job link from the
+  user: run 32383793291), not locally. Full Sampler suite still passed with
+  443 tests locally (this task itself can't be exercised without actually
+  publishing, so the real validation is the next CI run on the PR).
 
 ## Stable capabilities
 
