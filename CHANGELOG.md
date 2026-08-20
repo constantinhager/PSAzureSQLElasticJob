@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Custom `Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel`
+  table view in `PSAzureSQLElasticJob.Format.ps1xml`, overriding `Az.Sql`'s own
+  default view (loaded first, via `Update-FormatData -PrependPath` in
+  `suffix.ps1`). Its long `CommandText` no longer wraps across many
+  hard-to-read lines - it's truncated with `...` in the table - and the
+  `Output` column shows a short `schema.table` instead of the nested output
+  model's raw type name.
 - Tab completion (PSFramework TEPP) for `-ResourceGroupName`,
   `-ServerName`/`-TargetServerName`/`-OutputServerName`,
   `-DatabaseName`/`-TargetDatabaseName`/`-OutputDatabaseName`, `-AgentName`,

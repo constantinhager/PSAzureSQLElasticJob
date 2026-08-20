@@ -186,5 +186,73 @@
         </TableRowEntries>
       </TableControl>
     </View>
+    <View>
+      <Name>PSAzureSQLElasticJob.ElasticJobStep</Name>
+      <ViewSelectedBy>
+        <TypeName>Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel</TypeName>
+      </ViewSelectedBy>
+      <TableControl>
+        <TableHeaders>
+          <TableColumnHeader>
+            <Label>JobName</Label>
+            <Width>15</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>StepName</Label>
+            <Width>29</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>StepId</Label>
+            <Width>6</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>TargetGroupName</Label>
+            <Width>15</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>CredentialName</Label>
+            <Width>14</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>Output</Label>
+            <Width>26</Width>
+          </TableColumnHeader>
+          <TableColumnHeader>
+            <Label>CommandText</Label>
+          </TableColumnHeader>
+        </TableHeaders>
+        <TableRowEntries>
+          <TableRowEntry>
+            <TableColumnItems>
+              <TableColumnItem>
+                <PropertyName>JobName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>StepName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>StepId</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>TargetGroupName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <PropertyName>CredentialName</PropertyName>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.Output) { '{0}.{1}' -f $_.Output.SchemaName, $_.Output.TableName }
+                </ScriptBlock>
+              </TableColumnItem>
+              <TableColumnItem>
+                <ScriptBlock>
+                  if ($_.CommandText.Length -gt 60) { $_.CommandText.Substring(0, 57) + '...' } else { $_.CommandText }
+                </ScriptBlock>
+              </TableColumnItem>
+            </TableColumnItems>
+          </TableRowEntry>
+        </TableRowEntries>
+      </TableControl>
+    </View>
   </ViewDefinitions>
 </Configuration>

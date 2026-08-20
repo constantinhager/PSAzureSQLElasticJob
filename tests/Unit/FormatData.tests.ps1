@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -69,5 +69,45 @@ Describe 'PSAzureSQLElasticJob.Format.ps1xml' {
 
         $rendered | Should -Match ([regex]::Escape($ExpectedValue))
         $rendered.TrimEnd() -split "`r?`n" | Select-Object -First 1 | Should -Not -Match ':'
+    }
+}
+
+Describe 'PSAzureSQLElasticJob.ElasticJobStep format view' {
+    BeforeAll {
+        $script:step = [PSCustomObject]@{
+            PSTypeName      = 'Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel'
+            JobName         = 'nightly-report'
+            StepName        = 'collect-counts-with-output'
+            StepId          = 1
+            TargetGroupName = 'all-databases'
+            CredentialName  = $null
+            Output          = [PSCustomObject]@{
+                ServerName   = 'sql-reporting'
+                DatabaseName = 'reporting'
+                SchemaName   = 'dbo'
+                TableName    = 'OrderCounts'
+            }
+            CommandText     = 'SELECT $(job_execution_id) AS JobExecutionId, COUNT(*) AS RowCount FROM dbo.Orders WHERE Status = ''Open'''
+        }
+    }
+
+    It 'Should register a table view for the step model' {
+        Get-FormatData -TypeName 'Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel' | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Should render as a single line, truncating a long CommandText instead of wrapping it' {
+        $rendered = $script:step | Out-String -Width 200
+        $dataLine = ($rendered.TrimEnd() -split "`r?`n") | Select-Object -Last 1
+
+        $dataLine | Should -Match ([regex]::Escape('collect-counts-with-output'))
+        $dataLine | Should -Match ([regex]::Escape('...'))
+        $dataLine | Should -Not -Match ([regex]::Escape('RowCount FROM dbo.Orders'))
+    }
+
+    It 'Should render the output table as schema.table instead of the raw type name' {
+        $rendered = $script:step | Out-String -Width 200
+
+        $rendered | Should -Match ([regex]::Escape('dbo.OrderCounts'))
+        $rendered | Should -Not -Match 'AzureSqlElasticJobStepOutputModel'
     }
 }

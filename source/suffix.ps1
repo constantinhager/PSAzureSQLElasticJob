@@ -11,6 +11,16 @@ Set-PSFConfig -Module 'PSAzureSQLElasticJob' -Name 'Provisioning.ServiceObjectiv
 Set-PSFConfig -Module 'PSAzureSQLElasticJob' -Name 'Provisioning.ServerVersion' -Value '12.0' -Initialize -Validation 'string' -Description 'Version used for a logical SQL server this module creates.'
 
 <#
+    FormatsToProcess in the manifest loads this file, but Az.Sql's own format
+    data for AzureSqlElasticJobStepModel is loaded first (it's a RequiredModules
+    dependency, imported before this module), and PowerShell prefers the
+    first-registered view when several match the same type with no explicit
+    -View. Prepending here instead of just relying on FormatsToProcess makes
+    the compact step view in PSAzureSQLElasticJob.Format.ps1xml win by default.
+#>
+Update-FormatData -PrependPath (Join-Path -Path $PSScriptRoot -ChildPath 'PSAzureSQLElasticJob.Format.ps1xml')
+
+<#
     Tab completion (PSFramework TEPP). Every scriptblock below silently returns
     nothing rather than throwing - a broken completer must never interrupt the
     user's typing - and relies only on whatever the caller has already typed

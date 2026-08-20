@@ -192,6 +192,33 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `New-SqlElasticJobUserAssignedIdentity -Name` (creating a brand-new
   identity name has no natural "existing values" source without adding
   `Get-AzUserAssignedIdentity` lookups, judged low value for this pass).
+- 2026-08-20: Added a custom table view for
+  `Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel`
+  (the type `Get-SqlElasticJobStep`/`Add-SqlElasticJobStep`/etc. return) to
+  fix ugly multi-line wrapping of long `CommandText` values in the default
+  console table. Key finding: simply adding a `View` for an Az.Sql-owned type
+  to our own `FormatsToProcess` entry is NOT enough to override it - `Az.Sql`
+  is a `RequiredModules` dependency and imports (registering its own format
+  data for that type) *before* our module does, and PowerShell's default view
+  selection prefers the first-registered view for a type when multiple exist
+  and no `-View` is given. Fixed by calling
+  `Update-FormatData -PrependPath <path-to-our-.ps1xml>` explicitly in
+  `suffix.ps1` (module-load-time code), which inserts our format data at the
+  front of the search order, ahead of `Az.Sql`'s. Verified this ordering
+  empirically (`Format-Table`/default rendering) both before and after the
+  fix against the live environment - before the fix the view looked
+  identical to Az.Sql's stock output despite our format data being loaded.
+  Also learned along the way: the nested `Output` property
+  (`AzureSqlElasticJobStepOutputModel`) has no `ToString()` override of its
+  own either - Az.Sql's nice `(server.db.schema.table)`-looking display for
+  it in their own view comes from an inline `<ScriptBlock>` column
+  expression, not the object's own string conversion; replicated with a
+  `ScriptBlock` reading its `ServerName`/`DatabaseName`/`SchemaName`/
+  `TableName` properties, simplified to just `schema.table` for column width.
+  Added `tests/Unit/FormatData.tests.ps1` cases asserting the step view
+  exists, renders as one line, truncates `CommandText`, and doesn't leak the
+  `AzureSqlElasticJobStepOutputModel` type name. Full Sampler suite passed
+  with 443 tests.
 
 ## Stable capabilities
 
