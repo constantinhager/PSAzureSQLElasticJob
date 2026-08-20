@@ -19,6 +19,7 @@ Trim entries older than 90 days.
 2026-08-20 08:45 UTC | default | Added New-SqlElasticJobUserAssignedIdentity and wired -CreateUserAssignedManagedIdentity into New-SqlElasticJobEnvironment
 2026-08-20 09:10 UTC | default | Fixed live-run bugs: reverted accidental mandatory ServerAdministratorCredential; hardened identity creation against empty resource IDs
 2026-08-20 09:25 UTC | default | Made ServerAdministratorCredential prompt interactively; added Microsoft.ManagedIdentity resource-provider auto-registration
+2026-08-20 09:32 UTC | default | Added Identity property to New-SqlElasticJobEnvironment output object
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.

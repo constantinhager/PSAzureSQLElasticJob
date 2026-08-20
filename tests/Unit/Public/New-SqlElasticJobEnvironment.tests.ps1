@@ -130,6 +130,7 @@ Describe 'New-SqlElasticJobEnvironment' {
             $result.CreatedServer | Should -BeFalse
             $result.CreatedDatabase | Should -BeFalse
             $result.CreatedAgent | Should -BeFalse
+            $result.Identity | Should -BeNullOrEmpty
 
             Should -Invoke -CommandName New-AzSqlServer -ModuleName $script:moduleName -Times 0 -Exactly
             Should -Invoke -CommandName New-AzSqlDatabase -ModuleName $script:moduleName -Times 0 -Exactly
@@ -201,6 +202,7 @@ Describe 'New-SqlElasticJobEnvironment' {
 
             $result.CreatedAgent | Should -BeTrue
             $result.AssignedIdentity | Should -BeTrue
+            $result.Identity.UserAssignedIdentities.Keys | Should -Contain $script:identityId
 
             Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
                 $IdentityType -eq 'UserAssigned' -and $UserAssignedIdentityId -contains $script:identityId
@@ -238,6 +240,7 @@ Describe 'New-SqlElasticJobEnvironment' {
             $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
 
             $result.AssignedIdentity | Should -BeTrue
+            $result.Identity.UserAssignedIdentities.Keys | Should -Contain $script:identityId
 
             Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
                 $IdentityType -eq 'UserAssigned' -and $UserAssignedIdentityId -contains $script:identityId
@@ -257,6 +260,7 @@ Describe 'New-SqlElasticJobEnvironment' {
             $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
 
             $result.AssignedIdentity | Should -BeFalse
+            $result.Identity.UserAssignedIdentities.Keys | Should -Contain $script:identityId
 
             Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
         }

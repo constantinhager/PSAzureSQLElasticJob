@@ -93,6 +93,14 @@ Follow-up UX/reliability round based on that same live run:
   `Registered`, throwing directly (private-helper convention) otherwise. Added
   `Az.Resources` as a `RequiredModules` dependency for `Get-`/`Register-AzResourceProvider`.
 
+`New-SqlElasticJobEnvironment`'s output object gained an `Identity` property:
+`$agent.Identity` when `-UseUserAssignedManagedIdentity` was used, `$null`
+otherwise. Sourcing it from `$agent.Identity` (rather than the separately
+created `$identity` variable, which only exists on the
+`-CreateUserAssignedManagedIdentity` path) means it's populated consistently
+across every identity path: newly created agent, newly assigned identity on
+an existing agent, and an agent that already had the identity.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

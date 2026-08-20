@@ -78,6 +78,10 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   registration (new private `Assert-AzResourceProviderRegistered` helper, new
   `Az.Resources` dependency) to `New-SqlElasticJobUserAssignedIdentity`. Full
   Sampler suite passed with 380 tests.
+- 2026-08-20: Added an `Identity` property (`$agent.Identity`) to
+  `New-SqlElasticJobEnvironment`'s output object whenever
+  `-UseUserAssignedManagedIdentity` was used. Full Sampler suite passed with
+  380 tests.
 
 ## Stable capabilities
 

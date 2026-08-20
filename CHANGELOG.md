@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   database and Elastic Job agent, creating only the parts that are missing.
 - `New-SqlElasticJobEnvironment` accepts `-UseUserAssignedManagedIdentity` and
   `-UserAssignedIdentityId` to assign an existing user-assigned managed
-  identity to the Elastic Job agent, idempotently.
+  identity to the Elastic Job agent, idempotently. The output object gains an
+  `Identity` property with the agent's identity details when used.
 - `New-SqlElasticJobUserAssignedIdentity` to idempotently create a user-assigned
   managed identity, and a `-CreateUserAssignedManagedIdentity` (with
   `-UserAssignedIdentityName`) parameter set on `New-SqlElasticJobEnvironment`

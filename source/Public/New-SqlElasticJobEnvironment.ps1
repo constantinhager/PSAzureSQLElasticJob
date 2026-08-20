@@ -48,7 +48,8 @@
         Assigns a user-assigned managed identity to the Elastic Job agent.
         Requires -UserAssignedIdentityId, or -CreateUserAssignedManagedIdentity
         with -UserAssignedIdentityName. If the agent already has the identity
-        assigned, nothing changes.
+        assigned, nothing changes. The agent's identity details are returned in
+        the output object's Identity property.
 
     .PARAMETER UserAssignedIdentityId
         The resource ID of an existing user-assigned managed identity to assign
@@ -422,6 +423,7 @@ function New-SqlElasticJobEnvironment {
             CreatedDatabase   = $createdDatabase
             CreatedAgent      = $createdAgent
             AssignedIdentity  = $assignedIdentity
+            Identity          = if ($UseUserAssignedManagedIdentity) { $agent.Identity } else { $null }
         }
     }
 }
