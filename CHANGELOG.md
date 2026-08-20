@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tab completion (PSFramework TEPP) for `-ResourceGroupName`,
+  `-ServerName`/`-TargetServerName`/`-OutputServerName`,
+  `-DatabaseName`/`-TargetDatabaseName`/`-OutputDatabaseName`, `-AgentName`,
+  job/step `-Name`/`-JobName`, credential
+  `-Name`/`-CredentialName`/`-OutputCredentialName`/`-RefreshCredentialName`
+  and target group `-Name`/`-TargetGroupName` across the module. Later
+  parameters are scoped by whatever earlier ones the caller already typed
+  (e.g. completing `-Name` on `Get-SqlElasticJobStep` only suggests steps
+  that exist on the `-JobName` already given).
 - `PSAzureSQLElasticJob.Format.ps1xml` with compact table views for
   `New-SqlElasticJobEnvironment`, `Test-SqlElasticJobEnvironment` and
   `Grant-SqlElasticJobTargetDatabaseAccess`. Their `PSCustomObject` output now

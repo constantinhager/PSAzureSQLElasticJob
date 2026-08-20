@@ -160,6 +160,38 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   automatically; standalone files like a `.Format.ps1xml` need an explicit
   `CopyPaths` entry to land in `output/module/.../<version>/`). Full Sampler
   suite passed with 429 tests (6 new).
+- 2026-08-20: Added PSFramework TEPP tab completion for
+  `-ResourceGroupName`, `-ServerName`/`-TargetServerName`/`-OutputServerName`,
+  `-DatabaseName`/`-TargetDatabaseName`/`-OutputDatabaseName`, `-AgentName`,
+  job/step `-Name`/`-JobName`, credential
+  `-Name`/`-CredentialName`/`-OutputCredentialName`/`-RefreshCredentialName`
+  and target group `-Name`/`-TargetGroupName`, registered in `suffix.ps1`
+  (the only place module code runs at import - see the file's own header
+  comment). Each completer reads already-bound parameters via
+  `$fakeBoundParameter` to scope its Azure lookup (e.g. step names are only
+  looked up once `-JobName` is already typed) and silently returns nothing
+  rather than throwing, since a broken completer must never interrupt typing.
+  **Bug found and fixed during manual live-environment verification**: the
+  Elastic Jobs Az.Sql model objects do NOT expose a generic `.Name` property -
+  they use type-specific names (`AgentName`, `JobName`, `StepName`,
+  `CredentialName`, `TargetGroupName`); using `.Name` compiled and imported
+  fine but silently returned zero completions for every one of those five
+  completers. Only `Get-AzSqlServer`/`.ServerName` and
+  `Get-AzSqlDatabase`/`.DatabaseName` happen to match the generic pattern.
+  Verified against the live `elasticjobtest-rg` environment with
+  `TabExpansion2` before/after the fix. Added
+  `tests/Unit/TabCompletion.tests.ps1` (12 tests) mocking each `Get-AzSql*`
+  cmdlet with the correct property names so this class of bug regresses
+  loudly instead of silently. Also fixed an unrelated pre-existing bug found
+  while chasing a test failure here: `FormatData.tests.ps1`'s "should render
+  as a table" test relied on `Hashtable.Keys` enumeration order (undefined in
+  PowerShell) to pick an "expected" substring, making it flaky - fixed by
+  asserting a specific, explicitly-chosen value instead. Full Sampler suite
+  passed with 440 tests.
+  Left unaddressed (documented, not implemented): tab completion for
+  `New-SqlElasticJobUserAssignedIdentity -Name` (creating a brand-new
+  identity name has no natural "existing values" source without adding
+  `Get-AzUserAssignedIdentity` lookups, judged low value for this pass).
 
 ## Stable capabilities
 

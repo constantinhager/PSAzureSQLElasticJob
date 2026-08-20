@@ -9,6 +9,7 @@ It wraps `Az.Sql`'s Elastic Jobs cmdlets with:
 - **Consistent `-Strict`/`-PassThru` semantics** on every `Remove-*` command.
 - **`-WhatIf`/`-Confirm` support** throughout.
 - Support for **Microsoft Entra (Azure AD) user-assigned managed identities** as the recommended, credential-free way to authenticate job steps against target databases.
+- **Tab completion** for resource group, server, database, agent, job, step, credential and target group names, scoped by whatever earlier parameters are already typed.
 
 ## Requirements
 

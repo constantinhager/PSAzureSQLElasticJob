@@ -23,8 +23,9 @@ Describe 'PSAzureSQLElasticJob.Format.ps1xml' {
 
     It 'Should render <TypeName> as a table instead of the default list view' -ForEach @(
         @{
-            TypeName   = 'PSAzureSQLElasticJob.EnvironmentResult'
-            Properties = @{
+            TypeName      = 'PSAzureSQLElasticJob.EnvironmentResult'
+            ExpectedValue = 'sql-jobs'
+            Properties    = @{
                 ResourceGroupName = 'rg-jobs'
                 ServerName        = 'sql-jobs'
                 DatabaseName      = 'jobdb'
@@ -36,8 +37,9 @@ Describe 'PSAzureSQLElasticJob.Format.ps1xml' {
             }
         }
         @{
-            TypeName   = 'PSAzureSQLElasticJob.EnvironmentStatus'
-            Properties = @{
+            TypeName      = 'PSAzureSQLElasticJob.EnvironmentStatus'
+            ExpectedValue = 'sql-jobs'
+            Properties    = @{
                 ResourceGroupName = 'rg-jobs'
                 ServerName        = 'sql-jobs'
                 DatabaseName      = 'jobdb'
@@ -49,8 +51,9 @@ Describe 'PSAzureSQLElasticJob.Format.ps1xml' {
             }
         }
         @{
-            TypeName   = 'PSAzureSQLElasticJob.TargetDatabaseAccessResult'
-            Properties = @{
+            TypeName      = 'PSAzureSQLElasticJob.TargetDatabaseAccessResult'
+            ExpectedValue = 'sql-app'
+            Properties    = @{
                 TargetServerName      = 'sql-app'
                 TargetDatabaseName    = 'AppDb'
                 IdentityName          = 'id-jobs'
@@ -64,7 +67,7 @@ Describe 'PSAzureSQLElasticJob.Format.ps1xml' {
 
         $rendered = $object | Out-String
 
-        $rendered | Should -Match ([regex]::Escape(($Properties.Keys | Select-Object -First 1)))
+        $rendered | Should -Match ([regex]::Escape($ExpectedValue))
         $rendered.TrimEnd() -split "`r?`n" | Select-Object -First 1 | Should -Not -Match ':'
     }
 }
