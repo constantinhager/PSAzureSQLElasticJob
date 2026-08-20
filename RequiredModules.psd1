@@ -25,7 +25,7 @@
     'Az.ManagedServiceIdentity' = 'latest'
     'Az.Resources'              = 'latest'
     dbatools                    = 'latest'
-    dbatools.library            = 'latest'
+    'dbatools.library'          = 'latest'
     PSFramework                 = 'latest'
 
 
