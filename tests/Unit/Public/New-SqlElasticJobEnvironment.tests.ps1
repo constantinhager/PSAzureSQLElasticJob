@@ -262,6 +262,76 @@ Describe 'New-SqlElasticJobEnvironment' {
         }
     }
 
+    Context 'When creating a user-assigned managed identity that does not exist yet' {
+        BeforeAll {
+            $script:identityId = '/subscriptions/sub-1/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ServerName = 'srv' }
+            }
+
+            Mock -CommandName Get-AzSqlDatabase -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ DatabaseName = 'jobdb' }
+            }
+
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith { throw 'Agent does not exist.' }
+
+            Mock -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{
+                    AgentName = 'agent01'
+                    Identity  = [PSCustomObject]@{
+                        UserAssignedIdentities = @{ $script:identityId = @{} }
+                    }
+                }
+            }
+
+            Mock -CommandName Get-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith { throw 'Identity does not exist.' }
+
+            Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ Id = $script:identityId; Name = 'id-jobs' }
+            }
+        }
+
+        It 'Should require -UserAssignedIdentityName' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*-UserAssignedIdentityName*'
+
+            Should -Invoke -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+
+        It 'Should require -CreateUserAssignedManagedIdentity to be used with -UseUserAssignedManagedIdentity' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs' -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*-UseUserAssignedManagedIdentity*'
+
+            Should -Invoke -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+
+        It 'Should create the identity and assign its resource ID to the agent' {
+            $result = New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs' -Confirm:$false
+
+            $result.AssignedIdentity | Should -BeTrue
+
+            Should -Invoke -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $Name -eq 'id-jobs' -and $Location -eq 'westeurope'
+            }
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $UserAssignedIdentityId -contains $script:identityId
+            }
+        }
+
+        It 'Should stop without creating the agent when identity creation fails' {
+            Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
+                Write-Error 'Identity creation failed.'
+            }
+
+            { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs' -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Identity creation failed*'
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+    }
+
     Context 'When server creation fails' {
         BeforeAll {
             Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith { throw 'Server does not exist.' }

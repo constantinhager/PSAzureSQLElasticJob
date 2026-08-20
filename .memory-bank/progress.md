@@ -59,6 +59,12 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   to `New-SqlElasticJobEnvironment` to idempotently assign an existing
   user-assigned managed identity to the Elastic Job agent. Full Sampler suite
   passed with 352 tests.
+- 2026-08-20: Added `New-SqlElasticJobUserAssignedIdentity` (wrapping the new
+  `Az.ManagedServiceIdentity` dependency) and wired
+  `-CreateUserAssignedManagedIdentity`/`-UserAssignedIdentityName` into
+  `New-SqlElasticJobEnvironment` so it can create the identity when missing and
+  assign it to the Elastic Job agent in one call. Full Sampler suite passed
+  with 366 tests.
 
 ## Stable capabilities
 

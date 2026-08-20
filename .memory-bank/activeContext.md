@@ -35,6 +35,24 @@ via `$agent.Identity.UserAssignedIdentities` and only updated through
 output object gained an `AssignedIdentity` boolean and the completion summary
 lists `identity` among created resources.
 
+A new public command, `New-SqlElasticJobUserAssignedIdentity`, wraps
+`Az.ManagedServiceIdentity`'s `Get-`/`New-AzUserAssignedIdentity` with the same
+idempotent create-if-missing shape as `New-SqlElasticJobAgent`/`New-SqlElasticJobCredential`
+(simple pattern: no try/catch around the mutation, `-EnableException` only
+guards the missing-`-Location` validation). `New-SqlElasticJobEnvironment`
+gained `-CreateUserAssignedManagedIdentity` and `-UserAssignedIdentityName`; when
+both are set together with `-UseUserAssignedManagedIdentity` it calls
+`New-SqlElasticJobUserAssignedIdentity -Confirm:$false -ErrorAction Stop`
+(wrapped in try/catch, following the composite command's stricter fail-fast
+convention) before the agent step and uses the resulting `.Id` as
+`$UserAssignedIdentityId`. `-Confirm:$false` suppresses the nested command's own
+confirmation prompt while still letting `$WhatIfPreference` propagate
+correctly, since `-WhatIf` is inherited through nested `ShouldProcess` calls in
+the same runspace.
+
+Az.ManagedServiceIdentity 2.0.0 was added as a `RequiredModules` dependency
+(manifest + `RequiredModules.psd1`) to support this.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

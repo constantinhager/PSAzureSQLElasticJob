@@ -10,8 +10,9 @@ source: repository evidence
 ## Stack
 
 - PowerShell 7+ (`PowerShellVersion = '7.0'`, `CompatiblePSEditions = @('Core')`).
-- `Az.Accounts` (>= 2.13.0) and `Az.Sql` (>= 4.0.0) as manifest `RequiredModules`.
-  The module reuses the caller's `Az.Accounts` context and never authenticates.
+- `Az.Accounts` (>= 2.13.0), `Az.Sql` (>= 4.0.0) and `Az.ManagedServiceIdentity`
+  (>= 2.0.0) as manifest `RequiredModules`. The module reuses the caller's
+  `Az.Accounts` context and never authenticates.
 - `PSFramework` (>= 1.9.310) for logging (`Write-PSFMessage`), flow control
   (`Stop-PSFFunction`) and configuration (`Set-PSFConfig`).
 - Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
