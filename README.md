@@ -1,5 +1,7 @@
 # PSAzureSQLElasticJob
 
+<img src="assets/PSAzureSQLElasticJob.svg" alt="PSAzureSQLElasticJob logo" width="128" height="128" />
+
 A PowerShell module for managing [Azure SQL Elastic Jobs](https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview) - running T-SQL scripts across many Azure SQL databases on a schedule or on demand.
 
 It wraps `Az.Sql`'s Elastic Jobs cmdlets with:
