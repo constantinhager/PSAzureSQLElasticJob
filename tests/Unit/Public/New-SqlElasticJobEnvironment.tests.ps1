@@ -247,7 +247,7 @@ Describe 'New-SqlElasticJobEnvironment' {
             }
         }
 
-        It 'Should not reassign the identity when the agent already has it' {
+        It 'Should not reassign the identity when the agent already has it, but should still report it as assigned' {
             Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
                 [PSCustomObject]@{
                     AgentName = 'agent01'
@@ -259,7 +259,7 @@ Describe 'New-SqlElasticJobEnvironment' {
 
             $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
 
-            $result.AssignedIdentity | Should -BeFalse
+            $result.AssignedIdentity | Should -BeTrue
             $result.Identity.UserAssignedIdentities.Keys | Should -Contain $script:identityId
 
             Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly

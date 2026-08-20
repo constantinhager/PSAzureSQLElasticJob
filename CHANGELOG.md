@@ -55,6 +55,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   resource ID, instead of reporting success and letting
   `New-SqlElasticJobEnvironment` assign an empty identity ID to the Elastic Job
   agent.
+- `New-SqlElasticJobEnvironment`'s `AssignedIdentity` output property now
+  reflects whether the Elastic Job agent currently has the requested identity
+  assigned, instead of only whether this call performed the assignment. It
+  previously reported `$false` for an idempotent re-run even though the agent
+  already had the identity.
 
 ### Changed
 

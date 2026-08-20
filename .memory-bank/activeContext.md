@@ -101,6 +101,15 @@ created `$identity` variable, which only exists on the
 across every identity path: newly created agent, newly assigned identity on
 an existing agent, and an agent that already had the identity.
 
+`AssignedIdentity` had the same "only true for this run" problem: an
+idempotent re-run where the agent already had the identity reported
+`AssignedIdentity = $false`, which reads as "no identity is assigned" even
+though one clearly is. Fixed by computing the output `AssignedIdentity` from
+current state (`$agent.Identity.UserAssignedIdentities -contains $UserAssignedIdentityId`)
+rather than the internal `$identityAssignedThisRun` flag, which is now used only
+for the idempotent-check/`Created: ...` summary logic where "changed this run"
+is the correct semantics.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

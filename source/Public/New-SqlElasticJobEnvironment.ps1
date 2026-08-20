@@ -48,8 +48,10 @@
         Assigns a user-assigned managed identity to the Elastic Job agent.
         Requires -UserAssignedIdentityId, or -CreateUserAssignedManagedIdentity
         with -UserAssignedIdentityName. If the agent already has the identity
-        assigned, nothing changes. The agent's identity details are returned in
-        the output object's Identity property.
+        assigned, nothing changes. The output object's AssignedIdentity property
+        reflects whether the agent currently has the identity - whether this
+        call assigned it or it was already present - and Identity carries the
+        agent's identity details.
 
     .PARAMETER UserAssignedIdentityId
         The resource ID of an existing user-assigned managed identity to assign
@@ -214,7 +216,7 @@ function New-SqlElasticJobEnvironment {
         $createdServer = $false
         $createdDatabase = $false
         $createdAgent = $false
-        $assignedIdentity = $false
+        $identityAssignedThisRun = $false
 
         $server = Get-AzResourceIfPresent -ScriptBlock {
             Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName
@@ -352,7 +354,7 @@ function New-SqlElasticJobEnvironment {
                 $createdAgent = $true
 
                 if ($UseUserAssignedManagedIdentity) {
-                    $assignedIdentity = $true
+                    $identityAssignedThisRun = $true
                 }
             }
         } else {
@@ -377,7 +379,7 @@ function New-SqlElasticJobEnvironment {
 
                         Write-PSFMessage -Level Output -Message ('Assigned user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}''.' -f $UserAssignedIdentityId, $AgentName) -Tag 'agent', 'identity', 'create'
 
-                        $assignedIdentity = $true
+                        $identityAssignedThisRun = $true
                     }
                 } else {
                     Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already has user-assigned managed identity ''{1}''.' -f $AgentName, $UserAssignedIdentityId) -Tag 'idempotent'
@@ -386,7 +388,7 @@ function New-SqlElasticJobEnvironment {
         }
 
         if (($null -ne $server) -and ($null -ne $database) -and ($null -ne $agent)) {
-            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent) -and (-not $assignedIdentity)) {
+            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent) -and (-not $identityAssignedThisRun)) {
                 Write-PSFMessage -Level Output -Message ('Elastic Job environment already exists on server ''{0}'' with database ''{1}'' and agent ''{2}''. No changes were made.' -f $ServerName, $DatabaseName, $AgentName) -Tag 'environment', 'idempotent'
             } else {
                 $createdResources = @()
@@ -403,7 +405,7 @@ function New-SqlElasticJobEnvironment {
                     $createdResources += 'agent'
                 }
 
-                if ($assignedIdentity) {
+                if ($identityAssignedThisRun) {
                     $createdResources += 'identity'
                 }
 
@@ -422,7 +424,7 @@ function New-SqlElasticJobEnvironment {
             CreatedServer     = $createdServer
             CreatedDatabase   = $createdDatabase
             CreatedAgent      = $createdAgent
-            AssignedIdentity  = $assignedIdentity
+            AssignedIdentity  = $UseUserAssignedManagedIdentity -and ($null -ne $agent.Identity) -and ($null -ne $agent.Identity.UserAssignedIdentities) -and (@($agent.Identity.UserAssignedIdentities.Keys) -contains $UserAssignedIdentityId)
             Identity          = if ($UseUserAssignedManagedIdentity) { $agent.Identity } else { $null }
         }
     }

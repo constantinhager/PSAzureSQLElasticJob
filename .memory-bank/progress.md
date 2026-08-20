@@ -82,6 +82,10 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `New-SqlElasticJobEnvironment`'s output object whenever
   `-UseUserAssignedManagedIdentity` was used. Full Sampler suite passed with
   380 tests.
+- 2026-08-20: Fixed `AssignedIdentity` to reflect current state (the agent has
+  the identity) rather than only "assigned during this call", so an idempotent
+  re-run against an agent that already has the identity now correctly reports
+  `$true`. Full Sampler suite passed with 380 tests.
 
 ## Stable capabilities
 
