@@ -140,6 +140,11 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `Set-SqlElasticJobStep`. No test changes needed since existing unit tests
   already mocked the underlying `Get-AzSqlElasticJob*`/mutation cmdlets
   directly. Full Sampler suite still passed with 423 tests.
+- 2026-08-20: Populated `README.md` (previously a two-line stub) with
+  requirements, an end-to-end quick start covering environment provisioning
+  through job execution and output retrieval, and a full command reference
+  table grouped by area (environment, agents, jobs/steps,
+  credentials/targets).
 
 ## Stable capabilities
 
@@ -158,6 +163,5 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   subscription lifecycle test.
 - Retry the live environment provisioning with a globally unique logical SQL
   server name.
-- Populate `README.md` with usage examples.
 - Configure the `GalleryApiToken` repository secret before the first release.
 - Confirm the PowerShell Gallery publish path end to end.

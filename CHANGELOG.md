@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Populated `README.md` with requirements, an end-to-end quick start example
+  and a full command reference table.
 - Opt-in Azure subscription integration tests that validate the Elastic Job
   lifecycle while preserving the supplied resource group, server and database.
 - Sampler-based project scaffold with GitVersion, Pester 5 and GitHub Actions.
