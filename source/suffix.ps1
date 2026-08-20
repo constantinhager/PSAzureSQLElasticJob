@@ -65,7 +65,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.DatabaseName' -ScriptBlo
 
     try {
         $server = $fakeBoundParameter['ServerName'], $fakeBoundParameter['TargetServerName'], $fakeBoundParameter['OutputServerName'] |
-            Where-Object { $_ } | Select-Object -First 1
+        Where-Object { $_ } | Select-Object -First 1
 
         if (-not $server) {
             return
@@ -82,7 +82,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.DatabaseName' -ScriptBlo
         }
 
         $databases = (Get-AzSqlDatabase -ResourceGroupName $resourceGroupName -ServerName $server -ErrorAction Stop).DatabaseName |
-            Where-Object { $_ -ne 'master' -and $_ -like "$wordToComplete*" }
+        Where-Object { $_ -ne 'master' -and $_ -like "$wordToComplete*" }
 
         foreach ($database in $databases) {
             New-PSFTeppCompletionResult -CompletionText $database -ToolTip $database
@@ -103,7 +103,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.AgentName' -ScriptBlock 
         }
 
         $agents = (Get-AzSqlElasticJobAgent -ResourceGroupName $resourceGroupName -ServerName $serverName -ErrorAction Stop).AgentName |
-            Where-Object { $_ -like "$wordToComplete*" }
+        Where-Object { $_ -like "$wordToComplete*" }
 
         foreach ($agent in $agents) {
             New-PSFTeppCompletionResult -CompletionText $agent -ToolTip $agent
@@ -125,7 +125,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.JobName' -ScriptBlock {
         }
 
         $jobs = (Get-AzSqlElasticJob -ResourceGroupName $resourceGroupName -ServerName $serverName -AgentName $agentName -ErrorAction Stop).JobName |
-            Where-Object { $_ -like "$wordToComplete*" }
+        Where-Object { $_ -like "$wordToComplete*" }
 
         foreach ($job in $jobs) {
             New-PSFTeppCompletionResult -CompletionText $job -ToolTip $job
@@ -148,7 +148,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.StepName' -ScriptBlock {
         }
 
         $steps = (Get-AzSqlElasticJobStep -ResourceGroupName $resourceGroupName -ServerName $serverName -AgentName $agentName -JobName $jobName -ErrorAction Stop).StepName |
-            Where-Object { $_ -like "$wordToComplete*" }
+        Where-Object { $_ -like "$wordToComplete*" }
 
         foreach ($step in $steps) {
             New-PSFTeppCompletionResult -CompletionText $step -ToolTip $step
@@ -170,7 +170,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.CredentialName' -ScriptB
         }
 
         $credentials = (Get-AzSqlElasticJobCredential -ResourceGroupName $resourceGroupName -ServerName $serverName -AgentName $agentName -ErrorAction Stop).CredentialName |
-            Where-Object { $_ -like "$wordToComplete*" }
+        Where-Object { $_ -like "$wordToComplete*" }
 
         foreach ($credential in $credentials) {
             New-PSFTeppCompletionResult -CompletionText $credential -ToolTip $credential
@@ -192,7 +192,7 @@ Register-PSFTeppScriptblock -Name 'PSAzureSQLElasticJob.TargetGroupName' -Script
         }
 
         $targetGroups = (Get-AzSqlElasticJobTargetGroup -ResourceGroupName $resourceGroupName -ServerName $serverName -AgentName $agentName -ErrorAction Stop).TargetGroupName |
-            Where-Object { $_ -like "$wordToComplete*" }
+        Where-Object { $_ -like "$wordToComplete*" }
 
         foreach ($targetGroup in $targetGroups) {
             New-PSFTeppCompletionResult -CompletionText $targetGroup -ToolTip $targetGroup
