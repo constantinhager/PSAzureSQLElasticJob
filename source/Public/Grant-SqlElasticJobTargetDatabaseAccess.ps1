@@ -41,7 +41,9 @@
         output instead.
 
     .OUTPUTS
-        PSCustomObject describing the target and what was granted.
+        PSCustomObject describing the target and what was granted. Typed as
+        PSAzureSQLElasticJob.TargetDatabaseAccessResult, which has a custom
+        table format view showing a compact summary.
 
     .EXAMPLE
         Grant-SqlElasticJobTargetDatabaseAccess -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -IdentityName 'id-jobs'
@@ -215,6 +217,7 @@ function Grant-SqlElasticJobTargetDatabaseAccess {
             }
 
             [PSCustomObject]@{
+                PSTypeName            = 'PSAzureSQLElasticJob.TargetDatabaseAccessResult'
                 TargetServerName      = $TargetServerName
                 TargetDatabaseName    = $TargetDatabaseName
                 IdentityName          = $IdentityName

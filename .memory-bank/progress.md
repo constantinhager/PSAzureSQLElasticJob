@@ -145,6 +145,21 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   through job execution and output retrieval, and a full command reference
   table grouped by area (environment, agents, jobs/steps,
   credentials/targets).
+- 2026-08-20: Added `PSAzureSQLElasticJob.Format.ps1xml` with table views for
+  the three `PSCustomObject`-returning commands (`New-SqlElasticJobEnvironment`,
+  `Test-SqlElasticJobEnvironment`, `Grant-SqlElasticJobTargetDatabaseAccess`),
+  each now tagged with a `PSTypeName` so the view applies. Their default
+  rendering was PowerShell's list view (property count > 4 with no format
+  data), which is functional but less scannable than a one-line table for a
+  quick idempotent-check summary. Every other command returns an Az.Sql (or
+  Az.ManagedServiceIdentity) model object already carrying its own format
+  data from that module, so left untouched; `Get-SqlElasticJobExecutionOutput`
+  returns rows of an arbitrary user-defined query shape, so a fixed format
+  view isn't applicable there. Registered via `FormatsToProcess` in the
+  manifest and `CopyPaths` in `build.yaml` (ModuleBuilder only merges *.ps1
+  automatically; standalone files like a `.Format.ps1xml` need an explicit
+  `CopyPaths` entry to land in `output/module/.../<version>/`). Full Sampler
+  suite passed with 429 tests (6 new).
 
 ## Stable capabilities
 

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `PSAzureSQLElasticJob.Format.ps1xml` with compact table views for
+  `New-SqlElasticJobEnvironment`, `Test-SqlElasticJobEnvironment` and
+  `Grant-SqlElasticJobTargetDatabaseAccess`. Their `PSCustomObject` output now
+  carries a `PSTypeName` (`PSAzureSQLElasticJob.EnvironmentResult`,
+  `PSAzureSQLElasticJob.EnvironmentStatus` and
+  `PSAzureSQLElasticJob.TargetDatabaseAccessResult` respectively) so the
+  default rendering is a one-line table instead of PowerShell's default list
+  view, which each object's property count (6-11) would otherwise trigger.
+  Other commands return Az.Sql model objects, which already have their own
+  formatting from `Az.Sql`, so were left unchanged.
 - Populated `README.md` with requirements, an end-to-end quick start example
   and a full command reference table.
 - Opt-in Azure subscription integration tests that validate the Elastic Job
