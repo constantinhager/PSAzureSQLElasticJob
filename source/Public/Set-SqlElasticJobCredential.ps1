@@ -77,7 +77,7 @@ function Set-SqlElasticJobCredential
     {
         $null = Assert-AzContext
 
-        $existingCredential = Get-SqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingCredential = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -eq $existingCredential)
         {
@@ -94,7 +94,7 @@ function Set-SqlElasticJobCredential
 
         Write-PSFMessage -Level Output -Message ('Rotating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
 
-        $jobCredential = Set-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
+        $jobCredential = Set-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Rotated Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'update'
 

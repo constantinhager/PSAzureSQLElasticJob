@@ -29,6 +29,7 @@ Trim entries older than 90 days.
 2026-08-20 14:21 UTC | default | Added Azure's WithOutputDb parameter set to Add-SqlElasticJobStep (OutputDatabaseObject/OutputTableName/OutputCredentialName/OutputSchemaName)
 2026-08-20 14:42 UTC | default | Added Get-SqlElasticJobExecutionOutput to retrieve output-table rows for a job execution via internal_execution_id
 2026-08-20 15:15 UTC | default | Fixed Get-SqlElasticJobExecutionOutput correlation: internal_execution_id doesn't match JobExecutionId; switched to explicit $(job_execution_id) column
+2026-08-20 15:50 UTC | default | Fixed duplicate Assert-AzContext / missing -ErrorAction Stop across remaining ~14 CRUD commands
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.

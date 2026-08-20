@@ -59,7 +59,7 @@ function New-SqlElasticJobAgent {
     process {
         $null = Assert-AzContext
 
-        $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
+        $existingAgent = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name }
 
         if ($null -ne $existingAgent) {
             Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already exists on server ''{1}''.' -f $Name, $ServerName) -Tag 'idempotent'
@@ -75,7 +75,7 @@ function New-SqlElasticJobAgent {
 
         Write-PSFMessage -Level Output -Message ('Creating Elastic Job agent ''{0}'' on server ''{1}'' backed by database ''{2}''.' -f $Name, $ServerName, $DatabaseName) -Tag 'agent', 'create'
 
-        $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $Name
+        $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $Name -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Created Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'create'
 

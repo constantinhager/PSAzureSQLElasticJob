@@ -148,7 +148,7 @@ function Set-SqlElasticJobStep
     {
         $null = Assert-AzContext
 
-        $existingStep = Get-SqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
+        $existingStep = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name }
 
         if ($null -eq $existingStep)
         {
@@ -187,7 +187,7 @@ function Set-SqlElasticJobStep
 
         Write-PSFMessage -Level Output -Message ('Updating step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
 
-        $step = Set-AzSqlElasticJobStep @stepParameters
+        $step = Set-AzSqlElasticJobStep @stepParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Updated step ''{0}'' on Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'update'
 

@@ -87,7 +87,7 @@ function Remove-SqlElasticJobTargetGroup
     {
         $null = Assert-AzContext
 
-        $existingTargetGroup = Get-SqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingTargetGroup = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -eq $existingTargetGroup)
         {
@@ -122,7 +122,7 @@ function Remove-SqlElasticJobTargetGroup
 
         Write-PSFMessage -Level Output -Message ('Removing Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
 
-        $null = Remove-AzSqlElasticJobTargetGroup @removeParameters
+        $null = Remove-AzSqlElasticJobTargetGroup @removeParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Removed Elastic Job target group ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'remove'
 

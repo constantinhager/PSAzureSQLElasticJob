@@ -66,6 +66,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
+  `New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
+  `Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
+  `Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
+  `Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
+  `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential` and
+  `Set-SqlElasticJobStep` no longer call `Assert-AzContext` twice per
+  invocation (once directly, once again inside the public `Get-*` getter used
+  for their existence check) and now force `-ErrorAction Stop` on their
+  underlying Az mutation call, so a failure is reported instead of silently
+  reporting success. Same pattern already fixed in `Add-SqlElasticJobStep`.
 - `-ServerAdministratorCredential` on `New-SqlElasticJobEnvironment` is optional
   again; it is only required when the logical SQL server does not yet exist.
   When omitted in that case, you are now prompted interactively for it instead

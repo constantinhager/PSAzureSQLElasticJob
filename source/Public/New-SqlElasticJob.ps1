@@ -127,7 +127,7 @@ function New-SqlElasticJob
     {
         $null = Assert-AzContext
 
-        $existingJob = Get-SqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingJob = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -ne $existingJob)
         {
@@ -152,7 +152,7 @@ function New-SqlElasticJob
 
         Write-PSFMessage -Level Output -Message ('Creating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 
-        $job = New-AzSqlElasticJob @jobParameters
+        $job = New-AzSqlElasticJob @jobParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Created Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 

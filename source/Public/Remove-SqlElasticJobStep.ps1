@@ -87,7 +87,7 @@ function Remove-SqlElasticJobStep
     {
         $null = Assert-AzContext
 
-        $existingStep = Get-SqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
+        $existingStep = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name }
 
         if ($null -eq $existingStep)
         {
@@ -113,7 +113,7 @@ function Remove-SqlElasticJobStep
 
         Write-PSFMessage -Level Output -Message ('Removing step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
 
-        $null = Remove-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name
+        $null = Remove-AzSqlElasticJobStep -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -JobName $JobName -Name $Name -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Removed step ''{0}'' from Elastic Job ''{1}''.' -f $Name, $JobName) -Tag 'step', 'remove'
 

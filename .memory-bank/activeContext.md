@@ -286,19 +286,29 @@ Fixed by looking up the step inline (`Get-AzResourceIfPresent` wrapping
 `Get-AzSqlElasticJobStep` directly, mirroring `Get-SqlElasticJobStep`'s own
 body) and adding `-ErrorAction Stop`.
 
-**Open item, not yet fixed**: an audit found this exact two-bug pattern
-(duplicate `Assert-AzContext` via calling a sibling public `Get-*` getter, and
-missing `-ErrorAction Stop` on the Az mutation call) across essentially every
-simple CRUD command: `Add-SqlElasticJobTarget`, `New-SqlElasticJob`,
-`New-SqlElasticJobAgent`, `New-SqlElasticJobCredential`,
-`New-SqlElasticJobTargetGroup`, `Remove-SqlElasticJob`,
-`Remove-SqlElasticJobAgent`, `Remove-SqlElasticJobCredential`,
-`Remove-SqlElasticJobStep`, `Remove-SqlElasticJobTargetGroup`,
-`Set-SqlElasticJob`, `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
-`Set-SqlElasticJobStep`. Only `Add-SqlElasticJobStep` was fixed (the reported
-instance); the others are unchanged and still have both bugs latent. This is a
-good candidate for a dedicated follow-up pass across the whole CRUD surface
-rather than a one-off fix, since it touches ~14 files and their tests.
+**RESOLVED**: the two-bug pattern (duplicate `Assert-AzContext` via calling a
+sibling public `Get-*` getter, and missing `-ErrorAction Stop` on the Az
+mutation call) has now been fixed across the whole CRUD surface:
+`Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
+`New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
+`Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
+`Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
+`Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
+`Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
+`Set-SqlElasticJobStep` (in addition to `Add-SqlElasticJobStep`, fixed
+earlier). Same fix pattern each time: replaced the call to the sibling public
+`Get-SqlElasticJob*` getter with an inline
+`Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob* ... }` (mirroring
+that getter's own body, using the outer function's parameter variables
+directly rather than a hashtable - `-Name` is always mandatory in these
+New-/Remove-/Set- contexts so no conditional binding is needed), and appended
+`-ErrorAction Stop` to the actual mutating `New-`/`Remove-`/`Set-AzSqlElasticJob*`
+call. `Add-SqlElasticJobTarget` had no existing-resource check to begin with,
+so only needed `-ErrorAction Stop` added to `Add-AzSqlElasticJobTarget`.
+All existing unit tests already mocked the underlying `Get-AzSqlElasticJob*`/
+`New-`/`Remove-`/`Set-AzSqlElasticJob*` cmdlets directly (not the public
+`Get-SqlElasticJob*` wrappers), so no test changes were needed - full Sampler
+suite still passed with 423 tests after the fix.
 
 ## Evidence
 

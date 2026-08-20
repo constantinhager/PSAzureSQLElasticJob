@@ -71,7 +71,7 @@ function New-SqlElasticJobCredential
     {
         $null = Assert-AzContext
 
-        $existingCredential = Get-SqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingCredential = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -ne $existingCredential)
         {
@@ -87,7 +87,7 @@ function New-SqlElasticJobCredential
 
         Write-PSFMessage -Level Output -Message ('Creating Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
 
-        $jobCredential = New-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential
+        $jobCredential = New-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -Credential $Credential -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Created Elastic Job credential ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'create'
 

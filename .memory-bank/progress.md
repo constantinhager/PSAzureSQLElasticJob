@@ -129,6 +129,17 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   must select, changing the default `-ExecutionIdColumnName` to
   `JobExecutionId` and updating `Add-SqlElasticJobStep`'s `WithOutputDb`
   example accordingly. Full Sampler suite still passed with 423 tests.
+- 2026-08-20: Fixed the duplicate-`Assert-AzContext`/missing-`-ErrorAction
+  Stop` pattern (found earlier in `Add-SqlElasticJobStep`) across the rest of
+  the CRUD surface: `Add-SqlElasticJobTarget`, `New-SqlElasticJob`,
+  `New-SqlElasticJobAgent`, `New-SqlElasticJobCredential`,
+  `New-SqlElasticJobTargetGroup`, `Remove-SqlElasticJob`,
+  `Remove-SqlElasticJobAgent`, `Remove-SqlElasticJobCredential`,
+  `Remove-SqlElasticJobStep`, `Remove-SqlElasticJobTargetGroup`,
+  `Set-SqlElasticJob`, `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
+  `Set-SqlElasticJobStep`. No test changes needed since existing unit tests
+  already mocked the underlying `Get-AzSqlElasticJob*`/mutation cmdlets
+  directly. Full Sampler suite still passed with 423 tests.
 
 ## Stable capabilities
 
@@ -140,17 +151,6 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - Consistent `-Strict` and `-PassThru` semantics on every `Remove-*` command.
 
 ## Open work
-
-- Audit and fix the same two-bug pattern found in `Add-SqlElasticJobStep`
-  (duplicate `Assert-AzContext` via a sibling public `Get-*` getter; missing
-  `-ErrorAction Stop` on the Az mutation) across the rest of the CRUD surface:
-  `Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
-  `New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
-  `Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
-  `Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
-  `Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
-  `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
-  `Set-SqlElasticJobStep`.
 
 - Enable secret scanning and push protection in the repository settings
   (FIND-2026-004; cannot be done from a commit).
