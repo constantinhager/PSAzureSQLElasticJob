@@ -12,6 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sampler-based project scaffold with GitVersion, Pester 5 and GitHub Actions.
 - `New-SqlElasticJobEnvironment` to provision the logical SQL server, job
   database and Elastic Job agent, creating only the parts that are missing.
+- `New-SqlElasticJobEnvironment` accepts `-UseUserAssignedManagedIdentity` and
+  `-UserAssignedIdentityId` to assign an existing user-assigned managed
+  identity to the Elastic Job agent, idempotently. The output object gains an
+  `Identity` property with the agent's identity details when used.
+- `New-SqlElasticJobUserAssignedIdentity` to idempotently create a user-assigned
+  managed identity, and a `-CreateUserAssignedManagedIdentity` (with
+  `-UserAssignedIdentityName`) parameter set on `New-SqlElasticJobEnvironment`
+  that creates the identity when missing and assigns it to the Elastic Job
+  agent in one call. `New-SqlElasticJobUserAssignedIdentity` registers the
+  `Microsoft.ManagedIdentity` resource provider automatically when it is not
+  already registered on the subscription.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`
@@ -32,6 +43,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   release to GitHub and the PowerShell Gallery.
 - GitHub issue templates under `.github/ISSUE_TEMPLATE/`.
 - MIT license file.
+
+### Fixed
+
+- `-ServerAdministratorCredential` on `New-SqlElasticJobEnvironment` is optional
+  again; it is only required when the logical SQL server does not yet exist.
+  When omitted in that case, you are now prompted interactively for it instead
+  of failing outright or being forced to always supply it.
+- `New-SqlElasticJobUserAssignedIdentity` now forces `-ErrorAction Stop` on the
+  underlying `New-AzUserAssignedIdentity` call and fails when Azure returns no
+  resource ID, instead of reporting success and letting
+  `New-SqlElasticJobEnvironment` assign an empty identity ID to the Elastic Job
+  agent.
+- `New-SqlElasticJobEnvironment`'s `AssignedIdentity` output property now
+  reflects whether the Elastic Job agent currently has the requested identity
+  assigned, instead of only whether this call performed the assignment. It
+  previously reported `$false` for an idempotent re-run even though the agent
+  already had the identity.
 
 ### Changed
 

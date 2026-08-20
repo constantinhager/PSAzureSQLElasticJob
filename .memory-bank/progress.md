@@ -55,6 +55,37 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Removed the redundant public agent lookup from environment
   checks, so Azure context is asserted and reported once. Full Sampler suite
   passed.
+- 2026-08-20: Added `-UseUserAssignedManagedIdentity`/`-UserAssignedIdentityId`
+  to `New-SqlElasticJobEnvironment` to idempotently assign an existing
+  user-assigned managed identity to the Elastic Job agent. Full Sampler suite
+  passed with 352 tests.
+- 2026-08-20: Added `New-SqlElasticJobUserAssignedIdentity` (wrapping the new
+  `Az.ManagedServiceIdentity` dependency) and wired
+  `-CreateUserAssignedManagedIdentity`/`-UserAssignedIdentityName` into
+  `New-SqlElasticJobEnvironment` so it can create the identity when missing and
+  assign it to the Elastic Job agent in one call. Full Sampler suite passed
+  with 366 tests.
+- 2026-08-20: Fixed two bugs found during a live Azure run: reverted an
+  accidental `-ServerAdministratorCredential` mandatory-parameter change that
+  caused interactive prompting/test hangs, and hardened
+  `New-SqlElasticJobUserAssignedIdentity` to fail when Azure reports success
+  but returns no resource ID (seen when the `Microsoft.ManagedIdentity`
+  resource provider is not registered). Full Sampler suite passed with 369
+  tests.
+- 2026-08-20: Made `-ServerAdministratorCredential` prompt interactively via
+  `Get-Credential` when omitted and the server doesn't exist yet (rather than
+  erroring), and added automatic `Microsoft.ManagedIdentity` resource-provider
+  registration (new private `Assert-AzResourceProviderRegistered` helper, new
+  `Az.Resources` dependency) to `New-SqlElasticJobUserAssignedIdentity`. Full
+  Sampler suite passed with 380 tests.
+- 2026-08-20: Added an `Identity` property (`$agent.Identity`) to
+  `New-SqlElasticJobEnvironment`'s output object whenever
+  `-UseUserAssignedManagedIdentity` was used. Full Sampler suite passed with
+  380 tests.
+- 2026-08-20: Fixed `AssignedIdentity` to reflect current state (the agent has
+  the identity) rather than only "assigned during this call", so an idempotent
+  re-run against an agent that already has the identity now correctly reports
+  `$true`. Full Sampler suite passed with 380 tests.
 
 ## Stable capabilities
 

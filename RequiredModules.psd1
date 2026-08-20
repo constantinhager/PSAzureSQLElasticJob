@@ -22,6 +22,8 @@
     'Sampler.GitHubTasks' = 'latest'
     'Az.Accounts'         = 'latest'
     'Az.Sql'              = 'latest'
+    'Az.ManagedServiceIdentity' = 'latest'
+    'Az.Resources'        = 'latest'
     PSFramework           = 'latest'
 
 

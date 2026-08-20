@@ -10,8 +10,9 @@ source: repository evidence
 ## Stack
 
 - PowerShell 7+ (`PowerShellVersion = '7.0'`, `CompatiblePSEditions = @('Core')`).
-- `Az.Accounts` (>= 2.13.0) and `Az.Sql` (>= 4.0.0) as manifest `RequiredModules`.
-  The module reuses the caller's `Az.Accounts` context and never authenticates.
+- `Az.Accounts` (>= 2.13.0), `Az.Sql` (>= 4.0.0), `Az.ManagedServiceIdentity`
+  (>= 2.0.0) and `Az.Resources` (>= 6.0.0) as manifest `RequiredModules`. The
+  module reuses the caller's `Az.Accounts` context and never authenticates.
 - `PSFramework` (>= 1.9.310) for logging (`Write-PSFMessage`), flow control
   (`Stop-PSFFunction`) and configuration (`Set-PSFConfig`).
 - Sampler 0.120.1 build framework (`build.ps1`, `build.yaml`,
@@ -52,6 +53,12 @@ source: repository evidence
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
 - Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
   exported function; grouping several functions into one file fails the build.
+- `.\build.ps1 -Tasks test` alone does **not** rebuild the module; it imports
+  whatever is already in `output/module`. After editing `source/`, run the
+  default workflow (`.\build.ps1` with no `-Tasks`, which runs `build` then
+  `test`) or explicitly `-Tasks build,test`, otherwise source changes appear
+  as `ParameterBindingException`/stale-behavior failures against the old
+  build.
 - Last verified run: `.\build.ps1` -> 341 tests passed, 17 tasks, 0 errors.
 - Logging conformance is checkable: 64 `Write-PSFMessage` calls, all with an
   explicit `-Level`, and zero `Write-Verbose`/`Warning`/`Host`/`Error` calls in

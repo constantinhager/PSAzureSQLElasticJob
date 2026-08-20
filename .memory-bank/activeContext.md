@@ -23,6 +23,93 @@ status instead of the raw Azure ARM error text.
 agent lookup internally, avoiding a duplicate context status from the public
 agent getter.
 
+`New-SqlElasticJobEnvironment` can now also assign an existing user-assigned
+managed identity to the Elastic Job agent via `-UseUserAssignedManagedIdentity`
+and `-UserAssignedIdentityId`. It follows the same idempotent, `ShouldProcess`,
+fail-on-`-ErrorAction Stop` pattern as the server/database/agent steps: a new
+agent is created with the identity in one call; an existing agent is checked
+via `$agent.Identity.UserAssignedIdentities` and only updated through
+`Set-AzSqlElasticJobAgent` when the identity is missing. `Az.Sql` exposes
+`-IdentityType`/`-UserAssignedIdentityId` on both `New-`/`Set-AzSqlElasticJobAgent`
+(agent has no `PrimaryUserAssignedIdentityId`, unlike the server cmdlets). The
+output object gained an `AssignedIdentity` boolean and the completion summary
+lists `identity` among created resources.
+
+A new public command, `New-SqlElasticJobUserAssignedIdentity`, wraps
+`Az.ManagedServiceIdentity`'s `Get-`/`New-AzUserAssignedIdentity` with the same
+idempotent create-if-missing shape as `New-SqlElasticJobAgent`/`New-SqlElasticJobCredential`
+(simple pattern: no try/catch around the mutation, `-EnableException` only
+guards the missing-`-Location` validation). `New-SqlElasticJobEnvironment`
+gained `-CreateUserAssignedManagedIdentity` and `-UserAssignedIdentityName`; when
+both are set together with `-UseUserAssignedManagedIdentity` it calls
+`New-SqlElasticJobUserAssignedIdentity -Confirm:$false -ErrorAction Stop`
+(wrapped in try/catch, following the composite command's stricter fail-fast
+convention) before the agent step and uses the resulting `.Id` as
+`$UserAssignedIdentityId`. `-Confirm:$false` suppresses the nested command's own
+confirmation prompt while still letting `$WhatIfPreference` propagate
+correctly, since `-WhatIf` is inherited through nested `ShouldProcess` calls in
+the same runspace.
+
+Az.ManagedServiceIdentity 2.0.0 was added as a `RequiredModules` dependency
+(manifest + `RequiredModules.psd1`) to support this.
+
+A live run against a real subscription surfaced two bugs, both now fixed:
+1. A prior edit made `-ServerAdministratorCredential` `[Parameter(Mandatory)]`.
+   Since most calls (idempotent re-runs, identity-only runs) never need it,
+   PowerShell prompted interactively for a credential on every invocation
+   without one - including under Pester, hanging the test run. Reverted to
+   `[Parameter()]`; it stays validated internally (`$PSBoundParameters.ContainsKey`)
+   only when the server does not yet exist.
+2. `New-AzUserAssignedIdentity` (`Az.ManagedServiceIdentity` 2.0.0) reported an
+   ARM error ("subscription not registered for Microsoft.ManagedIdentity") but
+   still returned an object with an empty `.Id`, and the ambient inherited
+   `$ErrorActionPreference = 'Stop'` did not turn that into a terminating
+   error. `New-SqlElasticJobUserAssignedIdentity` now passes `-ErrorAction Stop`
+   directly on that call *and* explicitly checks `[string]::IsNullOrEmpty($identity.Id)`
+   after it returns, failing via `Stop-PSFFunction` either way.
+   `New-SqlElasticJobEnvironment` also re-validates `$identity.Id` before using
+   it, so an empty ID can never reach `New-AzSqlElasticJobAgent`. Lesson: do not
+   trust an inherited `-ErrorAction Stop`/`$ErrorActionPreference` alone for
+   generated Az cmdlets that process responses asynchronously - set it
+   explicitly on the call and validate the returned object's identifying
+   property.
+
+Follow-up UX/reliability round based on that same live run:
+- The user wants to be *prompted* for `-ServerAdministratorCredential` when it
+  is forgotten, not just get a clear error (better than the earlier mandatory
+  parameter, which prompted unconditionally and broke automation/tests). Fixed
+  by calling `Get-Credential` only inside the "server missing" branch, storing
+  the result in a plain local variable first and only assigning it to the
+  `[ValidateNotNull()]` parameter variable when non-null - assigning `$null`
+  directly to a validated parameter variable throws PowerShell's own generic
+  "cannot be validated" error instead of the intended message, since
+  `Validate*` attributes are enforced on every assignment to that variable,
+  not just initial parameter binding.
+- `New-SqlElasticJobUserAssignedIdentity` now calls a new private helper,
+  `Assert-AzResourceProviderRegistered -ProviderNamespace 'Microsoft.ManagedIdentity'`,
+  before creating the identity. It checks `Get-AzResourceProvider`'s
+  `RegistrationState`, calls `Register-AzResourceProvider` and polls (default
+  300s timeout / 10s interval, both mockable via parameters) until
+  `Registered`, throwing directly (private-helper convention) otherwise. Added
+  `Az.Resources` as a `RequiredModules` dependency for `Get-`/`Register-AzResourceProvider`.
+
+`New-SqlElasticJobEnvironment`'s output object gained an `Identity` property:
+`$agent.Identity` when `-UseUserAssignedManagedIdentity` was used, `$null`
+otherwise. Sourcing it from `$agent.Identity` (rather than the separately
+created `$identity` variable, which only exists on the
+`-CreateUserAssignedManagedIdentity` path) means it's populated consistently
+across every identity path: newly created agent, newly assigned identity on
+an existing agent, and an agent that already had the identity.
+
+`AssignedIdentity` had the same "only true for this run" problem: an
+idempotent re-run where the agent already had the identity reported
+`AssignedIdentity = $false`, which reads as "no identity is assigned" even
+though one clearly is. Fixed by computing the output `AssignedIdentity` from
+current state (`$agent.Identity.UserAssignedIdentities -contains $UserAssignedIdentityId`)
+rather than the internal `$identityAssignedThisRun` flag, which is now used only
+for the idempotent-check/`Created: ...` summary logic where "changed this run"
+is the correct semantics.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

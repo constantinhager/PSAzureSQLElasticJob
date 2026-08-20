@@ -54,6 +54,8 @@
     RequiredModules      = @(
         @{ ModuleName = 'Az.Accounts'; ModuleVersion = '2.13.0' }
         @{ ModuleName = 'Az.Sql'; ModuleVersion = '4.0.0' }
+        @{ ModuleName = 'Az.ManagedServiceIdentity'; ModuleVersion = '2.0.0' }
+        @{ ModuleName = 'Az.Resources'; ModuleVersion = '6.0.0' }
         @{ ModuleName = 'PSFramework'; ModuleVersion = '1.9.310' }
     )
 
@@ -86,6 +88,7 @@
         'New-SqlElasticJobCredential'
         'New-SqlElasticJobEnvironment'
         'New-SqlElasticJobTargetGroup'
+        'New-SqlElasticJobUserAssignedIdentity'
         'Remove-SqlElasticJob'
         'Remove-SqlElasticJobAgent'
         'Remove-SqlElasticJobCredential'

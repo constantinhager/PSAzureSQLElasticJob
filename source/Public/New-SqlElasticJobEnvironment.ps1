@@ -34,7 +34,8 @@
 
     .PARAMETER ServerAdministratorCredential
         The SQL administrator login for a new logical SQL server. Required only when
-        the server does not yet exist.
+        the server does not yet exist. When omitted in that case, you are prompted
+        interactively for it instead of failing outright.
 
     .PARAMETER ServiceObjectiveName
         The service objective for a new job database. Elastic Jobs requires S0 or
@@ -42,6 +43,31 @@
 
     .PARAMETER ServerVersion
         The version of a new logical SQL server. Defaults to '12.0'.
+
+    .PARAMETER UseUserAssignedManagedIdentity
+        Assigns a user-assigned managed identity to the Elastic Job agent.
+        Requires -UserAssignedIdentityId, or -CreateUserAssignedManagedIdentity
+        with -UserAssignedIdentityName. If the agent already has the identity
+        assigned, nothing changes. The output object's AssignedIdentity property
+        reflects whether the agent currently has the identity - whether this
+        call assigned it or it was already present - and Identity carries the
+        agent's identity details.
+
+    .PARAMETER UserAssignedIdentityId
+        The resource ID of an existing user-assigned managed identity to assign
+        to the Elastic Job agent. Used when the identity already exists; not
+        used together with -CreateUserAssignedManagedIdentity.
+
+    .PARAMETER CreateUserAssignedManagedIdentity
+        Creates the user-assigned managed identity named by
+        -UserAssignedIdentityName when it does not yet exist, using
+        New-SqlElasticJobUserAssignedIdentity, then assigns it to the Elastic Job
+        agent. Requires -UseUserAssignedManagedIdentity, -UserAssignedIdentityName
+        and -Location.
+
+    .PARAMETER UserAssignedIdentityName
+        The name of the user-assigned managed identity to create or reuse.
+        Required when -CreateUserAssignedManagedIdentity is specified.
 
     .PARAMETER EnableException
         Whether a failure raises a terminating exception. Defaults to $true so a
@@ -53,14 +79,30 @@
 
     .EXAMPLE
         $credential = Get-Credential -UserName 'sqladmin'
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope' -ServerAdministratorCredential $credential
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope'
 
         Creates the server, job database and agent. Running it again creates nothing.
 
     .EXAMPLE
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -WhatIf
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -WhatIf -ServerAdministratorCredential $credential
 
         Shows what would be created without changing anything.
+
+    .EXAMPLE
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -UseUserAssignedManagedIdentity -UserAssignedIdentityId '/subscriptions/.../resourceGroups/rg-jobs/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+
+        Creates the environment and assigns the existing user-assigned managed
+        identity to the Elastic Job agent. Running it again assigns nothing
+        further.
+
+    .EXAMPLE
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs'
+
+        Creates the user-assigned managed identity 'id-jobs' if it does not
+        already exist, then assigns it to the Elastic Job agent.
 
     .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
@@ -100,6 +142,24 @@ function New-SqlElasticJobEnvironment {
         [System.Management.Automation.PSCredential]
         $ServerAdministratorCredential,
 
+        [Parameter()]
+        [Switch]
+        $UseUserAssignedManagedIdentity,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $UserAssignedIdentityId,
+
+        [Parameter()]
+        [Switch]
+        $CreateUserAssignedManagedIdentity,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $UserAssignedIdentityName,
+
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -129,9 +189,34 @@ function New-SqlElasticJobEnvironment {
             return
         }
 
+        if ($UseUserAssignedManagedIdentity) {
+            if ($CreateUserAssignedManagedIdentity) {
+                if (-not $PSBoundParameters.ContainsKey('UserAssignedIdentityName')) {
+                    Stop-PSFFunction -Message '-CreateUserAssignedManagedIdentity requires -UserAssignedIdentityName.' -EnableException $EnableException -Category InvalidArgument
+
+                    return
+                }
+
+                if (-not $PSBoundParameters.ContainsKey('Location')) {
+                    Stop-PSFFunction -Message '-CreateUserAssignedManagedIdentity requires -Location.' -EnableException $EnableException -Category InvalidArgument
+
+                    return
+                }
+            } elseif (-not $PSBoundParameters.ContainsKey('UserAssignedIdentityId')) {
+                Stop-PSFFunction -Message '-UseUserAssignedManagedIdentity requires -UserAssignedIdentityId, or -CreateUserAssignedManagedIdentity with -UserAssignedIdentityName.' -EnableException $EnableException -Category InvalidArgument
+
+                return
+            }
+        } elseif ($CreateUserAssignedManagedIdentity) {
+            Stop-PSFFunction -Message '-CreateUserAssignedManagedIdentity requires -UseUserAssignedManagedIdentity.' -EnableException $EnableException -Category InvalidArgument
+
+            return
+        }
+
         $createdServer = $false
         $createdDatabase = $false
         $createdAgent = $false
+        $identityAssignedThisRun = $false
 
         $server = Get-AzResourceIfPresent -ScriptBlock {
             Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName
@@ -145,10 +230,18 @@ function New-SqlElasticJobEnvironment {
             }
 
             if (-not $PSBoundParameters.ContainsKey('ServerAdministratorCredential')) {
-                Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
-                    $ServerName) -EnableException $EnableException -Category InvalidArgument
+                Write-PSFMessage -Level Output -Message ('Logical SQL server ''{0}'' does not exist. Prompting for the SQL administrator credential.' -f $ServerName) -Tag 'server', 'credential'
 
-                return
+                $promptedCredential = Get-Credential -Message ('Enter the SQL administrator credential for new logical SQL server ''{0}''.' -f $ServerName)
+
+                if ($null -eq $promptedCredential) {
+                    Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
+                        $ServerName) -EnableException $EnableException -Category InvalidArgument
+
+                    return
+                }
+
+                $ServerAdministratorCredential = $promptedCredential
             }
 
             if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location))) {
@@ -202,6 +295,30 @@ function New-SqlElasticJobEnvironment {
             Write-PSFMessage -Level Output -Message ('Job database ''{0}'' already exists.' -f $DatabaseName) -Tag 'idempotent'
         }
 
+        if ($UseUserAssignedManagedIdentity -and $CreateUserAssignedManagedIdentity) {
+            try {
+                $identity = New-SqlElasticJobUserAssignedIdentity -ResourceGroupName $ResourceGroupName -Name $UserAssignedIdentityName -Location $Location -EnableException $true -Confirm:$false -ErrorAction Stop
+            } catch {
+                $message = ('Failed to create user-assigned managed identity ''{0}'': {1}' -f $UserAssignedIdentityName, $_.Exception.Message)
+                Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'identity', 'create'
+                Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                return
+            }
+
+            if ($null -ne $identity) {
+                if ([System.String]::IsNullOrEmpty($identity.Id)) {
+                    $message = ('User-assigned managed identity ''{0}'' was not created; Azure returned no resource ID.' -f $UserAssignedIdentityName)
+                    Write-PSFMessage -Level Error -Message $message -Tag 'identity', 'create'
+                    Stop-PSFFunction -Message $message -EnableException $EnableException
+
+                    return
+                }
+
+                $UserAssignedIdentityId = $identity.Id
+            }
+        }
+
         $agent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName
 
         if ($null -eq $agent) {
@@ -209,8 +326,21 @@ function New-SqlElasticJobEnvironment {
                 Write-PSFMessage -Level Output -Message ('Provisioning step 3 of 3: create Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'environment', 'progress'
                 Write-PSFMessage -Level Output -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
+                $newAgentParameters = @{
+                    ResourceGroupName = $ResourceGroupName
+                    ServerName        = $ServerName
+                    DatabaseName      = $DatabaseName
+                    Name              = $AgentName
+                    ErrorAction       = 'Stop'
+                }
+
+                if ($UseUserAssignedManagedIdentity) {
+                    $newAgentParameters['IdentityType'] = 'UserAssigned'
+                    $newAgentParameters['UserAssignedIdentityId'] = @($UserAssignedIdentityId)
+                }
+
                 try {
-                    $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName -ErrorAction Stop
+                    $agent = New-AzSqlElasticJobAgent @newAgentParameters
                 } catch {
                     $message = ('Failed to create Elastic Job agent ''{0}'': {1}' -f $AgentName, $_.Exception.Message)
                     Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'agent', 'create'
@@ -222,13 +352,43 @@ function New-SqlElasticJobEnvironment {
                 Write-PSFMessage -Level Output -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 $createdAgent = $true
+
+                if ($UseUserAssignedManagedIdentity) {
+                    $identityAssignedThisRun = $true
+                }
             }
         } else {
             Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
+
+            if ($UseUserAssignedManagedIdentity) {
+                $hasIdentity = ($null -ne $agent.Identity) -and ($null -ne $agent.Identity.UserAssignedIdentities) -and (@($agent.Identity.UserAssignedIdentities.Keys) -contains $UserAssignedIdentityId)
+
+                if (-not $hasIdentity) {
+                    if ($PSCmdlet.ShouldProcess($AgentName, ("Assign user-assigned managed identity '{0}'" -f $UserAssignedIdentityId))) {
+                        Write-PSFMessage -Level Output -Message ('Assigning user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}''.' -f $UserAssignedIdentityId, $AgentName) -Tag 'agent', 'identity', 'create'
+
+                        try {
+                            $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName -IdentityType 'UserAssigned' -UserAssignedIdentityId @($UserAssignedIdentityId) -ErrorAction Stop
+                        } catch {
+                            $message = ('Failed to assign user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}'': {2}' -f $UserAssignedIdentityId, $AgentName, $_.Exception.Message)
+                            Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'agent', 'identity', 'create'
+                            Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                            return
+                        }
+
+                        Write-PSFMessage -Level Output -Message ('Assigned user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}''.' -f $UserAssignedIdentityId, $AgentName) -Tag 'agent', 'identity', 'create'
+
+                        $identityAssignedThisRun = $true
+                    }
+                } else {
+                    Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already has user-assigned managed identity ''{1}''.' -f $AgentName, $UserAssignedIdentityId) -Tag 'idempotent'
+                }
+            }
         }
 
         if (($null -ne $server) -and ($null -ne $database) -and ($null -ne $agent)) {
-            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent)) {
+            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent) -and (-not $identityAssignedThisRun)) {
                 Write-PSFMessage -Level Output -Message ('Elastic Job environment already exists on server ''{0}'' with database ''{1}'' and agent ''{2}''. No changes were made.' -f $ServerName, $DatabaseName, $AgentName) -Tag 'environment', 'idempotent'
             } else {
                 $createdResources = @()
@@ -243,6 +403,10 @@ function New-SqlElasticJobEnvironment {
 
                 if ($createdAgent) {
                     $createdResources += 'agent'
+                }
+
+                if ($identityAssignedThisRun) {
+                    $createdResources += 'identity'
                 }
 
                 Write-PSFMessage -Level Output -Message ('Elastic Job environment is ready. Created: {0}.' -f ($createdResources -join ', ')) -Tag 'environment', 'create'
@@ -260,6 +424,8 @@ function New-SqlElasticJobEnvironment {
             CreatedServer     = $createdServer
             CreatedDatabase   = $createdDatabase
             CreatedAgent      = $createdAgent
+            AssignedIdentity  = $UseUserAssignedManagedIdentity -and ($null -ne $agent.Identity) -and ($null -ne $agent.Identity.UserAssignedIdentities) -and (@($agent.Identity.UserAssignedIdentities.Keys) -contains $UserAssignedIdentityId)
+            Identity          = if ($UseUserAssignedManagedIdentity) { $agent.Identity } else { $null }
         }
     }
 }
