@@ -75,51 +75,51 @@ Get-SqlElasticJobExecutionOutput -OutputServerName 'sql-jobs' -OutputDatabaseNam
 
 ### Environment
 
-| Command | Description |
-| --- | --- |
-| `New-SqlElasticJobEnvironment` | Idempotently provisions the logical SQL server, job database and Elastic Job agent, optionally assigning or creating a user-assigned managed identity for the agent. |
-| `Test-SqlElasticJobEnvironment` | Reports which parts of an environment exist, without changing anything. |
-| `New-SqlElasticJobUserAssignedIdentity` | Idempotently creates a user-assigned managed identity. |
-| `Grant-SqlElasticJobTargetDatabaseAccess` | Idempotently creates a contained database user for a managed identity on a target database and adds it to a role (`db_owner` by default). |
+| Command                                   | Description                                                                                                                                                          |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `New-SqlElasticJobEnvironment`            | Idempotently provisions the logical SQL server, job database and Elastic Job agent, optionally assigning or creating a user-assigned managed identity for the agent. |
+| `Test-SqlElasticJobEnvironment`           | Reports which parts of an environment exist, without changing anything.                                                                                              |
+| `New-SqlElasticJobUserAssignedIdentity`   | Idempotently creates a user-assigned managed identity.                                                                                                               |
+| `Grant-SqlElasticJobTargetDatabaseAccess` | Idempotently creates a contained database user for a managed identity on a target database and adds it to a role (`db_owner` by default).                            |
 
 ### Agents
 
-| Command | Description |
-| --- | --- |
-| `Get-SqlElasticJobAgent` | Returns an agent, or `$null` when it does not exist. |
-| `New-SqlElasticJobAgent` | Idempotently creates an agent on an existing job database. |
-| `Set-SqlElasticJobAgent` | Updates an agent's tags. |
-| `Remove-SqlElasticJobAgent` | Removes an agent. |
+| Command                     | Description                                                |
+| --------------------------- | ---------------------------------------------------------- |
+| `Get-SqlElasticJobAgent`    | Returns an agent, or `$null` when it does not exist.       |
+| `New-SqlElasticJobAgent`    | Idempotently creates an agent on an existing job database. |
+| `Set-SqlElasticJobAgent`    | Updates an agent's tags.                                   |
+| `Remove-SqlElasticJobAgent` | Removes an agent.                                          |
 
 ### Jobs and steps
 
-| Command | Description |
-| --- | --- |
-| `Get-SqlElasticJob` | Returns a job, or `$null` when it does not exist. |
-| `New-SqlElasticJob` | Idempotently creates a job. Schedules are set via `-RunOnce` or `-IntervalType`/`-IntervalCount`. |
-| `Set-SqlElasticJob` | Updates a job's description or schedule. |
-| `Remove-SqlElasticJob` | Removes a job and its steps. |
-| `Start-SqlElasticJob` | Starts a job on demand, optionally with `-Wait`. |
-| `Stop-SqlElasticJob` | Cancels a running job execution. |
-| `Get-SqlElasticJobStep` | Returns a job step, or `$null` when it does not exist. |
-| `Add-SqlElasticJobStep` | Idempotently adds a step to a job, optionally writing results to an output table (`-OutputDatabaseObject`/`-OutputTableName`). |
-| `Set-SqlElasticJobStep` | Updates an existing step. |
-| `Remove-SqlElasticJobStep` | Removes a step from a job. |
+| Command                            | Description                                                                                                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Get-SqlElasticJob`                | Returns a job, or `$null` when it does not exist.                                                                                                                   |
+| `New-SqlElasticJob`                | Idempotently creates a job. Schedules are set via `-RunOnce` or `-IntervalType`/`-IntervalCount`.                                                                   |
+| `Set-SqlElasticJob`                | Updates a job's description or schedule.                                                                                                                            |
+| `Remove-SqlElasticJob`             | Removes a job and its steps.                                                                                                                                        |
+| `Start-SqlElasticJob`              | Starts a job on demand, optionally with `-Wait`.                                                                                                                    |
+| `Stop-SqlElasticJob`               | Cancels a running job execution.                                                                                                                                    |
+| `Get-SqlElasticJobStep`            | Returns a job step, or `$null` when it does not exist.                                                                                                              |
+| `Add-SqlElasticJobStep`            | Idempotently adds a step to a job, optionally writing results to an output table (`-OutputDatabaseObject`/`-OutputTableName`).                                      |
+| `Set-SqlElasticJobStep`            | Updates an existing step.                                                                                                                                           |
+| `Remove-SqlElasticJobStep`         | Removes a step from a job.                                                                                                                                          |
 | `Get-SqlElasticJobExecutionOutput` | Retrieves the rows a step wrote to its output table for one execution, correlated by an explicit `$(job_execution_id)` column the step's `CommandText` must select. |
 
 ### Credentials, target groups and targets
 
-| Command | Description |
-| --- | --- |
-| `Get-SqlElasticJobCredential` | Returns a job credential, or `$null` when it does not exist. |
-| `New-SqlElasticJobCredential` | Idempotently creates a database-scoped credential job steps use to connect to targets. |
-| `Set-SqlElasticJobCredential` | Rotates a credential's password. |
-| `Remove-SqlElasticJobCredential` | Removes a credential. |
-| `Get-SqlElasticJobTargetGroup` | Returns a target group and its members, or `$null` when it does not exist. |
-| `New-SqlElasticJobTargetGroup` | Idempotently creates an empty target group. |
-| `Remove-SqlElasticJobTargetGroup` | Removes a target group. |
-| `Add-SqlElasticJobTarget` | Adds a database, server, elastic pool or shard map as a target group member. |
-| `Remove-SqlElasticJobTarget` | Removes a target group member. |
+| Command                           | Description                                                                            |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `Get-SqlElasticJobCredential`     | Returns a job credential, or `$null` when it does not exist.                           |
+| `New-SqlElasticJobCredential`     | Idempotently creates a database-scoped credential job steps use to connect to targets. |
+| `Set-SqlElasticJobCredential`     | Rotates a credential's password.                                                       |
+| `Remove-SqlElasticJobCredential`  | Removes a credential.                                                                  |
+| `Get-SqlElasticJobTargetGroup`    | Returns a target group and its members, or `$null` when it does not exist.             |
+| `New-SqlElasticJobTargetGroup`    | Idempotently creates an empty target group.                                            |
+| `Remove-SqlElasticJobTargetGroup` | Removes a target group.                                                                |
+| `Add-SqlElasticJobTarget`         | Adds a database, server, elastic pool or shard map as a target group member.           |
+| `Remove-SqlElasticJobTarget`      | Removes a target group member.                                                         |
 
 ## Authentication
 
@@ -137,4 +137,3 @@ This module is built with [Sampler](https://github.com/dsccommunity/Sampler). To
 ## License
 
 MIT - see [LICENSE](LICENSE).
-
