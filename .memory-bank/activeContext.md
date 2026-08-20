@@ -53,6 +53,27 @@ the same runspace.
 Az.ManagedServiceIdentity 2.0.0 was added as a `RequiredModules` dependency
 (manifest + `RequiredModules.psd1`) to support this.
 
+A live run against a real subscription surfaced two bugs, both now fixed:
+1. A prior edit made `-ServerAdministratorCredential` `[Parameter(Mandatory)]`.
+   Since most calls (idempotent re-runs, identity-only runs) never need it,
+   PowerShell prompted interactively for a credential on every invocation
+   without one - including under Pester, hanging the test run. Reverted to
+   `[Parameter()]`; it stays validated internally (`$PSBoundParameters.ContainsKey`)
+   only when the server does not yet exist.
+2. `New-AzUserAssignedIdentity` (`Az.ManagedServiceIdentity` 2.0.0) reported an
+   ARM error ("subscription not registered for Microsoft.ManagedIdentity") but
+   still returned an object with an empty `.Id`, and the ambient inherited
+   `$ErrorActionPreference = 'Stop'` did not turn that into a terminating
+   error. `New-SqlElasticJobUserAssignedIdentity` now passes `-ErrorAction Stop`
+   directly on that call *and* explicitly checks `[string]::IsNullOrEmpty($identity.Id)`
+   after it returns, failing via `Stop-PSFFunction` either way.
+   `New-SqlElasticJobEnvironment` also re-validates `$identity.Id` before using
+   it, so an empty ID can never reach `New-AzSqlElasticJobAgent`. Lesson: do not
+   trust an inherited `-ErrorAction Stop`/`$ErrorActionPreference` alone for
+   generated Az cmdlets that process responses asynchronously - set it
+   explicitly on the call and validate the returned object's identifying
+   property.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

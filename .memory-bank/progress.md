@@ -65,6 +65,13 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `New-SqlElasticJobEnvironment` so it can create the identity when missing and
   assign it to the Elastic Job agent in one call. Full Sampler suite passed
   with 366 tests.
+- 2026-08-20: Fixed two bugs found during a live Azure run: reverted an
+  accidental `-ServerAdministratorCredential` mandatory-parameter change that
+  caused interactive prompting/test hangs, and hardened
+  `New-SqlElasticJobUserAssignedIdentity` to fail when Azure reports success
+  but returns no resource ID (seen when the `Microsoft.ManagedIdentity`
+  resource provider is not registered). Full Sampler suite passed with 369
+  tests.
 
 ## Stable capabilities
 

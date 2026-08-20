@@ -90,7 +90,27 @@ function New-SqlElasticJobUserAssignedIdentity
 
         Write-PSFMessage -Level Output -Message ('Creating user-assigned managed identity ''{0}'' in ''{1}''.' -f $Name, $Location) -Tag 'identity', 'create'
 
-        $identity = New-AzUserAssignedIdentity -ResourceGroupName $ResourceGroupName -Name $Name -Location $Location
+        try
+        {
+            $identity = New-AzUserAssignedIdentity -ResourceGroupName $ResourceGroupName -Name $Name -Location $Location -ErrorAction Stop
+        }
+        catch
+        {
+            $message = ('Failed to create user-assigned managed identity ''{0}'': {1}' -f $Name, $_.Exception.Message)
+            Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'identity', 'create'
+            Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+            return
+        }
+
+        if ([System.String]::IsNullOrEmpty($identity.Id))
+        {
+            $message = ('User-assigned managed identity ''{0}'' was not created; Azure returned no resource ID. Check that the ''Microsoft.ManagedIdentity'' resource provider is registered on the subscription.' -f $Name)
+            Write-PSFMessage -Level Error -Message $message -Tag 'identity', 'create'
+            Stop-PSFFunction -Message $message -EnableException $EnableException
+
+            return
+        }
 
         Write-PSFMessage -Level Output -Message ('Created user-assigned managed identity ''{0}''.' -f $Name) -Tag 'identity', 'create'
 

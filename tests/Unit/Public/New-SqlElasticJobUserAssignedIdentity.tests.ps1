@@ -68,5 +68,23 @@ Describe 'New-SqlElasticJobUserAssignedIdentity' {
 
             Should -Invoke -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -Times 0 -Exactly
         }
+
+        It 'Should throw when Azure raises a terminating error while creating the identity' {
+            Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
+                throw "The subscription is not registered to use namespace 'Microsoft.ManagedIdentity'."
+            }
+
+            { New-SqlElasticJobUserAssignedIdentity -ResourceGroupName 'rg' -Name 'id-jobs' -Location 'westeurope' -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Microsoft.ManagedIdentity*'
+        }
+
+        It 'Should throw when Azure reports success but returns no resource ID' {
+            Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ Id = ''; Name = 'id-jobs' }
+            }
+
+            { New-SqlElasticJobUserAssignedIdentity -ResourceGroupName 'rg' -Name 'id-jobs' -Location 'westeurope' -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*no resource ID*'
+        }
     }
 }

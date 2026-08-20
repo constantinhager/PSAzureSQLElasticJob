@@ -75,24 +75,27 @@
 
     .EXAMPLE
         $credential = Get-Credential -UserName 'sqladmin'
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope' -ServerAdministratorCredential $credential
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope'
 
         Creates the server, job database and agent. Running it again creates nothing.
 
     .EXAMPLE
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -WhatIf
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -WhatIf -ServerAdministratorCredential $credential
 
         Shows what would be created without changing anything.
 
     .EXAMPLE
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -UseUserAssignedManagedIdentity -UserAssignedIdentityId '/subscriptions/.../resourceGroups/rg-jobs/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -UseUserAssignedManagedIdentity -UserAssignedIdentityId '/subscriptions/.../resourceGroups/rg-jobs/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
 
         Creates the environment and assigns the existing user-assigned managed
         identity to the Elastic Job agent. Running it again assigns nothing
         further.
 
     .EXAMPLE
-        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs'
+        $credential = Get-Credential -UserName 'sqladmin'
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -ServerAdministratorCredential $credential -DatabaseName 'jobdb' -AgentName 'agent01' -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs'
 
         Creates the user-assigned managed identity 'id-jobs' if it does not
         already exist, then assigns it to the Elastic Job agent.
@@ -292,6 +295,14 @@ function New-SqlElasticJobEnvironment {
             }
 
             if ($null -ne $identity) {
+                if ([System.String]::IsNullOrEmpty($identity.Id)) {
+                    $message = ('User-assigned managed identity ''{0}'' was not created; Azure returned no resource ID.' -f $UserAssignedIdentityName)
+                    Write-PSFMessage -Level Error -Message $message -Tag 'identity', 'create'
+                    Stop-PSFFunction -Message $message -EnableException $EnableException
+
+                    return
+                }
+
                 $UserAssignedIdentityId = $identity.Id
             }
         }

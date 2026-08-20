@@ -41,6 +41,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub issue templates under `.github/ISSUE_TEMPLATE/`.
 - MIT license file.
 
+### Fixed
+
+- `-ServerAdministratorCredential` on `New-SqlElasticJobEnvironment` is optional
+  again; it is only required when the logical SQL server does not yet exist,
+  and is validated internally instead of forcing an interactive PowerShell
+  credential prompt on every call.
+- `New-SqlElasticJobUserAssignedIdentity` now forces `-ErrorAction Stop` on the
+  underlying `New-AzUserAssignedIdentity` call and fails when Azure returns no
+  resource ID, instead of reporting success and letting
+  `New-SqlElasticJobEnvironment` assign an empty identity ID to the Elastic Job
+  agent.
+
 ### Changed
 
 - Replace raw Azure not-found errors with a concise status explaining that

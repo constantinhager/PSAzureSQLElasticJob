@@ -330,6 +330,17 @@ Describe 'New-SqlElasticJobEnvironment' {
 
             Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
         }
+
+        It 'Should stop without creating the agent when Azure returns no resource ID for the identity' {
+            Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ Id = ''; Name = 'id-jobs' }
+            }
+
+            { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -UseUserAssignedManagedIdentity -CreateUserAssignedManagedIdentity -UserAssignedIdentityName 'id-jobs' -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*no resource ID*'
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
     }
 
     Context 'When server creation fails' {
