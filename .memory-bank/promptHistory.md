@@ -26,6 +26,7 @@ Trim entries older than 90 days.
 2026-08-20 11:01 UTC | default | Renamed Grant-SqlElasticJobTargetDatabaseAccess's ServerName/DatabaseName to TargetServerName/TargetDatabaseName for naming consistency
 2026-08-20 11:12 UTC | default | Fixed Grant-SqlElasticJobTargetDatabaseAccess double-confirm/double-output bug; consolidated to one ShouldProcess and one summary object
 2026-08-20 13:53 UTC | default | Fixed Add-SqlElasticJobStep double context message and swallowed Az error; flagged same pattern in ~14 other CRUD commands as open work
+2026-08-20 14:21 UTC | default | Added Azure's WithOutputDb parameter set to Add-SqlElasticJobStep (OutputDatabaseObject/OutputTableName/OutputCredentialName/OutputSchemaName)
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.

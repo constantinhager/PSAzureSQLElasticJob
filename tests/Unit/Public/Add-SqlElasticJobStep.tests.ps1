@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -100,6 +100,32 @@ Describe 'Add-SqlElasticJobStep' {
             }
 
             { Add-SqlElasticJobStep @script:stepParameters } | Should -Throw -ExpectedMessage '*was not found*'
+        }
+    }
+
+    Context 'When writing step output to a database' {
+        BeforeAll {
+            Mock -CommandName Get-AzSqlElasticJobStep -ModuleName $script:moduleName -MockWith {
+                throw 'The requested resource could not be found.'
+            }
+
+            $script:outputDatabaseObject = [Microsoft.Azure.Commands.Sql.Database.Model.AzureSqlDatabaseModel]::new()
+        }
+
+        It 'Should pass the output database, table, credential and schema through to Azure' {
+            $null = Add-SqlElasticJobStep @script:stepParameters -OutputDatabaseObject $script:outputDatabaseObject -OutputTableName 'OrderCounts' -OutputCredentialName 'outputcred' -OutputSchemaName 'reporting'
+
+            Should -Invoke -CommandName Add-AzSqlElasticJobStep -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $OutputDatabaseObject -eq $script:outputDatabaseObject -and $OutputTableName -eq 'OrderCounts' -and $OutputCredentialName -eq 'outputcred' -and $OutputSchemaName -eq 'reporting'
+            }
+        }
+
+        It 'Should omit the optional output credential and schema when not supplied' {
+            $null = Add-SqlElasticJobStep @script:stepParameters -OutputDatabaseObject $script:outputDatabaseObject -OutputTableName 'OrderCounts'
+
+            Should -Invoke -CommandName Add-AzSqlElasticJobStep -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $null -eq $OutputCredentialName -and $null -eq $OutputSchemaName
+            }
         }
     }
 }

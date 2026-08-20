@@ -208,6 +208,20 @@ deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and
 changelog tasks.
 
+`Add-SqlElasticJobStep` now supports `Add-AzSqlElasticJobStep`'s `WithOutputDb`
+parameter set: `-OutputDatabaseObject` (a live `AzureSqlDatabaseModel`, e.g.
+from `Get-AzSqlDatabase` - mandatory, `ParameterSetName = 'WithOutputDb'`),
+`-OutputTableName` (mandatory in that set), `-OutputCredentialName` and
+`-OutputSchemaName` (both optional). Azure's own parameter names are reused
+as-is (unlike the `Target*` rename elsewhere), so they forward through
+`Add-OptionalParameter` unchanged. `CmdletBinding` gained
+`DefaultParameterSetName = 'Default'`; all pre-existing parameters stay
+common to both sets (no `ParameterSetName` on them), which is why none needed
+touching. Azure also exposes `WithOutputDbId` (`-OutputDatabaseResourceId`
+instead of a live object) and parent-object/parent-resource-ID variants
+(`ObjectSet`, `ResourceIdSet`, etc.) - only `WithOutputDb` was requested and
+added; those others remain unimplemented if ever needed.
+
 A live run of `Add-SqlElasticJobStep` against a job that did not exist yet
 surfaced the same two bugs as `New-SqlElasticJobUserAssignedIdentity` earlier:
 it logged "Using Azure context" twice (it called the public

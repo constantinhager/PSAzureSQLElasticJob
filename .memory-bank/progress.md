@@ -109,6 +109,11 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   did not exist. Fixed both; an audit found the same two-bug pattern latent in
   ~14 other CRUD commands, not yet fixed (see Open work). Full Sampler suite
   passed with 407 tests.
+- 2026-08-20: Added Azure's `WithOutputDb` parameter set to
+  `Add-SqlElasticJobStep` (`-OutputDatabaseObject`, `-OutputTableName`,
+  `-OutputCredentialName`, `-OutputSchemaName`) so a step can write its query
+  results into an output database table. Full Sampler suite passed with 409
+  tests.
 
 ## Stable capabilities
 

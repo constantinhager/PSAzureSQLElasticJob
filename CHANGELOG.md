@@ -40,7 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Schedules are set through the job itself with `-RunOnce` or
   `-IntervalType`/`-IntervalCount`, matching the Elastic Jobs object model.
 - Job step CRUD: `Get-SqlElasticJobStep`, `Add-SqlElasticJobStep`,
-  `Set-SqlElasticJobStep` and `Remove-SqlElasticJobStep`.
+  `Set-SqlElasticJobStep` and `Remove-SqlElasticJobStep`. `Add-SqlElasticJobStep`
+  supports Azure's `WithOutputDb` parameter set (`-OutputDatabaseObject`,
+  `-OutputTableName`, `-OutputCredentialName`, `-OutputSchemaName`) to write a
+  step's query results into an output database table.
 - Job credential CRUD: `Get-SqlElasticJobCredential`,
   `New-SqlElasticJobCredential`, `Set-SqlElasticJobCredential` and
   `Remove-SqlElasticJobCredential`.
