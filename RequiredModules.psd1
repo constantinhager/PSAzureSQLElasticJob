@@ -24,6 +24,7 @@
     'Az.Sql'              = 'latest'
     'Az.ManagedServiceIdentity' = 'latest'
     'Az.Resources'        = 'latest'
+    dbatools              = 'latest'
     PSFramework           = 'latest'
 
 

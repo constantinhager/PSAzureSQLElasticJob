@@ -90,6 +90,12 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `-ElasticPoolName`/`-ShardMapName` to `-TargetDatabaseName`/
   `-TargetElasticPoolName`/`-TargetShardMapName` for consistency with
   `-TargetServerName`. Full Sampler suite passed with 380 tests.
+- 2026-08-20: Added `Grant-SqlElasticJobTargetDatabaseAccess`, the first
+  command to touch the SQL data plane: creates a contained database user for a
+  managed identity on a target Azure SQL Database and adds it to a database
+  role (default `db_owner`), authenticating via an Azure AD token from the
+  caller's Az context and the new `dbatools` dependency. Full Sampler suite
+  passed with 404 tests.
 
 ## Stable capabilities
 

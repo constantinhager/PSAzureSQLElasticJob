@@ -123,6 +123,52 @@ etc.) instead, while `Add-OptionalParameter` still handles
 kept its name since it names a credential, not a target. No back-compat alias
 was added; the module is still unreleased/preview.
 
+The user separately standardized brace style to OTBS (opening brace on the
+same line as `function`/`process`/`if`) across `Add-`/`Remove-SqlElasticJobTarget`;
+follow that style (already the majority style elsewhere, e.g.
+`New-SqlElasticJobEnvironment.ps1`) for new code.
+
+Added `Grant-SqlElasticJobTargetDatabaseAccess`, the module's first command
+that touches the SQL *data plane* (T-SQL) rather than only the ARM control
+plane. It creates a contained database user for a managed identity directly
+in the target database (`CREATE USER [name] FROM EXTERNAL PROVIDER;` - no
+separate server-level login needed for Azure SQL Database, unlike SQL
+Managed Instance) and adds it to a database role (`-RoleName`, default
+`db_owner`). Design decisions (confirmed with the user):
+- Connects via an Azure AD access token from `Get-AzAccessToken -ResourceUrl 'https://database.windows.net/'`
+  (reusing the caller's signed-in Az context, no separate SQL credential),
+  passed straight through to `dbatools`' `Connect-DbaInstance -AccessToken`
+  (dbatools accepts the `Get-AzAccessToken` output object directly).
+- `dbatools` was added as a new `RequiredModules` dependency (2.8.4 installed
+  locally; manifest pins >= 2.1.0) specifically for `Connect-DbaInstance`/
+  `Invoke-DbaQuery`/`Disconnect-DbaInstance`. It is a large module but was the
+  user's explicit choice over raw `Microsoft.Data.SqlClient` or the `SqlServer`
+  module.
+- `-ServerName` accepts a short name (FQDN `.database.windows.net` appended
+  automatically unless the input already contains a `.`).
+- `IdentityName`/`RoleName` go directly into interpolated T-SQL (CREATE
+  USER/ALTER ROLE cannot parameterize identifiers), so both are constrained by
+  `[ValidatePattern('^[A-Za-z0-9][A-Za-z0-9_\-]{0,127}$')]` as a first defense
+  layer, and additionally passed through the new private helper
+  `Format-SqlBracketedIdentifier` (doubles `]` and wraps in brackets) as a
+  second, independent layer before being embedded in T-SQL - defense in depth
+  per the module's security-review conventions. Values embedded in `SELECT`
+  lookups are also single-quote-escaped even though the pattern already blocks
+  quotes.
+- Idempotent like the rest of the module: looks up `sys.database_principals`/
+  `sys.database_role_members` first and only runs `CREATE USER`/`ALTER ROLE`
+  when missing.
+- The SQL connection is always disconnected via `Disconnect-DbaInstance` in a
+  `finally` block, even on failure.
+- Pester note: dbatools' `-SqlInstance`/`-AccessToken`/etc. parameters use
+  custom argument-transforming types (e.g. `DbaInstanceParameter`), so a mock
+  for `Connect-DbaInstance` must return something that itself coerces to that
+  type (a plain string works) - returning an arbitrary `PSCustomObject` fails
+  argument transformation *before* the mock body even runs, since Pester
+  proxies still enforce the real parameter type. Also, `DbaInstanceParameter`
+  has no `-eq` string equality - compare via `"$SqlInstance" -eq '...'` in a
+  `-ParameterFilter`, not `$SqlInstance -eq '...'`.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and
