@@ -222,6 +222,29 @@ instead of a live object) and parent-object/parent-resource-ID variants
 (`ObjectSet`, `ResourceIdSet`, etc.) - only `WithOutputDb` was requested and
 added; those others remain unimplemented if ever needed.
 
+Added `Get-SqlElasticJobExecutionOutput`: retrieves the rows a job step's
+output table (from `Add-SqlElasticJobStep -OutputDatabaseObject`) holds for
+one execution. Same dbatools/Azure AD access token connection pattern as
+`Grant-SqlElasticJobTargetDatabaseAccess` (`Connect-DbaInstance`/
+`Invoke-DbaQuery`/`Disconnect-DbaInstance` in a `finally`), plus the same
+`Format-SqlBracketedIdentifier` defense for the schema/table/column names,
+which cannot be parameterized. The execution-ID *value* itself, unlike
+identifiers, genuinely can be parameterized, so it's passed via
+`Invoke-DbaQuery -SqlParameter @{ ExecutionId = $JobExecutionId }` rather than
+string interpolation. Per Microsoft's Elastic Jobs docs
+(`elastic-jobs-tsql-create-manage`), the output table - whether auto-created
+by the job step or pre-created manually - carries an `internal_execution_id`
+(`uniqueidentifier`) column that is the only reliable join key back to a
+specific run; that's the column `Start-SqlElasticJob`'s `JobExecutionId`
+return value correlates against. Defaulted to that column name via
+`-ExecutionIdColumnName`, overridable in case a manually pre-created table
+used a different name.
+Pester note: `Invoke-DbaQuery`'s `-SqlParameter` is typed `[PSObject[]]`, not
+`[Hashtable]`, so passing a hashtable literal gets wrapped in a one-element
+array; access it in a mock `-ParameterFilter` as `$SqlParameter[0]['Key']`,
+not `$SqlParameter['Key']` (the latter silently fails to match, since arrays
+don't support string indexers).
+
 A live run of `Add-SqlElasticJobStep` against a job that did not exist yet
 surfaced the same two bugs as `New-SqlElasticJobUserAssignedIdentity` earlier:
 it logged "Using Azure context" twice (it called the public

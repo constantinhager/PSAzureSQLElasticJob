@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `-TargetServerName`/`-TargetDatabaseName` parameters match the naming used by
   `Add-`/`Remove-SqlElasticJobTarget`. Both steps are confirmed once as a
   single grant operation and return exactly one summary object.
+- `Get-SqlElasticJobExecutionOutput` to retrieve the rows a job step wrote to
+  its output table for one execution, correlated by the `JobExecutionId`
+  `Start-SqlElasticJob` returns. Uses the same `dbatools`/Azure AD access token
+  connection as `Grant-SqlElasticJobTargetDatabaseAccess`.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`

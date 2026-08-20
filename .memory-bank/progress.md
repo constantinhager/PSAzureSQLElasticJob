@@ -114,6 +114,12 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   `-OutputCredentialName`, `-OutputSchemaName`) so a step can write its query
   results into an output database table. Full Sampler suite passed with 409
   tests.
+- 2026-08-20: Added `Get-SqlElasticJobExecutionOutput` to retrieve a job
+  step's output-table rows for a specific execution, correlated via the
+  table's `internal_execution_id` column against `Start-SqlElasticJob`'s
+  `JobExecutionId`. Same dbatools/Azure AD token connection pattern as
+  `Grant-SqlElasticJobTargetDatabaseAccess`. Full Sampler suite passed with
+  423 tests.
 
 ## Stable capabilities
 

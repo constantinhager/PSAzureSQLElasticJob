@@ -82,6 +82,7 @@
         'Get-SqlElasticJob'
         'Get-SqlElasticJobAgent'
         'Get-SqlElasticJobCredential'
+        'Get-SqlElasticJobExecutionOutput'
         'Get-SqlElasticJobStep'
         'Get-SqlElasticJobTargetGroup'
         'Grant-SqlElasticJobTargetDatabaseAccess'
