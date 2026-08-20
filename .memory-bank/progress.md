@@ -267,6 +267,16 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   Kept the `ExternalModuleDependencies` entry too since it's still correct
   guidance for the real PSGallery publish step. Full Sampler suite (regular
   `build`+`test`) still passed with 443 tests.
+- 2026-08-20: PR #7 merged to `main` (tagged `v0.2.0-preview0006`), so all
+  the work above (Get-SqlElasticJobExecutionOutput, the CRUD audit fix, the
+  README, the Format.ps1xml views, tab completion, and the dbatools.library
+  packaging fix) is now on `main`. Started a new branch
+  `feature/add-module-icon` for the user's `assets/PSAzureSQLElasticJob.svg`
+  icon: referenced from the manifest's `IconUri` and shown at the top of
+  `README.md`. The QA suite's "Changelog has been updated" test (compares
+  changed files against a base ref) requires a `CHANGELOG.md` entry for
+  every change, including asset-only ones - forgot it once and had to add
+  it retroactively. Full Sampler suite passed with 443 tests.
 
 ## Stable capabilities
 
