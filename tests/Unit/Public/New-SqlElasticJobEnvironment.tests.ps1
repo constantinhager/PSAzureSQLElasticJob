@@ -38,6 +38,10 @@ Describe 'New-SqlElasticJobEnvironment' {
             'sqladmin',
             (ConvertTo-SecureString -String 'not-a-real-password' -AsPlainText -Force))
 
+        Mock -CommandName Get-Credential -ModuleName $script:moduleName -MockWith {
+            $script:credential
+        }
+
         $script:baseParameters = @{
             ResourceGroupName = 'rg'
             ServerName        = 'srv'
@@ -90,7 +94,16 @@ Describe 'New-SqlElasticJobEnvironment' {
             Should -Throw -ExpectedMessage '*-Location*'
         }
 
-        It 'Should refuse to create a server without an administrator credential' {
+        It 'Should prompt for the administrator credential when it is not supplied' {
+            $null = New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -Confirm:$false
+
+            Should -Invoke -CommandName Get-Credential -ModuleName $script:moduleName -Times 1 -Exactly
+            Should -Invoke -CommandName New-AzSqlServer -ModuleName $script:moduleName -Times 1 -Exactly
+        }
+
+        It 'Should refuse to create a server when the administrator credential prompt is cancelled' {
+            Mock -CommandName Get-Credential -ModuleName $script:moduleName -MockWith { $null }
+
             { New-SqlElasticJobEnvironment @script:baseParameters -Location 'westeurope' -Confirm:$false } |
             Should -Throw -ExpectedMessage '*-ServerAdministratorCredential*'
         }
@@ -290,6 +303,12 @@ Describe 'New-SqlElasticJobEnvironment' {
             Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
                 [PSCustomObject]@{ Id = $script:identityId; Name = 'id-jobs' }
             }
+
+            Mock -CommandName Get-AzResourceProvider -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ProviderNamespace = 'Microsoft.ManagedIdentity'; RegistrationState = 'Registered' }
+            }
+
+            Mock -CommandName Register-AzResourceProvider -ModuleName $script:moduleName -MockWith { }
         }
 
         It 'Should require -UserAssignedIdentityName' {

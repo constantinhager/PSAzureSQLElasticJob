@@ -8,6 +8,11 @@
         in that resource group it is returned unchanged instead of causing an
         error.
 
+        Registers the 'Microsoft.ManagedIdentity' resource provider on the
+        subscription first when it is not already registered, since an
+        unregistered provider otherwise fails identity creation with an obscure
+        ARM error.
+
         Use New-SqlElasticJobEnvironment with -UseUserAssignedManagedIdentity and
         -CreateUserAssignedManagedIdentity to create the identity and assign it to
         an Elastic Job agent in one call, or call this command on its own to
@@ -92,6 +97,8 @@ function New-SqlElasticJobUserAssignedIdentity
 
         try
         {
+            Assert-AzResourceProviderRegistered -ProviderNamespace 'Microsoft.ManagedIdentity'
+
             $identity = New-AzUserAssignedIdentity -ResourceGroupName $ResourceGroupName -Name $Name -Location $Location -ErrorAction Stop
         }
         catch

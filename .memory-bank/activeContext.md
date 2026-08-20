@@ -74,6 +74,25 @@ A live run against a real subscription surfaced two bugs, both now fixed:
    explicitly on the call and validate the returned object's identifying
    property.
 
+Follow-up UX/reliability round based on that same live run:
+- The user wants to be *prompted* for `-ServerAdministratorCredential` when it
+  is forgotten, not just get a clear error (better than the earlier mandatory
+  parameter, which prompted unconditionally and broke automation/tests). Fixed
+  by calling `Get-Credential` only inside the "server missing" branch, storing
+  the result in a plain local variable first and only assigning it to the
+  `[ValidateNotNull()]` parameter variable when non-null - assigning `$null`
+  directly to a validated parameter variable throws PowerShell's own generic
+  "cannot be validated" error instead of the intended message, since
+  `Validate*` attributes are enforced on every assignment to that variable,
+  not just initial parameter binding.
+- `New-SqlElasticJobUserAssignedIdentity` now calls a new private helper,
+  `Assert-AzResourceProviderRegistered -ProviderNamespace 'Microsoft.ManagedIdentity'`,
+  before creating the identity. It checks `Get-AzResourceProvider`'s
+  `RegistrationState`, calls `Register-AzResourceProvider` and polls (default
+  300s timeout / 10s interval, both mockable via parameters) until
+  `Registered`, throwing directly (private-helper convention) otherwise. Added
+  `Az.Resources` as a `RequiredModules` dependency for `Get-`/`Register-AzResourceProvider`.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

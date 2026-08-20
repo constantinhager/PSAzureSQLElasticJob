@@ -34,7 +34,8 @@
 
     .PARAMETER ServerAdministratorCredential
         The SQL administrator login for a new logical SQL server. Required only when
-        the server does not yet exist.
+        the server does not yet exist. When omitted in that case, you are prompted
+        interactively for it instead of failing outright.
 
     .PARAMETER ServiceObjectiveName
         The service objective for a new job database. Elastic Jobs requires S0 or
@@ -226,10 +227,18 @@ function New-SqlElasticJobEnvironment {
             }
 
             if (-not $PSBoundParameters.ContainsKey('ServerAdministratorCredential')) {
-                Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
-                    $ServerName) -EnableException $EnableException -Category InvalidArgument
+                Write-PSFMessage -Level Output -Message ('Logical SQL server ''{0}'' does not exist. Prompting for the SQL administrator credential.' -f $ServerName) -Tag 'server', 'credential'
 
-                return
+                $promptedCredential = Get-Credential -Message ('Enter the SQL administrator credential for new logical SQL server ''{0}''.' -f $ServerName)
+
+                if ($null -eq $promptedCredential) {
+                    Stop-PSFFunction -Message ('Logical SQL server ''{0}'' does not exist and no -ServerAdministratorCredential was supplied.' -f
+                        $ServerName) -EnableException $EnableException -Category InvalidArgument
+
+                    return
+                }
+
+                $ServerAdministratorCredential = $promptedCredential
             }
 
             if ($PSCmdlet.ShouldProcess($ServerName, ("Create logical SQL server in '{0}'" -f $Location))) {

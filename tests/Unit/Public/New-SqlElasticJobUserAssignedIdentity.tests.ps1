@@ -21,6 +21,12 @@ Describe 'New-SqlElasticJobUserAssignedIdentity' {
         Mock -CommandName New-AzUserAssignedIdentity -ModuleName $script:moduleName -MockWith {
             [PSCustomObject]@{ Id = '/subscriptions/sub-1/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'; Name = 'id-jobs' }
         }
+
+        Mock -CommandName Get-AzResourceProvider -ModuleName $script:moduleName -MockWith {
+            [PSCustomObject]@{ ProviderNamespace = 'Microsoft.ManagedIdentity'; RegistrationState = 'Registered' }
+        }
+
+        Mock -CommandName Register-AzResourceProvider -ModuleName $script:moduleName -MockWith { }
     }
 
     Context 'When the identity already exists' {
@@ -85,6 +91,28 @@ Describe 'New-SqlElasticJobUserAssignedIdentity' {
 
             { New-SqlElasticJobUserAssignedIdentity -ResourceGroupName 'rg' -Name 'id-jobs' -Location 'westeurope' -Confirm:$false } |
             Should -Throw -ExpectedMessage '*no resource ID*'
+        }
+
+        It 'Should register the Microsoft.ManagedIdentity resource provider when it is not registered' {
+            $script:providerCallCount = 0
+
+            Mock -CommandName Get-AzResourceProvider -ModuleName $script:moduleName -MockWith {
+                $script:providerCallCount++
+
+                if ($script:providerCallCount -lt 2) {
+                    [PSCustomObject]@{ ProviderNamespace = 'Microsoft.ManagedIdentity'; RegistrationState = 'NotRegistered' }
+                } else {
+                    [PSCustomObject]@{ ProviderNamespace = 'Microsoft.ManagedIdentity'; RegistrationState = 'Registered' }
+                }
+            }
+
+            Mock -CommandName Start-Sleep -ModuleName $script:moduleName -MockWith { }
+
+            $null = New-SqlElasticJobUserAssignedIdentity -ResourceGroupName 'rg' -Name 'id-jobs' -Location 'westeurope' -Confirm:$false
+
+            Should -Invoke -CommandName Register-AzResourceProvider -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $ProviderNamespace -eq 'Microsoft.ManagedIdentity'
+            }
         }
     }
 }

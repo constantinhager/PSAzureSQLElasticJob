@@ -72,6 +72,12 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   but returns no resource ID (seen when the `Microsoft.ManagedIdentity`
   resource provider is not registered). Full Sampler suite passed with 369
   tests.
+- 2026-08-20: Made `-ServerAdministratorCredential` prompt interactively via
+  `Get-Credential` when omitted and the server doesn't exist yet (rather than
+  erroring), and added automatic `Microsoft.ManagedIdentity` resource-provider
+  registration (new private `Assert-AzResourceProviderRegistered` helper, new
+  `Az.Resources` dependency) to `New-SqlElasticJobUserAssignedIdentity`. Full
+  Sampler suite passed with 380 tests.
 
 ## Stable capabilities
 

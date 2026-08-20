@@ -19,7 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   managed identity, and a `-CreateUserAssignedManagedIdentity` (with
   `-UserAssignedIdentityName`) parameter set on `New-SqlElasticJobEnvironment`
   that creates the identity when missing and assigns it to the Elastic Job
-  agent in one call.
+  agent in one call. `New-SqlElasticJobUserAssignedIdentity` registers the
+  `Microsoft.ManagedIdentity` resource provider automatically when it is not
+  already registered on the subscription.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`
@@ -44,9 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `-ServerAdministratorCredential` on `New-SqlElasticJobEnvironment` is optional
-  again; it is only required when the logical SQL server does not yet exist,
-  and is validated internally instead of forcing an interactive PowerShell
-  credential prompt on every call.
+  again; it is only required when the logical SQL server does not yet exist.
+  When omitted in that case, you are now prompted interactively for it instead
+  of failing outright or being forced to always supply it.
 - `New-SqlElasticJobUserAssignedIdentity` now forces `-ErrorAction Stop` on the
   underlying `New-AzUserAssignedIdentity` call and fails when Azure returns no
   resource ID, instead of reporting success and letting
