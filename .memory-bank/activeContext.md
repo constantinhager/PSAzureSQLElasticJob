@@ -166,6 +166,34 @@ Managed Instance) and adds it to a database role (`-RoleName`, default
   when missing.
 - The SQL connection is always disconnected via `Disconnect-DbaInstance` in a
   `finally` block, even on failure.
+
+Follow-up fix after a live run: the user reported two confirmation prompts
+and two pipeline outputs for one call, plus asked to double check idempotency.
+1. **Double output**: `Disconnect-DbaInstance -InputObject $sqlConnection -ErrorAction SilentlyContinue`
+   was called unassigned in the `finally` block. Any uncaptured cmdlet output
+   inside a function - including in `finally` - flows to the function's own
+   output stream, so its return value became a second emitted object after
+   the summary `PSCustomObject`. Fixed with `$null = Disconnect-DbaInstance ...`.
+2. **Two confirmations**: the user creation and role-membership steps each had
+   their own `$PSCmdlet.ShouldProcess()` call. Consolidated into a single
+   `ShouldProcess` covering "Grant database access: <verb list>" for the whole
+   operation (both steps still individually skip work that's already done),
+   matching the "one summary object, one confirm" feel of
+   `New-SqlElasticJobEnvironment`.
+3. **Idempotency check gotcha** (introduced and then reverted in the same
+   pass): tried to "harden" `$null -eq $existingUser`/`$existingMembership`
+   checks to `@($existingUser).Count -gt 0`, intending to also treat an empty
+   array as "absent". This actually broke detection: **`@($null).Count` is
+   `1`, not `0`** - wrapping a variable that holds a literal `$null` in `@()`
+   produces a one-element array *containing* `$null`, it does not produce an
+   empty array. `dbatools`' `Invoke-DbaQuery` returning zero rows is captured
+   as a real `$null` (zero pipeline objects collapses to `$null` on
+   assignment), so the correct, simpler check is `$null -eq $existingUser` -
+   reverted to that. Lesson: `@($x).Count -eq 0` is only a safe "is this
+   empty" test when `$x` might itself be a *populated* array/collection you
+   want to size-check: do not use it as a blanket replacement for `$null -eq`
+   / `$null -ne` on a variable that a command assignment may leave as literal
+   `$null`.
 - Pester note: dbatools' `-SqlInstance`/`-AccessToken`/etc. parameters use
   custom argument-transforming types (e.g. `DbaInstanceParameter`), so a mock
   for `Connect-DbaInstance` must return something that itself coerces to that

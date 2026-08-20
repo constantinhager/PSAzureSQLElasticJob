@@ -29,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   role, `db_owner` by default. Connects using an Azure AD access token from the
   caller's signed-in Az context via the new `dbatools` dependency. Its
   `-TargetServerName`/`-TargetDatabaseName` parameters match the naming used by
-  `Add-`/`Remove-SqlElasticJobTarget`.
+  `Add-`/`Remove-SqlElasticJobTarget`. Both steps are confirmed once as a
+  single grant operation and return exactly one summary object.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`

@@ -4,8 +4,8 @@ BeforeAll {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop
 }
 
 AfterAll {
@@ -75,7 +75,7 @@ Describe 'Grant-SqlElasticJobTargetDatabaseAccess' {
         }
 
         It 'Should reject an identity name that is not a safe SQL identifier' {
-            { Grant-SqlElasticJobTargetDatabaseAccess -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -IdentityName "id]; DROP TABLE Users; --" -Confirm:$false } |
+            { Grant-SqlElasticJobTargetDatabaseAccess -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -IdentityName 'id]; DROP TABLE Users; --' -Confirm:$false } |
             Should -Throw
 
             Should -Invoke -CommandName Connect-DbaInstance -ModuleName $script:moduleName -Times 0 -Exactly
@@ -85,6 +85,12 @@ Describe 'Grant-SqlElasticJobTargetDatabaseAccess' {
             $null = Grant-SqlElasticJobTargetDatabaseAccess @script:baseParameters -Confirm:$false
 
             Should -Invoke -CommandName Disconnect-DbaInstance -ModuleName $script:moduleName -Times 1 -Exactly
+        }
+
+        It 'Should emit exactly one output object' {
+            $result = Grant-SqlElasticJobTargetDatabaseAccess @script:baseParameters -Confirm:$false
+
+            @($result).Count | Should -Be 1
         }
 
         It 'Should create nothing when -WhatIf is used' {
@@ -112,6 +118,12 @@ Describe 'Grant-SqlElasticJobTargetDatabaseAccess' {
             Should -Invoke -CommandName Invoke-DbaQuery -ModuleName $script:moduleName -Times 0 -Exactly -ParameterFilter {
                 $Query -like 'CREATE USER*' -or $Query -like 'ALTER ROLE*'
             }
+        }
+
+        It 'Should emit exactly one output object and not prompt for confirmation' {
+            $result = Grant-SqlElasticJobTargetDatabaseAccess @script:baseParameters
+
+            @($result).Count | Should -Be 1
         }
     }
 

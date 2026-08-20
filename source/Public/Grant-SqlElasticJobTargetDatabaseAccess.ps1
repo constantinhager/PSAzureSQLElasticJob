@@ -14,7 +14,9 @@
         classic SQL authentication).
 
         The command is idempotent: an existing user or existing role membership
-        is left as it is and reported as already present.
+        is left as it is and reported as already present. Both steps are
+        confirmed once as a single grant operation, and one summary object is
+        returned describing what was created.
 
         Connects using an Azure AD access token obtained from the caller's
         signed-in Az context, so no separate SQL credential is needed.
@@ -125,31 +127,11 @@ function Grant-SqlElasticJobTargetDatabaseAccess {
                 return
             }
 
-            if ($null -eq $existingUser) {
-                if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $TargetDatabaseName, $IdentityName), 'Create contained database user for managed identity')) {
-                    Write-PSFMessage -Level Output -Message ('Creating database user ''{0}'' in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
+            $userExists = $null -ne $existingUser
 
-                    try {
-                        $null = Invoke-DbaQuery -SqlInstance $sqlConnection -Database $TargetDatabaseName -Query ('CREATE USER {0} FROM EXTERNAL PROVIDER;' -f $bracketedIdentityName) -EnableException
-                    } catch {
-                        $message = ('Failed to create database user ''{0}'' in ''{1}''/''{2}'': {3}' -f $IdentityName, $TargetServerName, $TargetDatabaseName, $_.Exception.Message)
-                        Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'target', 'identity'
-                        Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
-
-                        return
-                    }
-
-                    Write-PSFMessage -Level Output -Message ('Created database user ''{0}'' in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
-
-                    $userCreated = $true
-                }
-            } else {
-                Write-PSFMessage -Level Output -Message ('Database user ''{0}'' already exists in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'idempotent'
-            }
-
-            $membershipQuery = "SELECT 1 FROM sys.database_role_members drm " +
-            "JOIN sys.database_principals r ON r.principal_id = drm.role_principal_id " +
-            "JOIN sys.database_principals m ON m.principal_id = drm.member_principal_id " +
+            $membershipQuery = 'SELECT 1 FROM sys.database_role_members drm ' +
+            'JOIN sys.database_principals r ON r.principal_id = drm.role_principal_id ' +
+            'JOIN sys.database_principals m ON m.principal_id = drm.member_principal_id ' +
             ("WHERE r.name = N'{0}' AND m.name = N'{1}';" -f $escapedRoleName, $escapedIdentityName)
 
             try {
@@ -162,26 +144,74 @@ function Grant-SqlElasticJobTargetDatabaseAccess {
                 return
             }
 
-            if ($null -eq $existingMembership) {
-                if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $TargetDatabaseName, $IdentityName), ("Add to database role '{0}'" -f $RoleName))) {
-                    Write-PSFMessage -Level Output -Message ('Adding database user ''{0}'' to role ''{1}'' in ''{2}''/''{3}''.' -f $IdentityName, $RoleName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
+            $roleMembershipExists = $null -ne $existingMembership
 
-                    try {
-                        $null = Invoke-DbaQuery -SqlInstance $sqlConnection -Database $TargetDatabaseName -Query ('ALTER ROLE {0} ADD MEMBER {1};' -f $bracketedRoleName, $bracketedIdentityName) -EnableException
-                    } catch {
-                        $message = ('Failed to add database user ''{0}'' to role ''{1}'' in ''{2}''/''{3}'': {4}' -f $IdentityName, $RoleName, $TargetServerName, $TargetDatabaseName, $_.Exception.Message)
-                        Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'target', 'identity'
-                        Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+            if ($userExists -and $roleMembershipExists) {
+                Write-PSFMessage -Level Output -Message ('Database user ''{0}'' already has access to ''{1}''/''{2}'' as a member of ''{3}''. No changes were made.' -f $IdentityName, $TargetServerName, $TargetDatabaseName, $RoleName) -Tag 'idempotent'
+            } else {
+                $actions = @()
 
-                        return
+                if (-not $userExists) {
+                    $actions += ('create database user ''{0}''' -f $IdentityName)
+                }
+
+                if (-not $roleMembershipExists) {
+                    $actions += ('add it to role ''{0}''' -f $RoleName)
+                }
+
+                if ($PSCmdlet.ShouldProcess(('{0}/{1}' -f $TargetDatabaseName, $IdentityName), ('Grant database access: {0}' -f ($actions -join ' and ')))) {
+                    if ($userExists) {
+                        Write-PSFMessage -Level Output -Message ('Database user ''{0}'' already exists in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'idempotent'
+                    } else {
+                        Write-PSFMessage -Level Output -Message ('Creating database user ''{0}'' in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
+
+                        try {
+                            $null = Invoke-DbaQuery -SqlInstance $sqlConnection -Database $TargetDatabaseName -Query ('CREATE USER {0} FROM EXTERNAL PROVIDER;' -f $bracketedIdentityName) -EnableException
+                        } catch {
+                            $message = ('Failed to create database user ''{0}'' in ''{1}''/''{2}'': {3}' -f $IdentityName, $TargetServerName, $TargetDatabaseName, $_.Exception.Message)
+                            Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'target', 'identity'
+                            Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                            return
+                        }
+
+                        Write-PSFMessage -Level Output -Message ('Created database user ''{0}'' in ''{1}''/''{2}''.' -f $IdentityName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
+
+                        $userCreated = $true
                     }
 
-                    Write-PSFMessage -Level Output -Message ('Added database user ''{0}'' to role ''{1}''.' -f $IdentityName, $RoleName) -Tag 'target', 'identity', 'create'
+                    if ($roleMembershipExists) {
+                        Write-PSFMessage -Level Output -Message ('Database user ''{0}'' is already a member of role ''{1}''.' -f $IdentityName, $RoleName) -Tag 'idempotent'
+                    } else {
+                        Write-PSFMessage -Level Output -Message ('Adding database user ''{0}'' to role ''{1}'' in ''{2}''/''{3}''.' -f $IdentityName, $RoleName, $TargetServerName, $TargetDatabaseName) -Tag 'target', 'identity', 'create'
 
-                    $roleMembershipGranted = $true
+                        try {
+                            $null = Invoke-DbaQuery -SqlInstance $sqlConnection -Database $TargetDatabaseName -Query ('ALTER ROLE {0} ADD MEMBER {1};' -f $bracketedRoleName, $bracketedIdentityName) -EnableException
+                        } catch {
+                            $message = ('Failed to add database user ''{0}'' to role ''{1}'' in ''{2}''/''{3}'': {4}' -f $IdentityName, $RoleName, $TargetServerName, $TargetDatabaseName, $_.Exception.Message)
+                            Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'target', 'identity'
+                            Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                            return
+                        }
+
+                        Write-PSFMessage -Level Output -Message ('Added database user ''{0}'' to role ''{1}''.' -f $IdentityName, $RoleName) -Tag 'target', 'identity', 'create'
+
+                        $roleMembershipGranted = $true
+                    }
+
+                    $grantedActions = @()
+
+                    if ($userCreated) {
+                        $grantedActions += 'user'
+                    }
+
+                    if ($roleMembershipGranted) {
+                        $grantedActions += 'role membership'
+                    }
+
+                    Write-PSFMessage -Level Output -Message ('Database access for ''{0}'' on ''{1}''/''{2}'' is ready. Created: {3}.' -f $IdentityName, $TargetServerName, $TargetDatabaseName, ($grantedActions -join ', ')) -Tag 'target', 'identity', 'create'
                 }
-            } else {
-                Write-PSFMessage -Level Output -Message ('Database user ''{0}'' is already a member of role ''{1}''.' -f $IdentityName, $RoleName) -Tag 'idempotent'
             }
 
             [PSCustomObject]@{
@@ -193,7 +223,7 @@ function Grant-SqlElasticJobTargetDatabaseAccess {
                 RoleMembershipGranted = $roleMembershipGranted
             }
         } finally {
-            Disconnect-DbaInstance -InputObject $sqlConnection -ErrorAction SilentlyContinue
+            $null = Disconnect-DbaInstance -InputObject $sqlConnection -ErrorAction SilentlyContinue
         }
     }
 }

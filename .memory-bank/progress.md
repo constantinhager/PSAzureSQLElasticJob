@@ -96,6 +96,12 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
   role (default `db_owner`), authenticating via an Azure AD token from the
   caller's Az context and the new `dbatools` dependency. Full Sampler suite
   passed with 404 tests.
+- 2026-08-20: Renamed `Grant-SqlElasticJobTargetDatabaseAccess`'s
+  `-ServerName`/`-DatabaseName` to `-TargetServerName`/`-TargetDatabaseName`;
+  fixed a live-run bug where it produced two confirmation prompts and two
+  pipeline outputs (an uncaptured `Disconnect-DbaInstance` call leaked a
+  second output) by consolidating to one `ShouldProcess` and suppressing that
+  call's output. Full Sampler suite passed with 406 tests.
 
 ## Stable capabilities
 
