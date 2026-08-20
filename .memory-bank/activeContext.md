@@ -144,8 +144,14 @@ Managed Instance) and adds it to a database role (`-RoleName`, default
   `Invoke-DbaQuery`/`Disconnect-DbaInstance`. It is a large module but was the
   user's explicit choice over raw `Microsoft.Data.SqlClient` or the `SqlServer`
   module.
-- `-ServerName` accepts a short name (FQDN `.database.windows.net` appended
-  automatically unless the input already contains a `.`).
+- `-TargetServerName`/`-TargetDatabaseName` (renamed from the initial
+  `-ServerName`/`-DatabaseName` for consistency with
+  `Add-`/`Remove-SqlElasticJobTarget`, and to avoid a pipeline property
+  collision - e.g. `Add-SqlElasticJobTarget`'s output has its own `ServerName`
+  meaning the agent's hosting server, not the target). A short name gets
+  `.database.windows.net` appended automatically unless the input already
+  contains a `.`. Output object properties were renamed to match
+  (`TargetServerName`/`TargetDatabaseName`).
 - `IdentityName`/`RoleName` go directly into interpolated T-SQL (CREATE
   USER/ALTER ROLE cannot parameterize identifiers), so both are constrained by
   `[ValidatePattern('^[A-Za-z0-9][A-Za-z0-9_\-]{0,127}$')]` as a first defense

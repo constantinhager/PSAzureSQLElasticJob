@@ -29,9 +29,9 @@ Describe 'Grant-SqlElasticJobTargetDatabaseAccess' {
         Mock -CommandName Disconnect-DbaInstance -ModuleName $script:moduleName -MockWith { }
 
         $script:baseParameters = @{
-            ServerName   = 'sql-prod'
-            DatabaseName = 'AppDb'
-            IdentityName = 'id-jobs'
+            TargetServerName   = 'sql-prod'
+            TargetDatabaseName = 'AppDb'
+            IdentityName       = 'id-jobs'
         }
     }
 
@@ -75,7 +75,7 @@ Describe 'Grant-SqlElasticJobTargetDatabaseAccess' {
         }
 
         It 'Should reject an identity name that is not a safe SQL identifier' {
-            { Grant-SqlElasticJobTargetDatabaseAccess -ServerName 'sql-prod' -DatabaseName 'AppDb' -IdentityName "id]; DROP TABLE Users; --" -Confirm:$false } |
+            { Grant-SqlElasticJobTargetDatabaseAccess -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -IdentityName "id]; DROP TABLE Users; --" -Confirm:$false } |
             Should -Throw
 
             Should -Invoke -CommandName Connect-DbaInstance -ModuleName $script:moduleName -Times 0 -Exactly

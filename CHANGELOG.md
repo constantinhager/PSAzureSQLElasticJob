@@ -27,7 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   database user for a user-assigned managed identity on a target Azure SQL
   Database (`CREATE USER ... FROM EXTERNAL PROVIDER`) and add it to a database
   role, `db_owner` by default. Connects using an Azure AD access token from the
-  caller's signed-in Az context via the new `dbatools` dependency.
+  caller's signed-in Az context via the new `dbatools` dependency. Its
+  `-TargetServerName`/`-TargetDatabaseName` parameters match the naming used by
+  `Add-`/`Remove-SqlElasticJobTarget`.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`
