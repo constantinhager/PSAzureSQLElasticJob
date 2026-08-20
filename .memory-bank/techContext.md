@@ -52,6 +52,12 @@ source: repository evidence
   `$env:PATH = [Environment]::GetEnvironmentVariable('PATH','Machine') + ';' + [Environment]::GetEnvironmentVariable('PATH','User')`
 - Sampler's QA test requires one `tests/Unit/**/<FunctionName>.tests.ps1` per
   exported function; grouping several functions into one file fails the build.
+- `.\build.ps1 -Tasks test` alone does **not** rebuild the module; it imports
+  whatever is already in `output/module`. After editing `source/`, run the
+  default workflow (`.\build.ps1` with no `-Tasks`, which runs `build` then
+  `test`) or explicitly `-Tasks build,test`, otherwise source changes appear
+  as `ParameterBindingException`/stale-behavior failures against the old
+  build.
 - Last verified run: `.\build.ps1` -> 341 tests passed, 17 tasks, 0 errors.
 - Logging conformance is checkable: 64 `Write-PSFMessage` calls, all with an
   explicit `-Level`, and zero `Write-Verbose`/`Warning`/`Host`/`Error` calls in

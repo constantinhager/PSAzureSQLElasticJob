@@ -14,6 +14,9 @@ Line format:
 
 Trim entries older than 90 days.
 
+2026-08-20 06:15 UTC | default | Added idempotent user-assigned managed identity assignment to New-SqlElasticJobEnvironment
+2026-08-20 08:27 UTC | default | Renamed branch to feature/*; moved managed identity assignment from SQL server to Elastic Job agent
+
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.
 2026-08-17 12:52 UTC | technical-writer | Added job/step/credential/target-group CRUD, GitHub Actions release workflow, and Add-OptionalParameter after finding Pester mock $PSBoundParameters is empty; 322 tests passing.

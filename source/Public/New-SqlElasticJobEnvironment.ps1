@@ -43,6 +43,16 @@
     .PARAMETER ServerVersion
         The version of a new logical SQL server. Defaults to '12.0'.
 
+    .PARAMETER UseUserAssignedManagedIdentity
+        Assigns an existing user-assigned managed identity to the Elastic Job
+        agent. Requires -UserAssignedIdentityId. If the agent already has the
+        identity assigned, nothing changes.
+
+    .PARAMETER UserAssignedIdentityId
+        The resource ID of the existing user-assigned managed identity to assign
+        to the Elastic Job agent. Required when -UseUserAssignedManagedIdentity
+        is specified.
+
     .PARAMETER EnableException
         Whether a failure raises a terminating exception. Defaults to $true so a
         failed provisioning run cannot pass unnoticed. Pass $false to get a
@@ -61,6 +71,13 @@
         New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -WhatIf
 
         Shows what would be created without changing anything.
+
+    .EXAMPLE
+        New-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01' -UseUserAssignedManagedIdentity -UserAssignedIdentityId '/subscriptions/.../resourceGroups/rg-jobs/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+
+        Creates the environment and assigns the existing user-assigned managed
+        identity to the Elastic Job agent. Running it again assigns nothing
+        further.
 
     .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
@@ -100,6 +117,15 @@ function New-SqlElasticJobEnvironment {
         [System.Management.Automation.PSCredential]
         $ServerAdministratorCredential,
 
+        [Parameter()]
+        [Switch]
+        $UseUserAssignedManagedIdentity,
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [System.String]
+        $UserAssignedIdentityId,
+
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateNotNullOrEmpty()]
         [System.String]
@@ -129,9 +155,16 @@ function New-SqlElasticJobEnvironment {
             return
         }
 
+        if ($UseUserAssignedManagedIdentity -and (-not $PSBoundParameters.ContainsKey('UserAssignedIdentityId'))) {
+            Stop-PSFFunction -Message '-UseUserAssignedManagedIdentity requires -UserAssignedIdentityId.' -EnableException $EnableException -Category InvalidArgument
+
+            return
+        }
+
         $createdServer = $false
         $createdDatabase = $false
         $createdAgent = $false
+        $assignedIdentity = $false
 
         $server = Get-AzResourceIfPresent -ScriptBlock {
             Get-AzSqlServer -ResourceGroupName $ResourceGroupName -ServerName $ServerName
@@ -209,8 +242,21 @@ function New-SqlElasticJobEnvironment {
                 Write-PSFMessage -Level Output -Message ('Provisioning step 3 of 3: create Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'environment', 'progress'
                 Write-PSFMessage -Level Output -Message ('Creating Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
+                $newAgentParameters = @{
+                    ResourceGroupName = $ResourceGroupName
+                    ServerName        = $ServerName
+                    DatabaseName      = $DatabaseName
+                    Name              = $AgentName
+                    ErrorAction       = 'Stop'
+                }
+
+                if ($UseUserAssignedManagedIdentity) {
+                    $newAgentParameters['IdentityType'] = 'UserAssigned'
+                    $newAgentParameters['UserAssignedIdentityId'] = @($UserAssignedIdentityId)
+                }
+
                 try {
-                    $agent = New-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -DatabaseName $DatabaseName -Name $AgentName -ErrorAction Stop
+                    $agent = New-AzSqlElasticJobAgent @newAgentParameters
                 } catch {
                     $message = ('Failed to create Elastic Job agent ''{0}'': {1}' -f $AgentName, $_.Exception.Message)
                     Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'agent', 'create'
@@ -222,13 +268,43 @@ function New-SqlElasticJobEnvironment {
                 Write-PSFMessage -Level Output -Message ('Created Elastic Job agent ''{0}''.' -f $AgentName) -Tag 'agent', 'create'
 
                 $createdAgent = $true
+
+                if ($UseUserAssignedManagedIdentity) {
+                    $assignedIdentity = $true
+                }
             }
         } else {
             Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already exists.' -f $AgentName) -Tag 'idempotent'
+
+            if ($UseUserAssignedManagedIdentity) {
+                $hasIdentity = ($null -ne $agent.Identity) -and ($null -ne $agent.Identity.UserAssignedIdentities) -and (@($agent.Identity.UserAssignedIdentities.Keys) -contains $UserAssignedIdentityId)
+
+                if (-not $hasIdentity) {
+                    if ($PSCmdlet.ShouldProcess($AgentName, ("Assign user-assigned managed identity '{0}'" -f $UserAssignedIdentityId))) {
+                        Write-PSFMessage -Level Output -Message ('Assigning user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}''.' -f $UserAssignedIdentityId, $AgentName) -Tag 'agent', 'identity', 'create'
+
+                        try {
+                            $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $AgentName -IdentityType 'UserAssigned' -UserAssignedIdentityId @($UserAssignedIdentityId) -ErrorAction Stop
+                        } catch {
+                            $message = ('Failed to assign user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}'': {2}' -f $UserAssignedIdentityId, $AgentName, $_.Exception.Message)
+                            Write-PSFMessage -Level Error -Message $message -ErrorRecord $_ -Tag 'agent', 'identity', 'create'
+                            Stop-PSFFunction -Message $message -EnableException $EnableException -ErrorRecord $_
+
+                            return
+                        }
+
+                        Write-PSFMessage -Level Output -Message ('Assigned user-assigned managed identity ''{0}'' to Elastic Job agent ''{1}''.' -f $UserAssignedIdentityId, $AgentName) -Tag 'agent', 'identity', 'create'
+
+                        $assignedIdentity = $true
+                    }
+                } else {
+                    Write-PSFMessage -Level Output -Message ('Elastic Job agent ''{0}'' already has user-assigned managed identity ''{1}''.' -f $AgentName, $UserAssignedIdentityId) -Tag 'idempotent'
+                }
+            }
         }
 
         if (($null -ne $server) -and ($null -ne $database) -and ($null -ne $agent)) {
-            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent)) {
+            if ((-not $createdServer) -and (-not $createdDatabase) -and (-not $createdAgent) -and (-not $assignedIdentity)) {
                 Write-PSFMessage -Level Output -Message ('Elastic Job environment already exists on server ''{0}'' with database ''{1}'' and agent ''{2}''. No changes were made.' -f $ServerName, $DatabaseName, $AgentName) -Tag 'environment', 'idempotent'
             } else {
                 $createdResources = @()
@@ -243,6 +319,10 @@ function New-SqlElasticJobEnvironment {
 
                 if ($createdAgent) {
                     $createdResources += 'agent'
+                }
+
+                if ($assignedIdentity) {
+                    $createdResources += 'identity'
                 }
 
                 Write-PSFMessage -Level Output -Message ('Elastic Job environment is ready. Created: {0}.' -f ($createdResources -join ', ')) -Tag 'environment', 'create'
@@ -260,6 +340,7 @@ function New-SqlElasticJobEnvironment {
             CreatedServer     = $createdServer
             CreatedDatabase   = $createdDatabase
             CreatedAgent      = $createdAgent
+            AssignedIdentity  = $assignedIdentity
         }
     }
 }

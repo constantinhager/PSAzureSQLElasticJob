@@ -152,6 +152,116 @@ Describe 'New-SqlElasticJobEnvironment' {
         }
     }
 
+    Context 'When assigning a user-assigned managed identity to a new agent' {
+        BeforeAll {
+            $script:identityId = '/subscriptions/sub-1/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ServerName = 'srv' }
+            }
+
+            Mock -CommandName Get-AzSqlDatabase -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ DatabaseName = 'jobdb' }
+            }
+
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith { throw 'Agent does not exist.' }
+
+            Mock -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{
+                    AgentName = 'agent01'
+                    Identity  = [PSCustomObject]@{
+                        UserAssignedIdentities = @{ $script:identityId = @{} }
+                    }
+                }
+            }
+        }
+
+        It 'Should require -UserAssignedIdentityId when -UseUserAssignedManagedIdentity is used' {
+            { New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*-UserAssignedIdentityId*'
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+
+        It 'Should create the agent with the identity in one step' {
+            $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
+
+            $result.CreatedAgent | Should -BeTrue
+            $result.AssignedIdentity | Should -BeTrue
+
+            Should -Invoke -CommandName New-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $IdentityType -eq 'UserAssigned' -and $UserAssignedIdentityId -contains $script:identityId
+            }
+        }
+    }
+
+    Context 'When assigning a user-assigned managed identity to an existing agent' {
+        BeforeAll {
+            $script:identityId = '/subscriptions/sub-1/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-jobs'
+
+            Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ ServerName = 'srv' }
+            }
+
+            Mock -CommandName Get-AzSqlDatabase -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ DatabaseName = 'jobdb' }
+            }
+
+            Mock -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{
+                    AgentName = 'agent01'
+                    Identity  = [PSCustomObject]@{
+                        UserAssignedIdentities = @{ $script:identityId = @{} }
+                    }
+                }
+            }
+        }
+
+        It 'Should assign the identity when the agent does not have it yet' {
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ AgentName = 'agent01'; Identity = $null }
+            }
+
+            $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
+
+            $result.AssignedIdentity | Should -BeTrue
+
+            Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
+                $IdentityType -eq 'UserAssigned' -and $UserAssignedIdentityId -contains $script:identityId
+            }
+        }
+
+        It 'Should not reassign the identity when the agent already has it' {
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{
+                    AgentName = 'agent01'
+                    Identity  = [PSCustomObject]@{
+                        UserAssignedIdentities = @{ $script:identityId = @{} }
+                    }
+                }
+            }
+
+            $result = New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false
+
+            $result.AssignedIdentity | Should -BeFalse
+
+            Should -Invoke -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -Times 0 -Exactly
+        }
+
+        It 'Should stop without marking the identity as assigned when Set-AzSqlElasticJobAgent fails' {
+            Mock -CommandName Get-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                [PSCustomObject]@{ AgentName = 'agent01'; Identity = $null }
+            }
+
+            Mock -CommandName Set-AzSqlElasticJobAgent -ModuleName $script:moduleName -MockWith {
+                Write-Error 'Identity assignment failed.'
+            }
+
+            { New-SqlElasticJobEnvironment @script:baseParameters -UseUserAssignedManagedIdentity -UserAssignedIdentityId $script:identityId -Confirm:$false } |
+            Should -Throw -ExpectedMessage '*Identity assignment failed*'
+        }
+    }
+
     Context 'When server creation fails' {
         BeforeAll {
             Mock -CommandName Get-AzSqlServer -ModuleName $script:moduleName -MockWith { throw 'Server does not exist.' }

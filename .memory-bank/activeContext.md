@@ -23,6 +23,18 @@ status instead of the raw Azure ARM error text.
 agent lookup internally, avoiding a duplicate context status from the public
 agent getter.
 
+`New-SqlElasticJobEnvironment` can now also assign an existing user-assigned
+managed identity to the Elastic Job agent via `-UseUserAssignedManagedIdentity`
+and `-UserAssignedIdentityId`. It follows the same idempotent, `ShouldProcess`,
+fail-on-`-ErrorAction Stop` pattern as the server/database/agent steps: a new
+agent is created with the identity in one call; an existing agent is checked
+via `$agent.Identity.UserAssignedIdentities` and only updated through
+`Set-AzSqlElasticJobAgent` when the identity is missing. `Az.Sql` exposes
+`-IdentityType`/`-UserAssignedIdentityId` on both `New-`/`Set-AzSqlElasticJobAgent`
+(agent has no `PrimaryUserAssignedIdentityId`, unlike the server cmdlets). The
+output object gained an `AssignedIdentity` boolean and the completion summary
+lists `identity` among created resources.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

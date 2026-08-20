@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sampler-based project scaffold with GitVersion, Pester 5 and GitHub Actions.
 - `New-SqlElasticJobEnvironment` to provision the logical SQL server, job
   database and Elastic Job agent, creating only the parts that are missing.
+- `New-SqlElasticJobEnvironment` accepts `-UseUserAssignedManagedIdentity` and
+  `-UserAssignedIdentityId` to assign an existing user-assigned managed
+  identity to the Elastic Job agent, idempotently.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`

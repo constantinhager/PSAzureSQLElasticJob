@@ -55,6 +55,10 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 - 2026-08-18: Removed the redundant public agent lookup from environment
   checks, so Azure context is asserted and reported once. Full Sampler suite
   passed.
+- 2026-08-20: Added `-UseUserAssignedManagedIdentity`/`-UserAssignedIdentityId`
+  to `New-SqlElasticJobEnvironment` to idempotently assign an existing
+  user-assigned managed identity to the Elastic Job agent. Full Sampler suite
+  passed with 352 tests.
 
 ## Stable capabilities
 
