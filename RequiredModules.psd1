@@ -15,7 +15,7 @@
     InvokeBuild                 = 'latest'
     PSScriptAnalyzer            = 'latest'
     # Pinned to 5.x: Sampler's QA template and build tasks are not Pester 6 compatible.
-    Pester                      = '[5.7.1, 6.0.0)'
+    Pester                      = '5.7.1'
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
