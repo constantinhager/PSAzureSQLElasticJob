@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Module icon (`assets/PSAzureSQLElasticJob.svg`), referenced from the
+  manifest's `IconUri` and shown at the top of `README.md`.
 - Custom `Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel`
   table view in `PSAzureSQLElasticJob.Format.ps1xml`, overriding `Az.Sql`'s own
   default view (loaded first, via `Update-FormatData -PrependPath` in

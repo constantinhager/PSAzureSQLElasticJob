@@ -141,7 +141,7 @@
             ProjectUri                 = 'https://github.com/constantinhager/PSAzureSQLElasticJob'
 
             # A URL to an icon representing this module.
-            # IconUri = ''
+            IconUri                    = 'https://raw.githubusercontent.com/constantinhager/PSAzureSQLElasticJob/main/assets/PSAzureSQLElasticJob.svg'
 
             # ReleaseNotes of this module
             ReleaseNotes               = ''

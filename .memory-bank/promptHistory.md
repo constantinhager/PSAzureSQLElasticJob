@@ -36,6 +36,7 @@ Trim entries older than 90 days.
 2026-08-20 16:50 UTC | default | Added custom step Format.ps1xml view via Update-FormatData -PrependPath to override Az.Sql's default and stop CommandText from wrapping
 2026-08-20 17:15 UTC | default | Fixed CI-only release failure: declared dbatools.library under ExternalModuleDependencies so PowerShellGet stops trying to resolve it
 2026-08-20 17:36 UTC | default | Root-caused and fixed the same CI failure properly: added dbatools.library to RequiredModules before dbatools so Sampler's package_module_nupkg publishes it first; verified locally with build.ps1 -Tasks pack
+2026-08-20 18:05 UTC | default | Added module icon (assets/PSAzureSQLElasticJob.svg) to manifest IconUri and README, on new branch feature/add-module-icon (PR #7 merged to main in between)
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.
