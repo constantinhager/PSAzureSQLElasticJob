@@ -124,7 +124,7 @@ function Set-SqlElasticJob
     {
         $null = Assert-AzContext
 
-        $existingJob = Get-SqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingJob = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -eq $existingJob)
         {
@@ -152,7 +152,7 @@ function Set-SqlElasticJob
 
         Write-PSFMessage -Level Output -Message ('Updating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
 
-        $job = Set-AzSqlElasticJob @jobParameters
+        $job = Set-AzSqlElasticJob @jobParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Updated Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'update'
 

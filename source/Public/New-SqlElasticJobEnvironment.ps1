@@ -76,6 +76,8 @@
 
     .OUTPUTS
         PSCustomObject describing the environment and which parts were created.
+        Typed as PSAzureSQLElasticJob.EnvironmentResult, which has a custom
+        table format view showing a compact summary.
 
     .EXAMPLE
         $credential = Get-Credential -UserName 'sqladmin'
@@ -414,6 +416,7 @@ function New-SqlElasticJobEnvironment {
         }
 
         [PSCustomObject]@{
+            PSTypeName        = 'PSAzureSQLElasticJob.EnvironmentResult'
             ResourceGroupName = $ResourceGroupName
             ServerName        = $ServerName
             DatabaseName      = $DatabaseName

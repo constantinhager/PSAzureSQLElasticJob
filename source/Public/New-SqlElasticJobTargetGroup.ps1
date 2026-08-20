@@ -57,7 +57,7 @@ function New-SqlElasticJobTargetGroup
     {
         $null = Assert-AzContext
 
-        $existingTargetGroup = Get-SqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingTargetGroup = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -ne $existingTargetGroup)
         {
@@ -73,7 +73,7 @@ function New-SqlElasticJobTargetGroup
 
         Write-PSFMessage -Level Output -Message ('Creating Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
 
-        $targetGroup = New-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $targetGroup = New-AzSqlElasticJobTargetGroup -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Created Elastic Job target group ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'targetgroup', 'create'
 

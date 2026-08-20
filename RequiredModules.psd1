@@ -12,19 +12,21 @@
     #    }
     #}
 
-    InvokeBuild           = 'latest'
-    PSScriptAnalyzer      = 'latest'
+    InvokeBuild                 = 'latest'
+    PSScriptAnalyzer            = 'latest'
     # Pinned to 5.x: Sampler's QA template and build tasks are not Pester 6 compatible.
-    Pester                = '[5.7.1, 6.0.0)'
-    ModuleBuilder         = 'latest'
-    ChangelogManagement   = 'latest'
-    Sampler               = 'latest'
-    'Sampler.GitHubTasks' = 'latest'
-    'Az.Accounts'         = 'latest'
-    'Az.Sql'              = 'latest'
+    Pester                      = '5.7.1'
+    ModuleBuilder               = 'latest'
+    ChangelogManagement         = 'latest'
+    Sampler                     = 'latest'
+    'Sampler.GitHubTasks'       = 'latest'
+    'Az.Accounts'               = 'latest'
+    'Az.Sql'                    = 'latest'
     'Az.ManagedServiceIdentity' = 'latest'
-    'Az.Resources'        = 'latest'
-    PSFramework           = 'latest'
+    'Az.Resources'              = 'latest'
+    dbatools                    = 'latest'
+    'dbatools.library'          = 'latest'
+    PSFramework                 = 'latest'
 
 
 }

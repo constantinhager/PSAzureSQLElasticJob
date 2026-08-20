@@ -123,10 +123,192 @@ etc.) instead, while `Add-OptionalParameter` still handles
 kept its name since it names a credential, not a target. No back-compat alias
 was added; the module is still unreleased/preview.
 
+The user separately standardized brace style to OTBS (opening brace on the
+same line as `function`/`process`/`if`) across `Add-`/`Remove-SqlElasticJobTarget`;
+follow that style (already the majority style elsewhere, e.g.
+`New-SqlElasticJobEnvironment.ps1`) for new code.
+
+Added `Grant-SqlElasticJobTargetDatabaseAccess`, the module's first command
+that touches the SQL *data plane* (T-SQL) rather than only the ARM control
+plane. It creates a contained database user for a managed identity directly
+in the target database (`CREATE USER [name] FROM EXTERNAL PROVIDER;` - no
+separate server-level login needed for Azure SQL Database, unlike SQL
+Managed Instance) and adds it to a database role (`-RoleName`, default
+`db_owner`). Design decisions (confirmed with the user):
+- Connects via an Azure AD access token from `Get-AzAccessToken -ResourceUrl 'https://database.windows.net/'`
+  (reusing the caller's signed-in Az context, no separate SQL credential),
+  passed straight through to `dbatools`' `Connect-DbaInstance -AccessToken`
+  (dbatools accepts the `Get-AzAccessToken` output object directly).
+- `dbatools` was added as a new `RequiredModules` dependency (2.8.4 installed
+  locally; manifest pins >= 2.1.0) specifically for `Connect-DbaInstance`/
+  `Invoke-DbaQuery`/`Disconnect-DbaInstance`. It is a large module but was the
+  user's explicit choice over raw `Microsoft.Data.SqlClient` or the `SqlServer`
+  module.
+- `-TargetServerName`/`-TargetDatabaseName` (renamed from the initial
+  `-ServerName`/`-DatabaseName` for consistency with
+  `Add-`/`Remove-SqlElasticJobTarget`, and to avoid a pipeline property
+  collision - e.g. `Add-SqlElasticJobTarget`'s output has its own `ServerName`
+  meaning the agent's hosting server, not the target). A short name gets
+  `.database.windows.net` appended automatically unless the input already
+  contains a `.`. Output object properties were renamed to match
+  (`TargetServerName`/`TargetDatabaseName`).
+- `IdentityName`/`RoleName` go directly into interpolated T-SQL (CREATE
+  USER/ALTER ROLE cannot parameterize identifiers), so both are constrained by
+  `[ValidatePattern('^[A-Za-z0-9][A-Za-z0-9_\-]{0,127}$')]` as a first defense
+  layer, and additionally passed through the new private helper
+  `Format-SqlBracketedIdentifier` (doubles `]` and wraps in brackets) as a
+  second, independent layer before being embedded in T-SQL - defense in depth
+  per the module's security-review conventions. Values embedded in `SELECT`
+  lookups are also single-quote-escaped even though the pattern already blocks
+  quotes.
+- Idempotent like the rest of the module: looks up `sys.database_principals`/
+  `sys.database_role_members` first and only runs `CREATE USER`/`ALTER ROLE`
+  when missing.
+- The SQL connection is always disconnected via `Disconnect-DbaInstance` in a
+  `finally` block, even on failure.
+
+Follow-up fix after a live run: the user reported two confirmation prompts
+and two pipeline outputs for one call, plus asked to double check idempotency.
+1. **Double output**: `Disconnect-DbaInstance -InputObject $sqlConnection -ErrorAction SilentlyContinue`
+   was called unassigned in the `finally` block. Any uncaptured cmdlet output
+   inside a function - including in `finally` - flows to the function's own
+   output stream, so its return value became a second emitted object after
+   the summary `PSCustomObject`. Fixed with `$null = Disconnect-DbaInstance ...`.
+2. **Two confirmations**: the user creation and role-membership steps each had
+   their own `$PSCmdlet.ShouldProcess()` call. Consolidated into a single
+   `ShouldProcess` covering "Grant database access: <verb list>" for the whole
+   operation (both steps still individually skip work that's already done),
+   matching the "one summary object, one confirm" feel of
+   `New-SqlElasticJobEnvironment`.
+3. **Idempotency check gotcha** (introduced and then reverted in the same
+   pass): tried to "harden" `$null -eq $existingUser`/`$existingMembership`
+   checks to `@($existingUser).Count -gt 0`, intending to also treat an empty
+   array as "absent". This actually broke detection: **`@($null).Count` is
+   `1`, not `0`** - wrapping a variable that holds a literal `$null` in `@()`
+   produces a one-element array *containing* `$null`, it does not produce an
+   empty array. `dbatools`' `Invoke-DbaQuery` returning zero rows is captured
+   as a real `$null` (zero pipeline objects collapses to `$null` on
+   assignment), so the correct, simpler check is `$null -eq $existingUser` -
+   reverted to that. Lesson: `@($x).Count -eq 0` is only a safe "is this
+   empty" test when `$x` might itself be a *populated* array/collection you
+   want to size-check: do not use it as a blanket replacement for `$null -eq`
+   / `$null -ne` on a variable that a command assignment may leave as literal
+   `$null`.
+- Pester note: dbatools' `-SqlInstance`/`-AccessToken`/etc. parameters use
+  custom argument-transforming types (e.g. `DbaInstanceParameter`), so a mock
+  for `Connect-DbaInstance` must return something that itself coerces to that
+  type (a plain string works) - returning an arbitrary `PSCustomObject` fails
+  argument transformation *before* the mock body even runs, since Pester
+  proxies still enforce the real parameter type. Also, `DbaInstanceParameter`
+  has no `-eq` string equality - compare via `"$SqlInstance" -eq '...'` in a
+  `-ParameterFilter`, not `$SqlInstance -eq '...'`.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and
 changelog tasks.
+
+`Add-SqlElasticJobStep` now supports `Add-AzSqlElasticJobStep`'s `WithOutputDb`
+parameter set: `-OutputDatabaseObject` (a live `AzureSqlDatabaseModel`, e.g.
+from `Get-AzSqlDatabase` - mandatory, `ParameterSetName = 'WithOutputDb'`),
+`-OutputTableName` (mandatory in that set), `-OutputCredentialName` and
+`-OutputSchemaName` (both optional). Azure's own parameter names are reused
+as-is (unlike the `Target*` rename elsewhere), so they forward through
+`Add-OptionalParameter` unchanged. `CmdletBinding` gained
+`DefaultParameterSetName = 'Default'`; all pre-existing parameters stay
+common to both sets (no `ParameterSetName` on them), which is why none needed
+touching. Azure also exposes `WithOutputDbId` (`-OutputDatabaseResourceId`
+instead of a live object) and parent-object/parent-resource-ID variants
+(`ObjectSet`, `ResourceIdSet`, etc.) - only `WithOutputDb` was requested and
+added; those others remain unimplemented if ever needed.
+
+Added `Get-SqlElasticJobExecutionOutput`: retrieves the rows a job step's
+output table (from `Add-SqlElasticJobStep -OutputDatabaseObject`) holds for
+one execution. Same dbatools/Azure AD access token connection pattern as
+`Grant-SqlElasticJobTargetDatabaseAccess` (`Connect-DbaInstance`/
+`Invoke-DbaQuery`/`Disconnect-DbaInstance` in a `finally`), plus the same
+`Format-SqlBracketedIdentifier` defense for the schema/table/column names,
+which cannot be parameterized. The execution-ID *value* itself, unlike
+identifiers, genuinely can be parameterized, so it's passed via
+`Invoke-DbaQuery -SqlParameter @{ ExecutionId = $JobExecutionId }` rather than
+string interpolation.
+IMPORTANT CORRECTION (verified live against a real job/output table): the
+first design assumed Azure's system-managed `internal_execution_id` column
+(auto-populated when a table is auto-created via `-OutputDatabaseObject`/
+`-OutputTableName`) equals the `JobExecutionId` `Start-SqlElasticJob`/
+`Get-AzSqlElasticJobExecution` return. Live-tested and confirmed FALSE: for
+6 successful executions of the same job, the table had exactly 6 distinct
+`internal_execution_id` values, but NONE of them matched any of the job's own
+`JobExecutionId` values (checked at job-level, step-level via
+`Get-AzSqlElasticJobStepExecution`, and target-level via
+`Get-AzSqlElasticJobTargetExecution` - all three expose the same
+`JobExecutionId`, none of which appear in the output table). The counts
+lined up (6 executions = 6 distinct ids) but the GUIDs themselves are a
+different, internal-only identifier not exposed by any public API. The MS
+docs sentence about `internal_execution_id` correlating to
+`$(job_execution_id)` applies only when the step's own `CommandText`
+explicitly does `SELECT $(job_execution_id) AS <col>, ...` - it is NOT true
+of Azure's automatic/system-managed output column. Fixed by changing
+`Get-SqlElasticJobExecutionOutput`'s default `-ExecutionIdColumnName` to
+`JobExecutionId` and requiring the job step to explicitly select
+`$(job_execution_id) AS JobExecutionId` in its `CommandText` (documented in
+both `Get-SqlElasticJobExecutionOutput` and `Add-SqlElasticJobStep`'s
+`WithOutputDb` example). This is the only mechanism Microsoft actually
+guarantees for output-row-to-execution correlation.
+Per Microsoft's Elastic Jobs docs (`elastic-jobs-tsql-create-manage`), the
+`$(job_execution_id)` built-in scripting variable is meant for exactly this:
+"group all results from the same job execution together."
+Pester note: `Invoke-DbaQuery`'s `-SqlParameter` is typed `[PSObject[]]`, not
+`[Hashtable]`, so passing a hashtable literal gets wrapped in a one-element
+array; access it in a mock `-ParameterFilter` as `$SqlParameter[0]['Key']`,
+not `$SqlParameter['Key']` (the latter silently fails to match, since arrays
+don't support string indexers).
+Debugging note: `Get-AzAccessToken` on newer Az.Accounts versions (5.x here)
+returns a `PSSecureAccessToken` (SecureString-backed `.Token`) by default,
+even with `-AsSecureString:$false` (parameter appears to be ignored/no-op in
+this version) - `[System.Net.NetworkCredential]::new('', $token.Token).Password`
+extracts the plain string when needed for ad-hoc diagnostics. Also: a
+"Login failed for user '<token-identified principal>'. The server is not
+currently configured to accept this token." error against a specific server
+usually means that server has no Microsoft Entra admin configured
+(`Get-AzSqlServerActiveDirectoryAdministrator` returns nothing) - unrelated
+to the SQL parameter/token type; check the target server's Entra admin
+config first.
+
+A live run of `Add-SqlElasticJobStep` against a job that did not exist yet
+surfaced the same two bugs as `New-SqlElasticJobUserAssignedIdentity` earlier:
+it logged "Using Azure context" twice (it called the public
+`Get-SqlElasticJobStep` for its idempotency check, which itself calls
+`Assert-AzContext`), and it called `Add-AzSqlElasticJobStep` without
+`-ErrorAction Stop`, so Azure's non-terminating "job not found" error was
+swallowed and the function printed a false "Added step..." success message.
+Fixed by looking up the step inline (`Get-AzResourceIfPresent` wrapping
+`Get-AzSqlElasticJobStep` directly, mirroring `Get-SqlElasticJobStep`'s own
+body) and adding `-ErrorAction Stop`.
+
+**RESOLVED**: the two-bug pattern (duplicate `Assert-AzContext` via calling a
+sibling public `Get-*` getter, and missing `-ErrorAction Stop` on the Az
+mutation call) has now been fixed across the whole CRUD surface:
+`Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
+`New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
+`Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
+`Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
+`Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
+`Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential`,
+`Set-SqlElasticJobStep` (in addition to `Add-SqlElasticJobStep`, fixed
+earlier). Same fix pattern each time: replaced the call to the sibling public
+`Get-SqlElasticJob*` getter with an inline
+`Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob* ... }` (mirroring
+that getter's own body, using the outer function's parameter variables
+directly rather than a hashtable - `-Name` is always mandatory in these
+New-/Remove-/Set- contexts so no conditional binding is needed), and appended
+`-ErrorAction Stop` to the actual mutating `New-`/`Remove-`/`Set-AzSqlElasticJob*`
+call. `Add-SqlElasticJobTarget` had no existing-resource check to begin with,
+so only needed `-ErrorAction Stop` added to `Add-AzSqlElasticJobTarget`.
+All existing unit tests already mocked the underlying `Get-AzSqlElasticJob*`/
+`New-`/`Remove-`/`Set-AzSqlElasticJob*` cmdlets directly (not the public
+`Get-SqlElasticJob*` wrappers), so no test changes were needed - full Sampler
+suite still passed with 423 tests after the fix.
 
 ## Evidence
 

@@ -63,7 +63,7 @@ function Set-SqlElasticJobAgent {
     process {
         $null = Assert-AzContext
 
-        $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
+        $existingAgent = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name }
 
         if ($null -eq $existingAgent) {
             Stop-PSFFunction -Message ('Elastic Job agent ''{0}'' was not found on server ''{1}'' in resource group ''{2}''.' -f
@@ -78,7 +78,7 @@ function Set-SqlElasticJobAgent {
 
         Write-PSFMessage -Level Output -Message ('Updating Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
 
-        $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -Tag $Tag
+        $agent = Set-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -Tag $Tag -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Updated Elastic Job agent ''{0}'' on server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'update'
 

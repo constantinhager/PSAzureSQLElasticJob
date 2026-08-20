@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Custom `Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel`
+  table view in `PSAzureSQLElasticJob.Format.ps1xml`, overriding `Az.Sql`'s own
+  default view (loaded first, via `Update-FormatData -PrependPath` in
+  `suffix.ps1`). Its long `CommandText` no longer wraps across many
+  hard-to-read lines - it's truncated with `...` in the table - and the
+  `Output` column shows a short `schema.table` instead of the nested output
+  model's raw type name.
+- Tab completion (PSFramework TEPP) for `-ResourceGroupName`,
+  `-ServerName`/`-TargetServerName`/`-OutputServerName`,
+  `-DatabaseName`/`-TargetDatabaseName`/`-OutputDatabaseName`, `-AgentName`,
+  job/step `-Name`/`-JobName`, credential
+  `-Name`/`-CredentialName`/`-OutputCredentialName`/`-RefreshCredentialName`
+  and target group `-Name`/`-TargetGroupName` across the module. Later
+  parameters are scoped by whatever earlier ones the caller already typed
+  (e.g. completing `-Name` on `Get-SqlElasticJobStep` only suggests steps
+  that exist on the `-JobName` already given).
+- `PSAzureSQLElasticJob.Format.ps1xml` with compact table views for
+  `New-SqlElasticJobEnvironment`, `Test-SqlElasticJobEnvironment` and
+  `Grant-SqlElasticJobTargetDatabaseAccess`. Their `PSCustomObject` output now
+  carries a `PSTypeName` (`PSAzureSQLElasticJob.EnvironmentResult`,
+  `PSAzureSQLElasticJob.EnvironmentStatus` and
+  `PSAzureSQLElasticJob.TargetDatabaseAccessResult` respectively) so the
+  default rendering is a one-line table instead of PowerShell's default list
+  view, which each object's property count (6-11) would otherwise trigger.
+  Other commands return Az.Sql model objects, which already have their own
+  formatting from `Az.Sql`, so were left unchanged.
+- Populated `README.md` with requirements, an end-to-end quick start example
+  and a full command reference table.
 - Opt-in Azure subscription integration tests that validate the Elastic Job
   lifecycle while preserving the supplied resource group, server and database.
 - Sampler-based project scaffold with GitVersion, Pester 5 and GitHub Actions.
@@ -23,6 +51,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   agent in one call. `New-SqlElasticJobUserAssignedIdentity` registers the
   `Microsoft.ManagedIdentity` resource provider automatically when it is not
   already registered on the subscription.
+- `Grant-SqlElasticJobTargetDatabaseAccess` to idempotently create a contained
+  database user for a user-assigned managed identity on a target Azure SQL
+  Database (`CREATE USER ... FROM EXTERNAL PROVIDER`) and add it to a database
+  role, `db_owner` by default. Connects using an Azure AD access token from the
+  caller's signed-in Az context via the new `dbatools` dependency. Its
+  `-TargetServerName`/`-TargetDatabaseName` parameters match the naming used by
+  `Add-`/`Remove-SqlElasticJobTarget`. Both steps are confirmed once as a
+  single grant operation and return exactly one summary object.
+- `Get-SqlElasticJobExecutionOutput` to retrieve the rows a job step wrote to
+  its output table for one execution, correlated by an explicit
+  `$(job_execution_id)` column the step's `CommandText` must select (Azure's
+  own system-managed output column does not match the `JobExecutionId`
+  `Start-SqlElasticJob` returns, so it cannot be used for filtering). Uses the
+  same `dbatools`/Azure AD access token connection as
+  `Grant-SqlElasticJobTargetDatabaseAccess`.
 - `Test-SqlElasticJobEnvironment` to report which parts of an environment exist
   without changing anything.
 - `Get-SqlElasticJobAgent`, `New-SqlElasticJobAgent`, `Set-SqlElasticJobAgent`
@@ -32,7 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Schedules are set through the job itself with `-RunOnce` or
   `-IntervalType`/`-IntervalCount`, matching the Elastic Jobs object model.
 - Job step CRUD: `Get-SqlElasticJobStep`, `Add-SqlElasticJobStep`,
-  `Set-SqlElasticJobStep` and `Remove-SqlElasticJobStep`.
+  `Set-SqlElasticJobStep` and `Remove-SqlElasticJobStep`. `Add-SqlElasticJobStep`
+  supports Azure's `WithOutputDb` parameter set (`-OutputDatabaseObject`,
+  `-OutputTableName`, `-OutputCredentialName`, `-OutputSchemaName`) to write a
+  step's query results into an output database table.
 - Job credential CRUD: `Get-SqlElasticJobCredential`,
   `New-SqlElasticJobCredential`, `Set-SqlElasticJobCredential` and
   `Remove-SqlElasticJobCredential`.
@@ -48,6 +94,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- CI release/packaging step still failing with "PowerShellGet cannot resolve
+  the module dependency 'dbatools.library'" after the previous
+  `ExternalModuleDependencies` fix - that setting only covers the real
+  PSGallery publish step, not Sampler's `package_module_nupkg` task, which
+  separately re-publishes every direct `RequiredModules` entry into a local
+  `output` repository before validating the built module against it, and
+  never touches transitive dependencies (`dbatools.library` is `dbatools`'s
+  own dependency, not ours). Fixed by adding `dbatools.library` as an
+  explicit `RequiredModules` entry, positioned *before* `dbatools` in the
+  array so it gets published to that local repository first - order matters
+  because Sampler's task processes the array in sequence and `dbatools`'s
+  own publish step validates its `dbatools.library` requirement against
+  whatever is already there. Reproduced and verified the fix locally with
+  `.\build.ps1 -Tasks pack` before pushing.
+- CI release/packaging step failing with "PowerShellGet cannot resolve the
+  module dependency 'dbatools.library'" - declared it under
+  `PrivateData.PSData.ExternalModuleDependencies` in the module manifest so
+  PowerShellGet no longer tries to resolve it from the local build
+  repository. Not reproducible locally since a plain `.\build.ps1` never
+  runs the `package_module_nupkg`/release tasks that validate this.
+- `Add-SqlElasticJobTarget`, `New-SqlElasticJob`, `New-SqlElasticJobAgent`,
+  `New-SqlElasticJobCredential`, `New-SqlElasticJobTargetGroup`,
+  `Remove-SqlElasticJob`, `Remove-SqlElasticJobAgent`,
+  `Remove-SqlElasticJobCredential`, `Remove-SqlElasticJobStep`,
+  `Remove-SqlElasticJobTargetGroup`, `Set-SqlElasticJob`,
+  `Set-SqlElasticJobAgent`, `Set-SqlElasticJobCredential` and
+  `Set-SqlElasticJobStep` no longer call `Assert-AzContext` twice per
+  invocation (once directly, once again inside the public `Get-*` getter used
+  for their existence check) and now force `-ErrorAction Stop` on their
+  underlying Az mutation call, so a failure is reported instead of silently
+  reporting success. Same pattern already fixed in `Add-SqlElasticJobStep`.
 - `-ServerAdministratorCredential` on `New-SqlElasticJobEnvironment` is optional
   again; it is only required when the logical SQL server does not yet exist.
   When omitted in that case, you are now prompted interactively for it instead
@@ -62,6 +139,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   assigned, instead of only whether this call performed the assignment. It
   previously reported `$false` for an idempotent re-run even though the agent
   already had the identity.
+- `Add-SqlElasticJobStep` no longer logs the Azure context twice (it looked up
+  the existing step via the public `Get-SqlElasticJobStep`, which asserts the
+  context again) and now forces `-ErrorAction Stop` on `Add-AzSqlElasticJobStep`,
+  so a non-terminating Azure error (e.g. the job does not exist) throws instead
+  of being silently swallowed and reported as a false success.
 
 ### Changed
 

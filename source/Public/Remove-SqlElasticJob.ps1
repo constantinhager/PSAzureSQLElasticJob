@@ -87,7 +87,7 @@ function Remove-SqlElasticJob
     {
         $null = Assert-AzContext
 
-        $existingJob = Get-SqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingJob = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -eq $existingJob)
         {
@@ -122,7 +122,7 @@ function Remove-SqlElasticJob
 
         Write-PSFMessage -Level Output -Message ('Removing Elastic Job ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'remove'
 
-        $null = Remove-AzSqlElasticJob @removeParameters
+        $null = Remove-AzSqlElasticJob @removeParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Removed Elastic Job ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'remove'
 

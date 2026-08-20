@@ -73,7 +73,7 @@ function Remove-SqlElasticJobAgent {
     process {
         $null = Assert-AzContext
 
-        $existingAgent = Get-SqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
+        $existingAgent = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name }
 
         if ($null -eq $existingAgent) {
             $message = "Elastic Job agent '{0}' was not found on server '{1}' in resource group '{2}'." -f
@@ -96,7 +96,7 @@ function Remove-SqlElasticJobAgent {
 
         Write-PSFMessage -Level Output -Message ('Removing Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
 
-        $null = Remove-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name
+        $null = Remove-AzSqlElasticJobAgent -ResourceGroupName $ResourceGroupName -ServerName $ServerName -Name $Name -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Removed Elastic Job agent ''{0}'' from server ''{1}''.' -f $Name, $ServerName) -Tag 'agent', 'remove'
 

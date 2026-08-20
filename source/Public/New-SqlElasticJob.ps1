@@ -63,8 +63,7 @@
     .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
 #>
-function New-SqlElasticJob
-{
+function New-SqlElasticJob {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium', DefaultParameterSetName = 'NoSchedule')]
     [OutputType([System.Object])]
     param
@@ -123,21 +122,18 @@ function New-SqlElasticJob
         $EndTime
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
-        $existingJob = Get-SqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingJob = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJob -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
-        if ($null -ne $existingJob)
-        {
+        if ($null -ne $existingJob) {
             Write-PSFMessage -Level Output -Message ('Elastic Job ''{0}'' already exists on agent ''{1}''.' -f $Name, $AgentName) -Tag 'idempotent'
 
             return $existingJob
         }
 
-        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $Name), 'Create Elastic Job'))
-        {
+        if (-not $PSCmdlet.ShouldProcess(('{0}/{1}' -f $AgentName, $Name), 'Create Elastic Job')) {
             return
         }
 
@@ -152,7 +148,7 @@ function New-SqlElasticJob
 
         Write-PSFMessage -Level Output -Message ('Creating Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 
-        $job = New-AzSqlElasticJob @jobParameters
+        $job = New-AzSqlElasticJob @jobParameters -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Created Elastic Job ''{0}'' on agent ''{1}''.' -f $Name, $AgentName) -Tag 'job', 'create'
 

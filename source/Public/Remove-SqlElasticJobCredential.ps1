@@ -81,7 +81,7 @@ function Remove-SqlElasticJobCredential
     {
         $null = Assert-AzContext
 
-        $existingCredential = Get-SqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $existingCredential = Get-AzResourceIfPresent -ScriptBlock { Get-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name }
 
         if ($null -eq $existingCredential)
         {
@@ -107,7 +107,7 @@ function Remove-SqlElasticJobCredential
 
         Write-PSFMessage -Level Output -Message ('Removing Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
 
-        $null = Remove-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name
+        $null = Remove-AzSqlElasticJobCredential -ResourceGroupName $ResourceGroupName -ServerName $ServerName -AgentName $AgentName -Name $Name -ErrorAction Stop
 
         Write-PSFMessage -Level Output -Message ('Removed Elastic Job credential ''{0}'' from agent ''{1}''.' -f $Name, $AgentName) -Tag 'credential', 'remove'
 

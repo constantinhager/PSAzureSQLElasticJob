@@ -23,6 +23,8 @@
 
     .OUTPUTS
         PSCustomObject with ServerExists, DatabaseExists, AgentExists and IsComplete.
+        Typed as PSAzureSQLElasticJob.EnvironmentStatus, which has a custom
+        table format view showing a compact summary.
 
     .EXAMPLE
         Test-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01'
@@ -85,6 +87,7 @@ function Test-SqlElasticJobEnvironment
             $(if ($null -ne $agent) { 'present' } else { 'absent' })) -Tag 'environment', 'lookup'
 
         [PSCustomObject]@{
+            PSTypeName        = 'PSAzureSQLElasticJob.EnvironmentStatus'
             ResourceGroupName = $ResourceGroupName
             ServerName        = $ServerName
             DatabaseName      = $DatabaseName

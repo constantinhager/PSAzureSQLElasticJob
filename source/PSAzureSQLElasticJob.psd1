@@ -56,6 +56,8 @@
         @{ ModuleName = 'Az.Sql'; ModuleVersion = '4.0.0' }
         @{ ModuleName = 'Az.ManagedServiceIdentity'; ModuleVersion = '2.0.0' }
         @{ ModuleName = 'Az.Resources'; ModuleVersion = '6.0.0' }
+        @{ ModuleName = 'dbatools.library'; ModuleVersion = '2026.5.3' }
+        @{ ModuleName = 'dbatools'; ModuleVersion = '2.1.0' }
         @{ ModuleName = 'PSFramework'; ModuleVersion = '1.9.310' }
     )
 
@@ -69,7 +71,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess     = @('PSAzureSQLElasticJob.Format.ps1xml')
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     # NestedModules = @()
@@ -81,8 +83,10 @@
         'Get-SqlElasticJob'
         'Get-SqlElasticJobAgent'
         'Get-SqlElasticJobCredential'
+        'Get-SqlElasticJobExecutionOutput'
         'Get-SqlElasticJobStep'
         'Get-SqlElasticJobTargetGroup'
+        'Grant-SqlElasticJobTargetDatabaseAccess'
         'New-SqlElasticJob'
         'New-SqlElasticJobAgent'
         'New-SqlElasticJobCredential'
@@ -128,28 +132,28 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags         = @('Azure', 'AzureSQL', 'ElasticJob', 'ElasticJobs', 'SQL', 'Automation', 'PSEdition_Core')
+            Tags                       = @('Azure', 'AzureSQL', 'ElasticJob', 'ElasticJobs', 'SQL', 'Automation', 'PSEdition_Core')
 
             # A URL to the license for this module.
-            LicenseUri   = 'https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/LICENSE'
+            LicenseUri                 = 'https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/LICENSE'
 
             # A URL to the main website for this project.
-            ProjectUri   = 'https://github.com/constantinhager/PSAzureSQLElasticJob'
+            ProjectUri                 = 'https://github.com/constantinhager/PSAzureSQLElasticJob'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = ''
+            ReleaseNotes               = ''
 
             # Prerelease string of this module
-            Prerelease   = ''
+            Prerelease                 = ''
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update/save
             # RequireLicenseAcceptance = $false
 
             # External dependent modules of this module
-            # ExternalModuleDependencies = @()
+            ExternalModuleDependencies = @('')
 
         } # End of PSData hashtable
 

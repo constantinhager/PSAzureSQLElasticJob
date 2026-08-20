@@ -80,7 +80,7 @@ jobs:
               shell: pwsh
               env:
                   ModuleVersion: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
-              run: ./build.ps1 -ResolveDependency -Tasks pack
+              run: ./build.ps1 -ResolveDependency -UseModuleFast -Tasks pack
 
             - name: Publish Build Artifact
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
