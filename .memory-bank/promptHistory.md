@@ -21,6 +21,7 @@ Trim entries older than 90 days.
 2026-08-20 09:25 UTC | default | Made ServerAdministratorCredential prompt interactively; added Microsoft.ManagedIdentity resource-provider auto-registration
 2026-08-20 09:32 UTC | default | Added Identity property to New-SqlElasticJobEnvironment output object
 2026-08-20 09:38 UTC | default | Fixed AssignedIdentity to reflect current agent identity state instead of only this-run changes
+2026-08-20 10:15 UTC | default | Renamed Add-/Remove-SqlElasticJobTarget's DatabaseName/ElasticPoolName/ShardMapName to TargetDatabaseName/TargetElasticPoolName/TargetShardMapName
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.

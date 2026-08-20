@@ -38,7 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `Remove-SqlElasticJobCredential`.
 - Target group CRUD: `Get-SqlElasticJobTargetGroup`,
   `New-SqlElasticJobTargetGroup` and `Remove-SqlElasticJobTargetGroup`, plus
-  `Add-SqlElasticJobTarget` and `Remove-SqlElasticJobTarget`.
+  `Add-SqlElasticJobTarget` and `Remove-SqlElasticJobTarget`. Their target-type
+  parameters are named `-TargetDatabaseName`, `-TargetElasticPoolName` and
+  `-TargetShardMapName` for consistency with `-TargetServerName`.
 - GitHub Actions workflow `.github/workflows/ci.yml` covering build, test and
   release to GitHub and the PowerShell Gallery.
 - GitHub issue templates under `.github/ISSUE_TEMPLATE/`.

@@ -32,7 +32,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should map the agent server and the target server to the correct Azure parameters' {
-        $null = Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false
+        $null = Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $AgentServerName -eq 'sql-jobs' -and $ServerName -eq 'sql-prod'
@@ -40,7 +40,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should add a single database target' {
-        $null = Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false
+        $null = Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $DatabaseName -eq 'AppDb'
@@ -56,7 +56,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should pass -Exclude through to Azure' {
-        $null = Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Exclude -Confirm:$false
+        $null = Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Exclude -Confirm:$false
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $Exclude -eq $true
@@ -64,7 +64,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should not mark the target as excluded when -Exclude was not supplied' {
-        $null = Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false
+        $null = Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             -not $Exclude
@@ -72,7 +72,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should add a shard map target' {
-        $null = Add-SqlElasticJobTarget @script:targetParameters -ShardMapName 'customers' -DatabaseName 'ShardMapManager' -Confirm:$false
+        $null = Add-SqlElasticJobTarget @script:targetParameters -TargetShardMapName 'customers' -TargetDatabaseName 'ShardMapManager' -Confirm:$false
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $ShardMapName -eq 'customers' -and $DatabaseName -eq 'ShardMapManager'
@@ -80,7 +80,7 @@ Describe 'Add-SqlElasticJobTarget' {
     }
 
     It 'Should add nothing when -WhatIf is used' {
-        Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -WhatIf
+        Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -WhatIf
 
         Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 0 -Exactly
     }
@@ -91,7 +91,7 @@ Describe 'Add-SqlElasticJobTarget' {
         }
 
         It 'Should throw before calling Azure' {
-            { Add-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false } |
+            { Add-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false } |
                 Should -Throw -ExpectedMessage '*Connect-AzAccount*'
 
             Should -Invoke -CommandName Add-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 0 -Exactly

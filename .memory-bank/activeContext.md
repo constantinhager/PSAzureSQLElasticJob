@@ -110,6 +110,19 @@ rather than the internal `$identityAssignedThisRun` flag, which is now used only
 for the idempotent-check/`Created: ...` summary logic where "changed this run"
 is the correct semantics.
 
+`Add-`/`Remove-SqlElasticJobTarget`'s target-identifying parameters were
+renamed for consistency with `-TargetServerName`/`-TargetGroupName`:
+`-DatabaseName` -> `-TargetDatabaseName`, `-ElasticPoolName` ->
+`-TargetElasticPoolName`, `-ShardMapName` -> `-TargetShardMapName`. The
+underlying `Add-`/`Remove-AzSqlElasticJobTarget` cmdlets keep their original
+`DatabaseName`/`ElasticPoolName`/`ShardMapName` parameter names, so
+`Add-OptionalParameter`'s same-name forwarding no longer applies to these
+three - they are now mapped explicitly (`$targetParameters['DatabaseName'] = $TargetDatabaseName`,
+etc.) instead, while `Add-OptionalParameter` still handles
+`RefreshCredentialName`/`Exclude` whose names are unchanged. `RefreshCredentialName`
+kept its name since it names a credential, not a target. No back-compat alias
+was added; the module is still unreleased/preview.
+
 The CI workflow now centralizes its permissions at the workflow level. The
 deploy job inherits those permissions and maps GitHub Actions' automatic token
 to the `GitHubToken` environment variable required by Sampler's release and

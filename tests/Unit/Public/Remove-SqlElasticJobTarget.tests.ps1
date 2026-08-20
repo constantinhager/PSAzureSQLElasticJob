@@ -32,7 +32,7 @@ Describe 'Remove-SqlElasticJobTarget' {
     }
 
     It 'Should map the agent server and the target server to the correct Azure parameters' {
-        $null = Remove-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false
+        $null = Remove-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false
 
         Should -Invoke -CommandName Remove-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $AgentServerName -eq 'sql-jobs' -and $ServerName -eq 'sql-prod'
@@ -40,7 +40,7 @@ Describe 'Remove-SqlElasticJobTarget' {
     }
 
     It 'Should remove a single database target' {
-        $null = Remove-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false
+        $null = Remove-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false
 
         Should -Invoke -CommandName Remove-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $DatabaseName -eq 'AppDb'
@@ -48,7 +48,7 @@ Describe 'Remove-SqlElasticJobTarget' {
     }
 
     It 'Should remove an elastic pool target' {
-        $null = Remove-SqlElasticJobTarget @script:targetParameters -ElasticPoolName 'pool01' -Confirm:$false
+        $null = Remove-SqlElasticJobTarget @script:targetParameters -TargetElasticPoolName 'pool01' -Confirm:$false
 
         Should -Invoke -CommandName Remove-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 1 -Exactly -ParameterFilter {
             $ElasticPoolName -eq 'pool01'
@@ -56,7 +56,7 @@ Describe 'Remove-SqlElasticJobTarget' {
     }
 
     It 'Should remove nothing when -WhatIf is used' {
-        Remove-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -WhatIf
+        Remove-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -WhatIf
 
         Should -Invoke -CommandName Remove-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 0 -Exactly
     }
@@ -67,7 +67,7 @@ Describe 'Remove-SqlElasticJobTarget' {
         }
 
         It 'Should throw before calling Azure' {
-            { Remove-SqlElasticJobTarget @script:targetParameters -DatabaseName 'AppDb' -Confirm:$false } |
+            { Remove-SqlElasticJobTarget @script:targetParameters -TargetDatabaseName 'AppDb' -Confirm:$false } |
                 Should -Throw -ExpectedMessage '*Connect-AzAccount*'
 
             Should -Invoke -CommandName Remove-AzSqlElasticJobTarget -ModuleName $script:moduleName -Times 0 -Exactly
