@@ -35,6 +35,8 @@
         Set-SqlElasticJobCredential -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'jobuser' -Credential $credential
 
         Rotates the password stored in the credential.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Set-SqlElasticJobCredential.ps1
 #>
 function Set-SqlElasticJobCredential
 {

@@ -38,6 +38,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJobTargetGroup -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'all-databases'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJobTargetGroup.ps1
 #>
 function Remove-SqlElasticJobTargetGroup
 {

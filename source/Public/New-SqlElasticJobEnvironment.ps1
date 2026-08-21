@@ -107,6 +107,9 @@
         already exist, then assigns it to the Elastic Job agent.
 
     .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/New-SqlElasticJobEnvironment.ps1
+
+    .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
 #>
 function New-SqlElasticJobEnvironment {

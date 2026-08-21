@@ -59,6 +59,8 @@
 
     .EXAMPLE
         Set-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-reindex' -Name 'rebuild-indexes' -TimeoutSeconds 7200
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Set-SqlElasticJobStep.ps1
 #>
 function Set-SqlElasticJobStep
 {

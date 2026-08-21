@@ -38,6 +38,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'nightly-reindex'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJob.ps1
 #>
 function Remove-SqlElasticJob
 {

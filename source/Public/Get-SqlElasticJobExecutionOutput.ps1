@@ -52,6 +52,8 @@
 
         Retrieves the rows the job's most recent execution wrote to the output table,
         relying on the step's CommandText having selected $(job_execution_id) AS JobExecutionId.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJobExecutionOutput.ps1
 #>
 function Get-SqlElasticJobExecutionOutput {
     [CmdletBinding()]

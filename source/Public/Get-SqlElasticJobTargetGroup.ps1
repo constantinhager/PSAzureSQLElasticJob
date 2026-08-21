@@ -30,6 +30,8 @@
         Get-SqlElasticJobTargetGroup -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01'
 
         Returns every target group on the agent.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJobTargetGroup.ps1
 #>
 function Get-SqlElasticJobTargetGroup
 {

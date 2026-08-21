@@ -37,6 +37,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-reindex' -Name 'rebuild-indexes'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJobStep.ps1
 #>
 function Remove-SqlElasticJobStep
 {

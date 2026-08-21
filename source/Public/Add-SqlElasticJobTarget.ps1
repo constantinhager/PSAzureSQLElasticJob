@@ -63,6 +63,8 @@
         Add-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -Exclude
 
         Excludes one database from a broader server-level inclusion.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Add-SqlElasticJobTarget.ps1
 #>
 function Add-SqlElasticJobTarget {
     # RefreshCredentialName names an existing job credential; it never carries a secret.

@@ -31,6 +31,8 @@
         Get-SqlElasticJobStep -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -JobName 'nightly-reindex'
 
         Returns every step of the job.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJobStep.ps1
 #>
 function Get-SqlElasticJobStep
 {

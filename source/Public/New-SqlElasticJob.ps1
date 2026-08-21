@@ -61,6 +61,9 @@
         Creates a job scheduled to run a single time.
 
     .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/New-SqlElasticJob.ps1
+
+    .LINK
         https://learn.microsoft.com/azure/azure-sql/database/elastic-jobs-overview
 #>
 function New-SqlElasticJob {

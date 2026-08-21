@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Help files generation using PlatyPS and Sampler build pipeline. External
+  MAML-formatted help files are automatically generated from comment-based help
+  in Public cmdlets during the build, included in the module output, and
+  validated by help quality checks.
+- Command-level online-help URLs for every exported function. `Get-Help
+  <command> -Online` opens the command's version-controlled help source.
 - Module icon (`assets/PSAzureSQLElasticJob.svg`), referenced from the
   manifest's `IconUri` and shown at the top of `README.md`.
 - Custom `Microsoft.Azure.Commands.Sql.ElasticJobs.Model.AzureSqlElasticJobStepModel`

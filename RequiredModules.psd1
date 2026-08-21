@@ -19,6 +19,7 @@
     ModuleBuilder               = 'latest'
     ChangelogManagement         = 'latest'
     Sampler                     = 'latest'
+    PlatyPS                     = 'latest'
     'Sampler.GitHubTasks'       = 'latest'
     'Az.Accounts'               = 'latest'
     'Az.Sql'                    = 'latest'

@@ -55,6 +55,8 @@
 
     .EXAMPLE
         Set-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'nightly-reindex' -IntervalType 'Hour' -IntervalCount 6
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Set-SqlElasticJob.ps1
 #>
 function Set-SqlElasticJob
 {

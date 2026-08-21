@@ -9,6 +9,14 @@ CopyPaths:
   - PSAzureSQLElasticJob.Format.ps1xml
 #  - DSCResources
 # - Modules
+
+####################################################
+#          PlatyPS Help Generation                #
+####################################################
+GenerateDocumentationHelp:
+  Enabled: true
+  Path: docs
+  DocSourceFolder: source
 Encoding: UTF8
 # Can be used to manually specify module's semantic version if the preferred method of
 # using GitVersion is not available, and it is not possible to set the session environment
@@ -49,7 +57,11 @@ BuildWorkflow:
     - Clean
     - Build_Module_ModuleBuilder
     - Build_NestedModules_ModuleBuilder
+    - Generate_MAML_from_built_module
     - Create_changelog_release_output
+
+  build_help:
+    - build
 
   pack:
     - build

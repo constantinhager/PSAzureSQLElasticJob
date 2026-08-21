@@ -14,6 +14,10 @@ unit tests, green `build.ps1`. Not yet released or integration tested.
 
 ## Recent milestones
 
+- 2026-08-21: Added command-level online-help URLs for every exported function
+  and moved MAML generation into the shared Sampler `build` workflow, so CI's
+  `pack` workflow includes external help. Full build and test validation passed
+  with the detached PowerShell Core runner.
 - 2026-08-17: Canonical Memory Bank base initialized.
 - 2026-08-17: Project scope, stack, and CRUD surface confirmed with the user.
 - 2026-08-17: Sampler `SimpleModule` scaffold generated and merged; manifest

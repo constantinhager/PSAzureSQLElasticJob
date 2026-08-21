@@ -15,6 +15,14 @@ message, converts non-terminating Azure errors to terminating failures, and
 never returns misleading `Created*` state after failure. The full Sampler suite
 passes with 344 tests. It also emits an `Output`-level completion summary that
 states whether it reused the environment or which components it created.
+
+Every exported command now starts its comment-based help links with its stable
+GitHub source URL. PlatyPS promotes that first `.LINK` entry to the MAML
+`Online Version` link, so `Get-Help <command> -Online` opens the command's
+version-controlled help source. `Generate_MAML_from_built_module` is part of
+the shared `build` workflow, so the default workflow and CI's `pack` workflow
+generate and package MAML help automatically. The QA suite ensures every
+exported function retains its command-level online-help URL.
 All ordinary PSFramework lifecycle and existence messages now use `Output`;
 the deeper resource lookup diagnostics remain `VeryVerbose`.
 Confirmed absent-resource lookups now emit a concise provisioning-oriented

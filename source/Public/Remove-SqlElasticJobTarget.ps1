@@ -44,6 +44,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJobTarget -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -TargetGroupName 'all-databases' -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJobTarget.ps1
 #>
 function Remove-SqlElasticJobTarget {
     # RefreshCredentialName names an existing job credential; it never carries a secret.

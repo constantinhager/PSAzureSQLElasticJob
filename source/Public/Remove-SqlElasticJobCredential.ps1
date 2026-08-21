@@ -36,6 +36,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJobCredential -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'jobuser'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJobCredential.ps1
 #>
 function Remove-SqlElasticJobCredential
 {

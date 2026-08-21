@@ -28,6 +28,8 @@
 
     .EXAMPLE
         Set-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -Name 'agent01' -Tag @{ Env = 'Prod' }
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Set-SqlElasticJobAgent.ps1
 #>
 function Set-SqlElasticJobAgent {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
