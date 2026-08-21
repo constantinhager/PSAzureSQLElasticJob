@@ -9,11 +9,16 @@ source: repository evidence
 
 ## Current status
 
-Feature-complete for the agreed CRUD scope. 25 public commands, 322 passing
-unit tests, green `build.ps1`. Not yet released or integration tested.
+Version `1.0.0` released for the agreed CRUD scope. The release workflow passed
+package creation, Ubuntu/macOS/Windows tests, GitHub Release publication and
+PowerShell Gallery publication. Azure subscription integration tests remain
+opt-in.
 
 ## Recent milestones
 
+- 2026-08-21: Released version `1.0.0` from `main` with tag `v1.0.0`. GitHub
+  Actions passed package, cross-platform tests and deploy; the module is
+  available on PowerShell Gallery as `PSAzureSQLElasticJob` version `1.0.0`.
 - 2026-08-21: Added command-level online-help URLs for every exported function
   and moved MAML generation into the shared Sampler `build` workflow, so CI's
   `pack` workflow includes external help. Full build and test validation passed

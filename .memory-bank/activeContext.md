@@ -9,6 +9,11 @@ source: current task evidence
 
 ## Current focus
 
+Version `1.0.0` was released on 2026-08-21. The tag workflow passed package
+creation, tests on Ubuntu, macOS and Windows, GitHub Release publication and
+PowerShell Gallery publication. The GitHub release is at
+https://github.com/constantinhager/PSAzureSQLElasticJob/releases/tag/v1.0.0.
+
 `New-SqlElasticJobEnvironment` now fails fast when Azure cannot create its
 server, database or agent. Each provisioning step emits a PSFramework progress
 message, converts non-terminating Azure errors to terminating failures, and

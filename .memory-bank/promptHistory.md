@@ -38,6 +38,7 @@ Trim entries older than 90 days.
 2026-08-20 17:36 UTC | default | Root-caused and fixed the same CI failure properly: added dbatools.library to RequiredModules before dbatools so Sampler's package_module_nupkg publishes it first; verified locally with build.ps1 -Tasks pack
 2026-08-20 18:05 UTC | default | Added module icon (assets/PSAzureSQLElasticJob.svg) to manifest IconUri and README, on new branch feature/add-module-icon (PR #7 merged to main in between)
 2026-08-21 09:08 UTC | software-engineer | Added exported command online-help URLs and made PlatyPS MAML generation part of the shared Sampler build workflow
+2026-08-21 09:35 UTC | default | Released PSAzureSQLElasticJob version 1.0.0 from main after package and cross-platform validation
 
 2026-08-17 12:12 UTC | default | Initialized Memory Bank and captured scope/stack for PSAzureSQLElasticJob (no code written).
 2026-08-17 12:20 UTC | technical-writer | Scaffolded Sampler project; implemented Elastic Job environment provisioning and agent CRUD with 105 passing tests.
