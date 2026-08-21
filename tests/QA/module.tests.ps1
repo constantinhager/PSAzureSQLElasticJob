@@ -5,8 +5,7 @@ BeforeDiscovery {
         If the QA tests are run outside of the build script (e.g with Invoke-Pester)
         the parent scope has not set the variable $ProjectName.
     #>
-    if (-not $ProjectName)
-    {
+    if (-not $ProjectName) {
         # Assuming project folder name is project name.
         $ProjectName = Get-SamplerProjectName -BuildRoot $projectPath
     }
@@ -16,8 +15,8 @@ BeforeDiscovery {
     Remove-Module -Name $script:moduleName -Force -ErrorAction SilentlyContinue
 
     $mut = Get-Module -Name $script:moduleName -ListAvailable |
-        Select-Object -First 1 |
-            Import-Module -Force -ErrorAction Stop -PassThru
+    Select-Object -First 1 |
+    Import-Module -Force -ErrorAction Stop -PassThru
 }
 
 BeforeAll {
@@ -26,15 +25,14 @@ BeforeAll {
     # Get git-related project path. This is relevant for modules that will not be deployed in the root folder of Git.
     $gitTopLevelPath = (&git rev-parse --show-toplevel)
     $gitRelatedModulePath = (($projectPath -replace [regex]::Escape([IO.Path]::DirectorySeparatorChar), '/') -replace $gitTopLevelPath, '')
-    if (-not [string]::IsNullOrEmpty($gitRelatedModulePath)) { $gitRelatedModulePath = $gitRelatedModulePath.Trim('/')  + '/' }
+    if (-not [string]::IsNullOrEmpty($gitRelatedModulePath)) { $gitRelatedModulePath = $gitRelatedModulePath.Trim('/') + '/' }
     $escapedGitRelatedModulePath = [regex]::Escape($gitRelatedModulePath)
 
     <#
         If the QA tests are run outside of the build script (e.g with Invoke-Pester)
         the parent scope has not set the variable $ProjectName.
     #>
-    if (-not $ProjectName)
-    {
+    if (-not $ProjectName) {
         # Assuming project folder name is project name.
         $ProjectName = Get-SamplerProjectName -BuildRoot $projectPath
     }
@@ -43,19 +41,16 @@ BeforeAll {
 
     $sourcePath = (
         Get-ChildItem -Path $projectPath\*\*.psd1 |
-            Where-Object -FilterScript {
-                ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) `
-                    -and $(
-                    try
-                    {
-                        Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
-                    }
-                    catch
-                    {
-                        $false
-                    }
-                )
-            }
+        Where-Object -FilterScript {
+            ($_.Directory.Name -match 'source|src' -or $_.Directory.Name -eq $_.BaseName) `
+                -and $(
+                try {
+                    Test-ModuleManifest -Path $_.FullName -ErrorAction Stop
+                } catch {
+                    $false
+                }
+            )
+        }
     ).Directory.FullName
 }
 
@@ -71,22 +66,20 @@ Describe 'Changelog Management' -Tag 'Changelog' {
 
         $filesChanged = @()
         # Only run if there is a remote called origin
-        if (((git remote) -match 'origin'))
-        {
+        if (((git remote) -match 'origin')) {
             $headCommit = &git rev-parse HEAD
             $defaultBranchCommit = &git rev-parse origin/main
             $filesChanged += (&git @('diff', "$defaultBranchCommit...$headCommit", '--name-only') |
-                Where-Object { $_ -match "^$escapedGitRelatedModulePath" }) -replace "^$escapedGitRelatedModulePath", ""
+                Where-Object { $_ -match "^$escapedGitRelatedModulePath" }) -replace "^$escapedGitRelatedModulePath", ''
         }
 
         $filesStagedAndUnstaged = (&git @('diff', 'HEAD', '--name-only') 2>&1 |
-            Where-Object { $_ -match "^$escapedGitRelatedModulePath" }) -replace "^$escapedGitRelatedModulePath", ""
+            Where-Object { $_ -match "^$escapedGitRelatedModulePath" }) -replace "^$escapedGitRelatedModulePath", ''
 
         $filesChanged += $filesStagedAndUnstaged
 
         # Only check if there are any changed files.
-        if ($filesChanged)
-        {
+        if ($filesChanged) {
             $filesChanged | Should -Contain 'CHANGELOG.md' -Because 'the CHANGELOG.md must be updated with at least one entry in the Unreleased section for each PR'
         }
     }
@@ -96,7 +89,7 @@ Describe 'Changelog Management' -Tag 'Changelog' {
     }
 
     It 'Changelog should have an Unreleased header' -Skip:$skipTest {
-            (Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction Stop).Unreleased | Should -Not -BeNullOrEmpty
+        (Get-ChangelogData -Path (Join-Path -Path $ProjectPath -ChildPath 'CHANGELOG.md') -ErrorAction Stop).Unreleased | Should -Not -BeNullOrEmpty
     }
 }
 
@@ -121,33 +114,25 @@ BeforeDiscovery {
     # Build test cases.
     $testCases = @()
 
-    foreach ($function in $allModuleFunctions)
-    {
+    foreach ($function in $allModuleFunctions) {
         $testCases += @{
             Name = $function.Name
         }
     }
 
-    $publicCommandTestCases = foreach ($functionName in $mut.ExportedCommands.Keys)
-    {
+    $publicCommandTestCases = foreach ($functionName in $mut.ExportedCommands.Keys) {
         @{ Name = $functionName }
     }
 }
 
 Describe 'Quality for module' -Tags 'TestQuality' {
     BeforeDiscovery {
-        if (Get-Command -Name Invoke-ScriptAnalyzer -ErrorAction SilentlyContinue)
-        {
+        if (Get-Command -Name Invoke-ScriptAnalyzer -ErrorAction SilentlyContinue) {
             $scriptAnalyzerRules = Get-ScriptAnalyzerRule
-        }
-        else
-        {
-            if ($ErrorActionPreference -ne 'Stop')
-            {
+        } else {
+            if ($ErrorActionPreference -ne 'Stop') {
                 Write-Warning -Message 'ScriptAnalyzer not found!'
-            }
-            else
-            {
+            } else {
                 throw 'ScriptAnalyzer not found!'
             }
         }
@@ -178,9 +163,9 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
 
         $parsedFunction = $abstractSyntaxTree.FindAll( $astSearchDelegate, $true ) |
-            Where-Object -FilterScript {
-                $_.Name -eq $Name
-            }
+        Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
 
         $functionHelp = $parsedFunction.GetHelpContent()
 
@@ -197,9 +182,9 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
 
         $parsedFunction = $abstractSyntaxTree.FindAll($astSearchDelegate, $true) |
-            Where-Object -FilterScript {
-                $_.Name -eq $Name
-            }
+        Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
 
         $functionHelp = $parsedFunction.GetHelpContent()
 
@@ -216,9 +201,9 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
 
         $parsedFunction = $abstractSyntaxTree.FindAll($astSearchDelegate, $true) |
-            Where-Object -FilterScript {
-                $_.Name -eq $Name
-            }
+        Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
 
         $functionHelp = $parsedFunction.GetHelpContent()
 
@@ -235,9 +220,9 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
 
         $parsedFunction = $abstractSyntaxTree.FindAll( $astSearchDelegate, $true ) |
-            Where-Object -FilterScript {
-                $_.Name -eq $Name
-            }
+        Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
 
         $functionHelp = $parsedFunction.GetHelpContent()
 
@@ -257,19 +242,17 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
 
         $parsedFunction = $abstractSyntaxTree.FindAll( $astSearchDelegate, $true ) |
-            Where-Object -FilterScript {
-                $_.Name -eq $Name
-            }
+        Where-Object -FilterScript {
+            $_.Name -eq $Name
+        }
 
         $functionHelp = $parsedFunction.GetHelpContent()
 
         $parameters = $parsedFunction.Body.ParamBlock.Parameters.Name.VariablePath.ForEach({ $_.ToString() })
 
-        foreach ($parameter in $parameters)
-        {
+        foreach ($parameter in $parameters) {
             $functionHelp.Parameters.($parameter.ToUpper()) | Should -Not -BeNullOrEmpty -Because ('the parameter {0} must have a description' -f $parameter)
             $functionHelp.Parameters.($parameter.ToUpper()).Length | Should -BeGreaterThan 25 -Because ('the parameter {0} must have descriptive description' -f $parameter)
         }
     }
 }
-

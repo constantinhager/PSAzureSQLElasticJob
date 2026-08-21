@@ -32,8 +32,7 @@
     .LINK
         https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJob.ps1
 #>
-function Get-SqlElasticJob
-{
+function Get-SqlElasticJob {
     [CmdletBinding()]
     [OutputType([System.Object])]
     param
@@ -60,8 +59,7 @@ function Get-SqlElasticJob
         $Name
     )
 
-    process
-    {
+    process {
         $null = Assert-AzContext
 
         $jobParameters = @{
@@ -70,8 +68,7 @@ function Get-SqlElasticJob
             AgentName         = $AgentName
         }
 
-        if ($PSBoundParameters.ContainsKey('Name'))
-        {
+        if ($PSBoundParameters.ContainsKey('Name')) {
             $jobParameters['Name'] = $Name
         }
 
