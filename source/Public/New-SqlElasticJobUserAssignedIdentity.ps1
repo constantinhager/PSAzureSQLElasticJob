@@ -38,6 +38,8 @@
 
     .EXAMPLE
         New-SqlElasticJobUserAssignedIdentity -ResourceGroupName 'rg-jobs' -Name 'id-jobs' -Location 'westeurope'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/New-SqlElasticJobUserAssignedIdentity.ps1
 #>
 function New-SqlElasticJobUserAssignedIdentity
 {

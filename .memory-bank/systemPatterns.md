@@ -59,6 +59,12 @@ Composite public commands validate Azure context at their boundary, then use
 private helpers and direct Az cmdlets for nested lookups. Do not call another
 public command when it would repeat the same context assertion.
 
+Each exported function's comment-based help begins its `.LINK` list with the
+matching version-controlled source URL. PlatyPS uses the first link as the
+external MAML `Online Version` target. Keep `Generate_MAML_from_built_module`
+in the shared Sampler `build` workflow so both normal builds and `pack` create
+and package the MAML help file.
+
 ## Decisions
 
 ### Decision 1: Use the canonical Memory Bank base

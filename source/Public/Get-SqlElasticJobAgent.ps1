@@ -27,6 +27,8 @@
         Get-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs'
 
         Returns every Elastic Job agent on the server.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJobAgent.ps1
 #>
 function Get-SqlElasticJobAgent {
     [CmdletBinding()]

@@ -29,6 +29,8 @@
         Get-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01'
 
         Returns every job on the agent.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJob.ps1
 #>
 function Get-SqlElasticJob
 {

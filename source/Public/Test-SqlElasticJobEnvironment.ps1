@@ -28,6 +28,8 @@
 
     .EXAMPLE
         Test-SqlElasticJobEnvironment -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -DatabaseName 'jobdb' -AgentName 'agent01'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Test-SqlElasticJobEnvironment.ps1
 #>
 function Test-SqlElasticJobEnvironment
 {

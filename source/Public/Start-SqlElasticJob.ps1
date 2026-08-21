@@ -36,6 +36,8 @@
         Start-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'nightly-reindex' -Wait
 
         Starts the job and blocks until the execution completes.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Start-SqlElasticJob.ps1
 #>
 function Start-SqlElasticJob
 {

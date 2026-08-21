@@ -54,6 +54,8 @@
         Grant-SqlElasticJobTargetDatabaseAccess -TargetServerName 'sql-prod' -TargetDatabaseName 'AppDb' -IdentityName 'id-jobs' -RoleName 'db_datareader'
 
         Grants read-only access instead of db_owner.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Grant-SqlElasticJobTargetDatabaseAccess.ps1
 #>
 function Grant-SqlElasticJobTargetDatabaseAccess {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

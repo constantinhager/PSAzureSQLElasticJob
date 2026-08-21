@@ -31,6 +31,8 @@
         Get-SqlElasticJobCredential -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01'
 
         Returns every credential on the agent.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Get-SqlElasticJobCredential.ps1
 #>
 function Get-SqlElasticJobCredential
 {

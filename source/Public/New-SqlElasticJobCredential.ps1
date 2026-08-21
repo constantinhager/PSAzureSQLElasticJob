@@ -33,6 +33,8 @@
     .EXAMPLE
         $credential = Get-Credential -UserName 'jobuser'
         New-SqlElasticJobCredential -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'jobuser' -Credential $credential
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/New-SqlElasticJobCredential.ps1
 #>
 function New-SqlElasticJobCredential
 {

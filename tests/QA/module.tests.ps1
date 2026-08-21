@@ -127,6 +127,11 @@ BeforeDiscovery {
             Name = $function.Name
         }
     }
+
+    $publicCommandTestCases = foreach ($functionName in $mut.ExportedCommands.Keys)
+    {
+        @{ Name = $functionName }
+    }
 }
 
 Describe 'Quality for module' -Tags 'TestQuality' {
@@ -180,6 +185,25 @@ Describe 'Help for module' -Tags 'helpQuality' {
         $functionHelp = $parsedFunction.GetHelpContent()
 
         $functionHelp.Synopsis | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Should have a command-level online help URL for <Name>' -ForEach $publicCommandTestCases {
+        $functionFile = Get-ChildItem -Path $sourcePath -Recurse -Include "$Name.ps1"
+
+        $scriptFileRawContent = Get-Content -Raw -Path $functionFile.FullName
+
+        $abstractSyntaxTree = [System.Management.Automation.Language.Parser]::ParseInput($scriptFileRawContent, [ref] $null, [ref] $null)
+
+        $astSearchDelegate = { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }
+
+        $parsedFunction = $abstractSyntaxTree.FindAll($astSearchDelegate, $true) |
+            Where-Object -FilterScript {
+                $_.Name -eq $Name
+            }
+
+        $functionHelp = $parsedFunction.GetHelpContent()
+
+        $functionHelp.Links[0] | Should -Be "https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/$Name.ps1"
     }
 
     It 'Should have a .DESCRIPTION with length greater than 40 characters for <Name>' -ForEach $testCases {

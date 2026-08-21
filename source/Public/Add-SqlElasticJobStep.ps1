@@ -82,6 +82,8 @@
         lets Get-SqlElasticJobExecutionOutput filter the output table for a
         specific run - Azure's own system-managed output column does not
         correlate to the JobExecutionId Start-SqlElasticJob returns.
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Add-SqlElasticJobStep.ps1
 #>
 function Add-SqlElasticJobStep {
     # CredentialName/OutputCredentialName name existing job credentials; neither carries a secret.

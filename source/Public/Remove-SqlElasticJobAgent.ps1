@@ -35,6 +35,8 @@
 
     .EXAMPLE
         Remove-SqlElasticJobAgent -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -Name 'agent01'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Remove-SqlElasticJobAgent.ps1
 #>
 function Remove-SqlElasticJobAgent {
     [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]

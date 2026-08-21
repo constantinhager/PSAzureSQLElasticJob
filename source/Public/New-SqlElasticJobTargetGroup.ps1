@@ -24,6 +24,8 @@
 
     .EXAMPLE
         New-SqlElasticJobTargetGroup -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'all-databases'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/New-SqlElasticJobTargetGroup.ps1
 #>
 function New-SqlElasticJobTargetGroup
 {

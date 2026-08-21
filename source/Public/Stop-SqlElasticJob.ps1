@@ -27,6 +27,8 @@
 
     .EXAMPLE
         Stop-SqlElasticJob -ResourceGroupName 'rg-jobs' -ServerName 'sql-jobs' -AgentName 'agent01' -Name 'nightly-reindex' -JobExecutionId '5555e5e5-5555-5e55-e555-5555e5e55555'
+    .LINK
+        https://github.com/constantinhager/PSAzureSQLElasticJob/blob/main/source/Public/Stop-SqlElasticJob.ps1
 #>
 function Stop-SqlElasticJob
 {
