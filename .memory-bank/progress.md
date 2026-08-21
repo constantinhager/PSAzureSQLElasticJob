@@ -9,13 +9,16 @@ source: repository evidence
 
 ## Current status
 
-Version `1.0.0` released for the agreed CRUD scope. The release workflow passed
+Version `1.0.1` released for the agreed CRUD scope. The release workflow passed
 package creation, Ubuntu/macOS/Windows tests, GitHub Release publication and
 PowerShell Gallery publication. Azure subscription integration tests remain
 opt-in.
 
 ## Recent milestones
 
+- 2026-08-21: Released version `1.0.1` from `main` with tag `v1.0.1`. GitHub
+  Actions passed package, cross-platform tests and deploy; the module is
+  available on PowerShell Gallery as `PSAzureSQLElasticJob` version `1.0.1`.
 - 2026-08-21: Released version `1.0.0` from `main` with tag `v1.0.0`. GitHub
   Actions passed package, cross-platform tests and deploy; the module is
   available on PowerShell Gallery as `PSAzureSQLElasticJob` version `1.0.0`.
